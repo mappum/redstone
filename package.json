@@ -1,0 +1,17 @@
+{
+  "name": "redstone",
+  "version": "0.0.0",
+  "description": "A fast, scalable Minecraft server",
+  "main": "bin/server.coffee",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "author": "Matt Bell <mappum@gmail.com>",
+  "license": "BSD",
+
+  "dependencies": {
+    "minecraft-net": ">=0.1.1",
+    "coffee-script": ">=1.4.0"
+  }
+}
