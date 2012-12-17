@@ -7,15 +7,15 @@ Interface = require '../lib/interface'
 # logging
 winston = require 'winston'
 logger = new winston.Logger
-	transports: [
-    	new winston.transports.Console
-    		colorize: true
+    transports: [
+        new winston.transports.Console
+            colorize: true
     ]
 winston.addColors
-	debug: 'white'
-	info: 'cyan'
-	warn: 'yellow'
-	error: 'red'
+    debug: 'white'
+    info: 'cyan'
+    warn: 'yellow'
+    error: 'red'
 
 serverInterface = new Interface
 server = new Server serverInterface
