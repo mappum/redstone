@@ -23,6 +23,8 @@ class EventStack
 		if event.indexOf(EVENT_SEPARATOR) != -1
 			throw new Error "Tried to emit an event that contained a selector (#{event})"
 
+		event = String(event).trim().toLowerCase()
+
 		# create array to be emitted as handler arguments
 		e = new Event @
 		args = Array::slice.call arguments, 1
