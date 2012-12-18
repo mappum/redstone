@@ -8,5 +8,6 @@ class Interface extends EventEmitter
 
     emit: => if @remote? then @remote._emit.apply @remote, arguments
 
+    remoteAddress: 'direct'
 
 module.exports = Interface

@@ -22,15 +22,23 @@ class Connector extends Base
     connection: (socket, handshake) =>
         connection = handshake
         connection.client = socket
-        connection.server = @server
+        connection.server = @se
+        configrver
+        # TODO: contact master to get destination server
 
         @connections.push connection
         @connections.usernames[connection.username.toLowerCase()] = connection
 
+        address = "#{connection.client.socket.remoteAddress}:#{connection.client.socket.remotePort}"
+        @info "#{connection.username}[#{address}] connected"
+
+        connection.client.on 'close', (id, packet) =>
+            @info "#{connection.username}[#{address}] disconnected"
+
         # when we recieve data from the client, send it to the corresponding server
         connection.client.on 'data', (id, packet) =>
             connection.server.emit 'data', connection.username, id, packet
-
+            
         @emit 'connection', connection
         connection.server.emit 'connection', connection
 
