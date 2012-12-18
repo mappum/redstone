@@ -11,8 +11,9 @@
   "license": "BSD",
 
   "dependencies": {
-    "minecraft-net": ">=0.1.1",
-    "coffee-script": ">=1.4.0",
-    "winston": ">=0.6.2"
+    "minecraft-net": "0.1.1",
+    "coffee-script": "1.4.0",
+    "winston": "0.6.2",
+    "commander": "1.1.1"
   }
 }
