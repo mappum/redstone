@@ -19,10 +19,10 @@ winston.addColors
 
 serverInterface = new Interface
 server = new Server serverInterface
-server.on 'log', (level, message) -> logger.log level, "[server] #{message}"
+server.on 'log', (e, level, message) -> logger.log level, "[server] #{message}"
 
 connector = new Connector(
     new Interface(serverInterface),
     requireAuth: false
 )
-connector.on 'log', (level, message) -> logger.log level, "[connector] #{message}"
+connector.on 'log', (e, level, message) -> logger.log level, "[connector] #{message}"

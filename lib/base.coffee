@@ -1,6 +1,6 @@
-events = require 'events'
+EventStack = require './eventstack'
 
-class Base extends events.EventEmitter
+class Base extends EventStack
     log: (level, message) => @emit 'log', level, message, @meta
     debug: (message) => @log 'debug', message
     info: (message) => @log 'info', message

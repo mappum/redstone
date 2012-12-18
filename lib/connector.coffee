@@ -3,6 +3,8 @@ mcnet = require 'minecraft-net'
 
 class Connector extends Base
     constructor: (@server, options) ->
+        super()
+        
         @connections = []
         @connections.usernames = {}
 
