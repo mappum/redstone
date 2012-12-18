@@ -17,7 +17,7 @@ class EventStack
 		@stacks[event] = [] if not @stacks[event]?
 		stacks = @stacks[event]
 		stacks[priority] = [] if not stacks[priority]?
-		stacks[priority].splice 0, 0, handler
+		stacks[priority].push handler
 
 	emit: (event) =>
 		if event.indexOf(EVENT_SEPARATOR) != -1
