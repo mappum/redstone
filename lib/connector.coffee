@@ -2,16 +2,11 @@ Base = require './base'
 mcnet = require 'minecraft-net'
 
 class Connector extends Base
-    constructor: (@server, options) ->
+    constructor: (@master, options) ->
         super()
         
         @connections = []
         @connections.usernames = {}
-
-        # when we receieve data from the server, send it to the corresponding client
-        @server.on 'data', (connection, id, data) =>
-            if typeof connection == 'string' then connection = @connections.usernames[connection]
-            connection.client.write id, data if connection.client?
 
         # listen for client connections
         @mcserver = mcnet.createServer options, @connection
@@ -20,26 +15,31 @@ class Connector extends Base
             @emit 'listening'
 
     connection: (socket, handshake) =>
-        connection = handshake
-        connection.client = socket
-        connection.server = @se
-        configrver
+        client = handshake
+        client.socket = socket
         # TODO: contact master to get destination server
+        #client.server =
 
-        @connections.push connection
-        @connections.usernames[connection.username.toLowerCase()] = connection
+        ###
 
-        address = "#{connection.client.socket.remoteAddress}:#{connection.client.socket.remotePort}"
-        @info "#{connection.username}[#{address}] connected"
+        @clients.push client
+        @clients.usernames[client.username.toLowerCase()] = client
 
-        connection.client.on 'close', (id, packet) =>
-            @info "#{connection.username}[#{address}] disconnected"
+        address = "#{client.client.socket.remoteAddress}:#{client.client.socket.remotePort}"
+        @info "#{client.username}[#{address}] connected"
 
+        client.socket.on 'close', (id, packet) =>
+            @info "#{client.username}[#{address}] disconnected"
+            # TODO: tell master about leave
+            # TODO: close connection to server
+ 
         # when we recieve data from the client, send it to the corresponding server
-        connection.client.on 'data', (id, packet) =>
-            connection.server.emit 'data', connection.username, id, packet
-            
-        @emit 'connection', connection
-        connection.server.emit 'connection', connection
+        client.socket.on 'data', (id, packet) =>
+            client.server.emit 'data', client.username, id, packet
+
+        @emit 'client', client
+        client.server.emit 'client', client
+
+        ###
 
 module.exports = Connector

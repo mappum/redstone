@@ -50,32 +50,33 @@ Interface = Interface.websocket if config.master != true
 
 # start components
 if config.master == true
+    logger.info 'Initializing master'
+
     Master = require '../lib/master'
 
-    master = new Master(
-        new Interface().listen()
-    )
+    master = new Master(new Interface().listen())
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ') + message
     
 masterInterface = if config.master == true then master.interface else config.master
 
 if config.connector == true
+    logger.info 'Initializing connector'
+
     Connector = require '../lib/connector'
 
-    connector = new Connector(
-        new Interface(masterInterface),
+    connector = new Connector(new Interface(masterInterface),
         requireAuth: false
     )
     connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ') + message
 
 if config.server == true
+    logger.info 'Initializing server'
+
     Server = require '../lib/server'
 
-    server = new Server(
-        new Interface(masterInterface)
-    )
+    server = new Server(new Interface(masterInterface))
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ') + message
 
