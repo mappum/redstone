@@ -7,22 +7,22 @@ class Master extends Base
         @connectors = []
         @servers = []
 
-        # on connections from servers/connectors
+        # listen for connections from servers/connectors
         @interface.on 'connection', (connection) =>
             connection.respond 'init', (res, options) =>
                 remote = options
                 remote.connection = connection
 
-                if options.type == 'server'
+                if remote.type == 'server'
                     id = @servers.length
                     @servers.push remote
-                else if options.type == 'connector'
+                else if remote.type == 'connector'
                     id = @connectors.length
                     @connectors.push remote
 
                 @info "incoming connection from #{options.type} #{id}"
 
-                if options.type == 'connector'
+                if remote.type == 'connector'
                     connection.respond 'connection', (res, handshake) =>
                         res
                             serverId: @servers[0].id

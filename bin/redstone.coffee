@@ -69,6 +69,9 @@ if config.server == true
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ') + message
 
+    # TODO: handle module loading
+    server.use require '../lib/controllers/players'
+
 if config.connector == true
     logger.info 'Initializing connector'
 
@@ -79,6 +82,3 @@ if config.connector == true
     )
     connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ') + message
-
-    # TODO: handle module loading
-    server.use require '../lib/controllers/players'

@@ -1,4 +1,5 @@
 module.exports = ->
+    console.log 'players.coffee'
 
     @on 'join', (e, player, connector) =>
         @info "#{player.username} joined (connector: #{connector.remoteAddress})"
