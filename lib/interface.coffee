@@ -8,6 +8,9 @@ class Interface extends EventEmitter
             if @remote.listening then @remote._connect @
             else @remote.remote = @
 
+        # the handle or uri others can use to connect to this interface
+        @handle = @
+
     # sends an event to the remote interface
     emit: =>
         # first argument is request id, insert null
@@ -70,6 +73,7 @@ class Interface extends EventEmitter
         @_emit 'connection', connection, null
 
     remoteAddress: 'direct'
+    type: 'direct'
 
 class WebsocketInterface extends EventEmitter
     constructor: (@remoteAddress) ->

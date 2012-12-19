@@ -65,7 +65,7 @@ if config.server == true
 
     Server = require '../lib/server'
 
-    server = new Server(new Interface(masterInterface))
+    server = new Server(new Interface(masterInterface), new Interface().listen())
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ') + message
 

@@ -9,6 +9,9 @@ class Connector extends Base
         @clients = []
         @clients.usernames = {}
 
+        # register with master
+        @master.request 'init', type: 'connector', (id) =>
+
         # listen for client connections
         @mcserver = mcnet.createServer options, @connection
         @mcserver.listen options.port or 25565, =>
@@ -21,24 +24,23 @@ class Connector extends Base
         socket.on 'close', (id, packet) =>
             @info "#{handshake.username} [#{address}] disconnected"
 
+        # request server to forward player connection to
         @master.request 'connection', handshake, (server) =>
             client = handshake
             client.socket = socket
-            client.server = new Interface(server)
-            ###
+            client.server = new Interface[server.interfaceType](server.interface)
 
             @clients.push client
             @clients.usernames[client.username.toLowerCase()] = client
             client.socket.on 'close', (id, packet) =>
-                client.server.emit ''
+                client.server.emit 'leave'
                 @master.emit 'leave', client.username
      
             # when we recieve data from the client, send it to the corresponding server
             client.socket.on 'data', (id, packet) =>
                 client.server.emit 'data', client.username, id, packet
 
-            @emit 'client', client
-            client.server.emit 'client', client
-            ###
+            @emit 'join', client
+            client.server.emit 'join', client
 
 module.exports = Connector
