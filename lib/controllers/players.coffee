@@ -1,13 +1,11 @@
 module.exports = ->
-    console.log 'players.coffee'
+    @on 'join', (e, player) =>
+        @info "#{player.username} joined (connector: #{player.connector.remoteAddress})"
 
-    @on 'join', (e, player, connector) =>
-        @info "#{player.username} joined (connector: #{connector.remoteAddress})"
+        #player.client.on 'close', =>
+        #    @info "#{player.username} quit"
 
-        player.client.on 'close', =>
-            @info "#{player.username} quit"
-
-        player.client.write 0x1,
+        player.emit 0x1,
             entityId: 0
             levelType: 'default'
             gameMode: 1
@@ -15,7 +13,7 @@ module.exports = ->
             difficulty: 0
             maxPlayers: 64
 
-        player.client.write 0xd,
+        player.emit 0xd,
             x: 0
             y: 64
             stance: 65.5

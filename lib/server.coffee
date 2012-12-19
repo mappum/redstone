@@ -18,9 +18,14 @@ class Server extends Base
                     @servers.push remote
                 else if remote.type == 'connector'
                     id = @connectors.length
-                    @connectors.push remote
+                    @connectors.push remote                    
 
                 @info "incoming connection from #{options.type} #{id}"
+
+            connection.on 'join', (player) =>
+                player.connector = connection
+                player.emit = (id, data) -> connection.emit 'data', player.username, id, data
+                @emit 'join', player
 
         # register with master
         @master.request 'init',
