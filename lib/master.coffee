@@ -4,11 +4,11 @@ class Master extends Base
     constructor: (@interface) ->
         super()
 
+        # on connections from servers/connectors
         @interface.on 'connection', (connection) =>
             @info 'incoming connection'
 
-            console.log connection
-
-            connection.on 'data', (id) => @info '<< ' + id
+            connection.respond 'connection', (res, handshake) =>
+                res 'foo'
 
 module.exports = Master

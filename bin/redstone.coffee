@@ -60,17 +60,6 @@ if config.master == true
     
 masterInterface = if config.master == true then master.interface else config.master
 
-if config.connector == true
-    logger.info 'Initializing connector'
-
-    Connector = require '../lib/connector'
-
-    connector = new Connector(new Interface(masterInterface),
-        requireAuth: false
-    )
-    connector.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[connector] ') + message
-
 if config.server == true
     logger.info 'Initializing server'
 
@@ -79,6 +68,17 @@ if config.server == true
     server = new Server(new Interface(masterInterface))
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ') + message
+
+if config.connector == true
+    logger.info 'Initializing connector'
+
+    Connector = require '../lib/connector'
+
+    connector = new Connector(new Interface(masterInterface),
+        requireAuth: config.requireAuth or false
+    )
+    connector.on 'log', (e, level, message) ->
+        logger.log level, (if multipleComponents then '[connector] ') + message
 
     # TODO: handle module loading
     server.use require '../lib/controllers/players'

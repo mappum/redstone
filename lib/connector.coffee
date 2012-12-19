@@ -1,12 +1,13 @@
 Base = require './base'
+Interface = require './interface'
 mcnet = require 'minecraft-net'
 
 class Connector extends Base
     constructor: (@master, options) ->
         super()
         
-        @connections = []
-        @connections.usernames = {}
+        @clients = []
+        @clients.usernames = {}
 
         # listen for client connections
         @mcserver = mcnet.createServer options, @connection
@@ -15,31 +16,29 @@ class Connector extends Base
             @emit 'listening'
 
     connection: (socket, handshake) =>
-        client = handshake
-        client.socket = socket
-        # TODO: contact master to get destination server
-        #client.server =
+        address = "#{socket.socket.remoteAddress}:#{socket.socket.remotePort}"
+        @info "#{handshake.username} [#{address}] connected"
+        socket.on 'close', (id, packet) =>
+            @info "#{handshake.username} [#{address}] disconnected"
 
-        ###
+        @master.request 'connection', handshake, (server) =>
+            client = handshake
+            client.socket = socket
+            client.server = new Interface(server)
+            ###
 
-        @clients.push client
-        @clients.usernames[client.username.toLowerCase()] = client
+            @clients.push client
+            @clients.usernames[client.username.toLowerCase()] = client
+            client.socket.on 'close', (id, packet) =>
+                client.server.emit ''
+                @master.emit 'leave', client.username
+     
+            # when we recieve data from the client, send it to the corresponding server
+            client.socket.on 'data', (id, packet) =>
+                client.server.emit 'data', client.username, id, packet
 
-        address = "#{client.client.socket.remoteAddress}:#{client.client.socket.remotePort}"
-        @info "#{client.username}[#{address}] connected"
-
-        client.socket.on 'close', (id, packet) =>
-            @info "#{client.username}[#{address}] disconnected"
-            # TODO: tell master about leave
-            # TODO: close connection to server
- 
-        # when we recieve data from the client, send it to the corresponding server
-        client.socket.on 'data', (id, packet) =>
-            client.server.emit 'data', client.username, id, packet
-
-        @emit 'client', client
-        client.server.emit 'client', client
-
-        ###
+            @emit 'client', client
+            client.server.emit 'client', client
+            ###
 
 module.exports = Connector
