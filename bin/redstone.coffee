@@ -7,7 +7,7 @@ program
     .option('-c, --connector', 'Run a connector instance ')
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
-    .option('-S, --suppress', 'Supress ')
+    .option('-S, --suppress', 'Supress logging')
     .option('--config [file]', 'Loads the specified config file', '../config')
     .parse process.argv
 
@@ -33,11 +33,9 @@ if not config.master?
 
 # logging
 winston = require 'winston'
-logger = new winston.Logger
-    transports: [
-        new winston.transports.Console
-            colorize: true
-    ]
+transports = []
+transports.push new winston.transports.Console colorize: true
+logger = new winston.Logger transports: transports
 winston.addColors
     debug: 'white'
     info: 'cyan'
