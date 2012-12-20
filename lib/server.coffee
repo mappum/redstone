@@ -2,7 +2,7 @@ Base = require './base'
 
 class Server extends Base
     constructor: (@master, @interface) ->
-        super()
+        super(@interface)
 
         @connectors = []
         @servers = []
@@ -10,7 +10,7 @@ class Server extends Base
         # listen for connections from servers/connectors
         @interface.on 'connection', (connection) =>
             connection.respond 'init', (res, options) =>
-                remote = options
+                remote = options or {}
                 remote.connection = connection
 
                 if remote.type == 'server'
@@ -27,11 +27,13 @@ class Server extends Base
                 player.emit = (id, data) -> connection.emit 'data', player.username, id, data
                 @emit 'join', player
 
+            connection.on 'data', (username, id, data) =>
+
         # register with master
         @master.request 'init',
             type: 'server'
-            interface: @interface.handle
-            interfaceType: @interface.type,
+            interfaceType: @interface.type
+            port: @interface.port or @interface,
             (id) => @id = id
 
     use: (middleware) => middleware.call @

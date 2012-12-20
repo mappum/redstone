@@ -14,6 +14,9 @@
     "minecraft-net": "0.1.1",
     "coffee-script": "1.4.0",
     "winston": "0.6.2",
-    "commander": "1.1.1"
+    "commander": "1.1.1",
+    "socket.io": "0.9.13",
+    "socket.io-client": "0.9.11",
+    "underscore": "1.4.3"
   }
 }

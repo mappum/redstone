@@ -1,6 +1,7 @@
 Base = require './base'
 Interface = require './interface'
 mcnet = require 'minecraft-net'
+_ = require 'underscore'
 
 class Connector extends Base
     constructor: (@master, options) ->
@@ -38,21 +39,21 @@ class Connector extends Base
                     client = @clients.usernames[username]
                     if client? then client.socket.write id, data
 
-            client = handshake
+            client = _.clone handshake
             client.socket = socket
             client.server = @servers[res.serverId]
 
             @clients.push client
             @clients.usernames[client.username.toLowerCase()] = client
-            client.socket.on 'close', (id, packet) =>
+            client.socket.on 'close', =>
                 client.server.emit 'leave', client.username
                 @master.emit 'leave', client.username
      
             # when we recieve data from the client, send it to the corresponding server
-            client.socket.on 'data', (id, packet) =>
-                client.server.emit 'data', client.username, id, packet
+            client.socket.on 'data', (packet) =>
+                client.server.emit 'data', client.username, packet.id, packet.data
 
             @emit 'join', client
-            client.server.emit 'join', client
+            client.server.emit 'join', handshake
 
 module.exports = Connector

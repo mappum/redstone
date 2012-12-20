@@ -8,7 +8,7 @@ program
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('-S, --suppress', 'Supress ')
-    .option('--config <file>', 'Loads the specified config file')
+    .option('--config [file]', 'Loads the specified config file', '../config')
     .parse process.argv
 
 if program.config? then config = require program.config
@@ -45,7 +45,7 @@ winston.addColors
     error: 'red'
 
 # if running a local master, use direct interface, otherwise use websocket
-Interface = require('../lib/interface')
+Interface = require '../lib/interface'
 Interface = Interface.websocket if config.master != true
 
 # start components
@@ -54,7 +54,7 @@ if config.master == true
 
     Master = require '../lib/master'
 
-    master = new Master(new Interface().listen())
+    master = new Master(new Interface().listen(8000))
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ') + message
     
@@ -65,7 +65,7 @@ if config.server == true
 
     Server = require '../lib/server'
 
-    server = new Server(new Interface(masterInterface), new Interface().listen())
+    server = new Server(new Interface(masterInterface), new Interface().listen(8001))
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ') + message
 

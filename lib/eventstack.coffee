@@ -21,7 +21,7 @@ class EventStack
 
     emit: (event) =>
         if event.indexOf(EVENT_SEPARATOR) != -1
-            throw new Error "Tried to emit an event that contained a selector (#{event})"
+            throw new Error "Tried to emit an event that contained a modifier (#{event})"
 
         event = String(event).trim().toLowerCase()
 

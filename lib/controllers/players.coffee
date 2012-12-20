@@ -1,6 +1,6 @@
 module.exports = ->
     @on 'join', (e, player) =>
-        @info "#{player.username} joined (connector: #{player.connector.remoteAddress})"
+        @info "#{player.username} joined (connector: #{player.connector.id})"
 
         #player.client.on 'close', =>
         #    @info "#{player.username} quit"
