@@ -1,6 +1,6 @@
-Base = require './base'
+Component = require './component'
 
-class Master extends Base
+class Master extends Component
     constructor: (iface) ->
         super iface
 

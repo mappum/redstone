@@ -1,9 +1,9 @@
-Base = require './base'
+Component = require './component'
 Interface = require './interface'
 mcnet = require 'minecraft-net'
 _ = require 'underscore'
 
-class Connector extends Base
+class Connector extends Component
     constructor: (@master, options) ->
         super()
         
