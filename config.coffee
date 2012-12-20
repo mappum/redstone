@@ -1,2 +1,2 @@
-###module.exports =
-    master: 'http://localhost:8000'
+module.exports =
+    master: 'ws://localhost:8000'

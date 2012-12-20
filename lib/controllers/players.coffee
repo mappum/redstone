@@ -21,3 +21,4 @@ module.exports = ->
             yaw: 0
             pitch: 0
             onGround: false
+            

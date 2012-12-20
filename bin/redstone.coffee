@@ -4,7 +4,7 @@ program = require 'commander'
 
 program
     .version('0.0.0')
-    .option('-c, --connector', 'Run a connector instance')
+    .option('-c, --connector', 'Run a connector instance ')
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('-S, --suppress', 'Supress ')
@@ -46,7 +46,7 @@ winston.addColors
 
 # if running a local master, use direct interface, otherwise use websocket
 Interface = require '../lib/interface'
-Interface = Interface.websocket if config.master != true
+Interface = Interface.websocket if config.master != true or (config.master == true and not multipleComponents)
 
 # start components
 if config.master == true
@@ -56,7 +56,7 @@ if config.master == true
 
     master = new Master(new Interface().listen(8000))
     master.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[master] ') + message
+        logger.log level, (if multipleComponents then '[master] ' else '') + message
     
 masterInterface = if config.master == true then master.interface else config.master
 
@@ -67,7 +67,7 @@ if config.server == true
 
     server = new Server(new Interface(masterInterface), new Interface().listen(8001))
     server.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[server] ') + message
+        logger.log level, (if multipleComponents then '[server] ' else '') + message
 
     # TODO: handle module loading
     server.use require '../lib/controllers/players'
@@ -81,4 +81,8 @@ if config.connector == true
         requireAuth: config.requireAuth or false
     )
     connector.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[connector] ') + message
+        logger.log level, (if multipleComponents then '[connector] ' else '') + message
+
+setInterval ->
+  0
+, 1000 * 1000

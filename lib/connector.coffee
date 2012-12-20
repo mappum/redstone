@@ -19,7 +19,7 @@ class Connector extends Base
             @emit 'listening'
 
         # register with master
-        @master.request 'init', type: 'connector', (id) => @id = id
+        @master.request 'init', type: 'connector', (@id) =>
 
     connection: (socket, handshake) =>
         address = "#{socket.socket.remoteAddress}:#{socket.socket.remotePort}"
