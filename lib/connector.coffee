@@ -24,13 +24,13 @@ class Connector extends Component
         @master.request 'init', type: 'connector', (@id) =>
 
     connection: (socket, handshake) =>
-        address = "#{socket.socket.remoteAddress}:#{socket.socket.remotePort}"
-        @info "#{handshake.username} [#{address}] connected"
-        socket.on 'close', (id, packet) =>
-            @info "#{handshake.username} [#{address}] disconnected"
-            
         while not handshake.connectionId? or @clients.connectionIds[handshake.connectionId]?
             handshake.connectionId = Math.floor(Math.random() * 0xffffffff).toString(36)
+
+        address = "#{socket.socket.remoteAddress}:#{socket.socket.remotePort}"
+        @info "#{handshake.username}/#{handshake.connectionId} [#{address}] connected"
+        socket.on 'close', (id, packet) =>
+            @info "#{handshake.username}/#{handshake.connectionId} [#{address}] disconnected"
 
         # request server to forward player connection to
         @master.request 'connection', handshake, (res) =>
