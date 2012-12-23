@@ -10,7 +10,7 @@ class Master extends Component
 
                 if server.interfaceType == 'websocket'
                     address = server.connection.socket.handshake.address
-                    iface = "http://#{address.address}:#{server.port}"
+                    iface = "#{address.address}:#{server.port}"
                 else if server.interfaceType == 'direct'
                     iface = server.port
 
