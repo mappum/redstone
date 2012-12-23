@@ -3,38 +3,43 @@ Player = require '../models/player'
 module.exports = ->
     @players = []
     @players.usernames = {}
+    @players.connectionIds = {}
 
     getPlayer = (fn) =>
-        return (username) =>
+        return (connectionId) =>
+            player = @players.connectionIds[connectionId]
             args = Array::slice.call arguments, 1
-            args.splice 0, 0, @players.usernames[username.toLowerCase()]
-            fn.apply @, args
+            args.splice 0, 0, player
+            fn.apply @, args if player?
 
     @on 'peer.connector', (e, connector, connection) =>
         connection.on 'join', (player) =>
             player.connector = connector
             player = new Player player
+            @players.connectionIds[player.connectionId] = player
+
+            if @players.usernames[player.userId]?
+                player.kick "Someone named '#{player.username}' is already connected."
+                @players.connectionIds[player.connectionId] = undefined
+                return
+
+            @players.push player
+            @players.usernames[player.userId] = player
 
             @emit 'join', player
 
         connection.on 'quit', getPlayer (player) =>
-            @emit 'quit', player
+            if not player.kicked
+                @emit 'quit', player
+                @players.splice @players.indexOf(player), 1
+                @players.usernames[player.userId] = undefined
+                @players.connectionIds[player.connectionId] = undefined
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
             player.emit 'data.0x'+id.toString(16), data
 
-    @on 'join:before', (e, player) ->
-        player.kick = (reason) -> player.send 0xff, reason: reason
-
     @on 'join', (e, player) =>
-        if @players.usernames[player.username.toLowerCase()]?
-            player.kick "Someone named #{player.username} is already connected."
-            return
-
-        @players.push player
-        @players.usernames[player.username.toLowerCase()] = player
-
         @info "#{player.username} joined (connector:#{player.connector.id})"
 
         player.send 0x1,
@@ -55,7 +60,4 @@ module.exports = ->
             onGround: false
             
     @on 'quit', (e, player) =>
-        @players[player.username.toLowerCase()] = undefined
-        @players.splice @players.indexOf(player), 1
-
         @info "#{player.username} quit (connector:#{player.connector.id})"
