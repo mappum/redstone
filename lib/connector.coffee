@@ -37,7 +37,7 @@ class Connector extends Component
                     id: @id,
                     =>
                 server.on 'data', (username, id, data) =>
-                    client = @clients.usernames[username]
+                    client = @clients.usernames[username.toLowerCase()]
                     if client? then client.socket.write id, data
 
             client = _.clone handshake
