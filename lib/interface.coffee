@@ -105,7 +105,7 @@ class WebsocketInterface extends Interface
     _send: => @socket.emit.apply @socket, toArray arguments
 
     _connect: (remote) =>
-        @socket = if typeof remote == 'string' then ioc.connect remote else remote
+        @socket = if typeof remote == 'string' then ioc.connect 'ws://'+remote else remote
 
     type: 'websocket'
 
