@@ -15,7 +15,6 @@ module.exports = ->
             player.connector = connector
             player = new Player player
 
-            player.index = @players.length
             @players.push player
             @players.usernames[player.username.toLowerCase()] = player
 
@@ -25,7 +24,7 @@ module.exports = ->
             @emit 'quit', player
 
             @players[player.username.toLowerCase()] = undefined
-            @players.splice player.index, 1
+            @players.splice @players.indexOf(player), 1
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
