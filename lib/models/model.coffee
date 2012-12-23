@@ -1,4 +1,4 @@
-EeventStack = require '../eventstack'
+EventStack = require '../eventstack'
 
 class Model extends EventStack
 

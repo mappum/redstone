@@ -14,6 +14,7 @@ class Connector extends Component
 
         # listen for client connections
         @mcserver = mcnet.createServer options, @connection
+        @mcserver.on 'error', @error        
         @mcserver.listen options.port or 25565, =>
             @info "listening for Minecraft connections on port #{@mcserver.port}"
             @emit 'listening'
