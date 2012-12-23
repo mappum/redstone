@@ -1,9 +1,21 @@
 module.exports = ->
-    @on 'join', (e, player) =>
-        @info "#{player.username} joined (connector: #{player.connector.id})"
+    @players = []
+    @players.usernames = {}
 
-        #player.client.on 'close', =>
-        #    @info "#{player.username} quit"
+    @on 'peer.connector', (e, connector, connection) =>
+        connection.on 'join', (player) =>
+            player.connector = connector
+            player.emit = (id, data) -> connection.emit 'data', player.username, id, data
+            @emit 'join', player
+
+        connection.on 'quit', (username) =>
+            player = @players.usernames[username]
+            @emit 'quit', player if player?
+
+    @on 'join', (e, player) =>
+        @info "#{player.username} joined (connector:#{player.connector.id})"
+        @players.push player
+        @players.usernames[player.username] = player
 
         player.emit 0x1,
             entityId: 0
@@ -22,3 +34,5 @@ module.exports = ->
             pitch: 0
             onGround: false
             
+    @on 'quit', (e, player) =>
+        @info "#{player.username} quit (connector:#{player.connector.id})"

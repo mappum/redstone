@@ -45,9 +45,10 @@ class Connector extends Component
 
             @clients.push client
             @clients.usernames[client.username.toLowerCase()] = client
+
             client.socket.on 'close', =>
-                client.server.emit 'leave', client.username
-                @master.emit 'leave', client.username
+                client.server.emit 'quit', client.username
+                @master.emit 'quit', client.username
      
             # when we recieve data from the client, send it to the corresponding server
             client.socket.on 'data', (packet) =>

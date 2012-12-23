@@ -31,7 +31,7 @@ class Component extends EventStack
 
             @info "incoming connection from #{options.type}:#{id}"
 
-            res id: id
+            res id
 
             @emit 'peer', peer, connection
             @emit 'peer.'+options.type, peer, connection
