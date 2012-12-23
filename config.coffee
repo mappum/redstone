@@ -1,2 +1,1 @@
-module.exports =
-    master: 'ws://localhost:8000'
+module.exports = {}

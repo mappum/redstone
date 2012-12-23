@@ -6,7 +6,6 @@ class Player extends Model
 		options = options or {}
 		@[k] = v for k,v of options
 
-	send: (id, data) =>
-		@connector.connection.emit 'data', @username, id, data
+	send: (id, data) => @connector.connection.emit 'data', @username, id, data
 
 module.exports = Player

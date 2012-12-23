@@ -69,6 +69,8 @@ if config.server == true
 
     # TODO: handle module loading
     server.use require '../lib/controllers/players'
+    server.use require '../lib/controllers/chat'
+    server.use require '../lib/controllers/commands'
 
 if config.connector == true
     logger.info 'Initializing connector'
