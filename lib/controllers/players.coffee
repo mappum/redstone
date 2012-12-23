@@ -15,22 +15,26 @@ module.exports = ->
             player.connector = connector
             player = new Player player
 
-            @players.push player
-            @players.usernames[player.username.toLowerCase()] = player
-
             @emit 'join', player
 
         connection.on 'quit', getPlayer (player) =>
             @emit 'quit', player
 
-            @players[player.username.toLowerCase()] = undefined
-            @players.splice @players.indexOf(player), 1
-
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
             player.emit 'data.0x'+id.toString(16), data
 
+    @on 'join:before', (e, player) ->
+        player.kick = (reason) -> player.send 0xff, reason: reason
+
     @on 'join', (e, player) =>
+        if @players.usernames[player.username.toLowerCase()]?
+            player.kick "Someone named #{player.username} is already connected."
+            return
+
+        @players.push player
+        @players.usernames[player.username.toLowerCase()] = player
+
         @info "#{player.username} joined (connector:#{player.connector.id})"
 
         player.send 0x1,
@@ -51,4 +55,7 @@ module.exports = ->
             onGround: false
             
     @on 'quit', (e, player) =>
+        @players[player.username.toLowerCase()] = undefined
+        @players.splice @players.indexOf(player), 1
+
         @info "#{player.username} quit (connector:#{player.connector.id})"
