@@ -4,7 +4,7 @@ program = require 'commander'
 
 program
     .version('0.0.0')
-    .option('-c, --connector', 'Run a connector instance ')
+    .option('-c, --connector [port]', 'Run a connector instance, and optionally specify a port')
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('-S, --suppress', 'Supress logging')
@@ -23,13 +23,13 @@ if not config.connector and not config.server and not config.master
     config.connector = config.server = config.master = true
 
 # check if more than one component is running
-if Number(config.connector == true) + Number(config.server == true) + Number(config.master == true) > 1
+if Number(config.connector) + Number(config.server) + Number(config.master == true) > 1
     multipleComponents = true
 
 # we either need a master to connect to, or we should run a local master
 if not config.master?
     console.log 'You must either specify a master to connect to or run a master instance'
-    program.help().master = true
+    program.help()
 
 # logging
 winston = require 'winston'
@@ -58,7 +58,7 @@ if config.master == true
     
 masterInterface = if config.master == true then master.interface else config.master
 
-if config.server == true
+if config.server
     logger.info 'Initializing server'
 
     Server = require '../lib/server'
@@ -74,13 +74,14 @@ if config.server == true
     server.use require '../lib/controllers/regions'
 
 
-if config.connector == true
+if config.connector
     logger.info 'Initializing connector'
 
     Connector = require '../lib/connector'
 
     connector = new Connector(new Interface(masterInterface),
         requireAuth: config.requireAuth or false
+        port: if config.connector != true then Number(config.connector)
     )
     connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ' else '') + message

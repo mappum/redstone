@@ -3,29 +3,37 @@ Player = require '../models/player'
 module.exports = ->
     @players = []
     @players.usernames = {}
+    @players.connectionIds = {}
 
     getPlayer = (fn) =>
-        return (username) =>
+        return (connectionId) =>
+            player = @players.connectionIds[connectionId]
             args = Array::slice.call arguments, 1
-            args.splice 0, 0, @players.usernames[username.toLowerCase()]
-            fn.apply @, args
+            args.splice 0, 0, player
+            fn.apply @, args if player?
 
     @on 'peer.connector', (e, connector, connection) =>
         connection.on 'join', (player) =>
             player.connector = connector
             player = new Player player
+            @players.connectionIds[player.connectionId] = player
 
-            player.index = @players.length
+            if @players.usernames[player.userId]?
+                player.kick "Someone named '#{player.username}' is already connected."
+                @players.connectionIds[player.connectionId] = undefined
+                return
+
             @players.push player
-            @players.usernames[player.username.toLowerCase()] = player
+            @players.usernames[player.userId] = player
 
             @emit 'join', player
 
         connection.on 'quit', getPlayer (player) =>
-            @emit 'quit', player
-
-            @players[player.username.toLowerCase()] = undefined
-            @players.splice player.index, 1
+            if not player.kicked
+                @emit 'quit', player
+                @players.splice @players.indexOf(player), 1
+                @players.usernames[player.userId] = undefined
+                @players.connectionIds[player.connectionId] = undefined
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data

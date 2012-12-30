@@ -36,4 +36,11 @@ class Component extends EventStack
             @emit 'peer', peer, connection
             @emit 'peer.'+options.type, peer, connection
 
+            connection.on 'disconnect', =>
+                @peers[options.type+'s'].splice @peers[options.type+'s'].indexOf(peer), 1
+                @peers.all[id] = undefined
+
+                @info "#{options.type}:#{id} disconnected"
+            
+
 module.exports = Component
