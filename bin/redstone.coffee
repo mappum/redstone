@@ -71,6 +71,8 @@ if config.server == true
     server.use require '../lib/controllers/players'
     server.use require '../lib/controllers/chat'
     server.use require '../lib/controllers/commands'
+    server.use require '../lib/controllers/regions'
+
 
 if config.connector == true
     logger.info 'Initializing connector'
