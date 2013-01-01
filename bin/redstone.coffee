@@ -23,7 +23,7 @@ if not config.connector and not config.server and not config.master
     config.connector = config.server = config.master = true
 
 # check if more than one component is running
-if Number(config.connector) + Number(config.server) + Number(config.master == true) > 1
+if Number(config.connector?) + Number(config.server) + Number(config.master == true) > 1
     multipleComponents = true
 
 # we either need a master to connect to, or we should run a local master
