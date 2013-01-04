@@ -23,24 +23,23 @@ class Component extends EventStack
         connection.respond 'init', (res, options) =>
             peer = options or {}
             peer.connection = connection
-
-            id = Math.floor(Math.random() * 0xffffffff).toString(36) while not id or @peers.all[id]?
+            peer.id = Math.floor(Math.random() * 0xffffffff).toString(36) while not peer.id or @peers.all[peer.id]?
 
             @peers[options.type+'s'].push peer
-            @peers.all[id] = peer
+            @peers.all[peer.id] = peer
 
-            @info "incoming connection from #{options.type}:#{id}"
+            @info "incoming connection from #{options.type}:#{peer.id}"
 
-            res id
+            res peer.id
 
             @emit 'peer', peer, connection
             @emit 'peer.'+options.type, peer, connection
 
             connection.on 'disconnect', =>
                 @peers[options.type+'s'].splice @peers[options.type+'s'].indexOf(peer), 1
-                @peers.all[id] = undefined
+                @peers.all[peer.id] = undefined
 
-                @info "#{options.type}:#{id} disconnected"
+                @info "#{options.type}:#{peer.id} disconnected"
             
 
 module.exports = Component

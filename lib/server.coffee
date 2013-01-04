@@ -1,4 +1,5 @@
 Component = require './component'
+os = require 'os'
 
 class Server extends Component
     constructor: (@master, iface) ->
@@ -10,6 +11,19 @@ class Server extends Component
             interfaceType: @interface.type
             port: @interface.port or @interface,
             (@id) =>
+
+        updateMaster = =>
+            data = 
+                loadavg: os.loadavg()
+                uptime: os.uptime()
+                totalmem: os.totalmem()
+                freemem: os.freemem()
+                cpus: os.cpus().length
+            @master.emit 'update', data
+            @debug 'sending stats to master'
+
+        updateMaster()
+        @updateMasterInterval = setInterval updateMaster, 60 * 1000
 
     use: (middleware) => middleware.call @
 
