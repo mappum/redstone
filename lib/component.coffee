@@ -13,7 +13,7 @@ class Component extends EventStack
             # listen for connections from servers/connectors
             @interface.on 'connection', @connection
 
-    log: (level, message) => @emit 'log', level, message, @meta
+    log: (level, message) => @emit 'log', level, message
     debug: (message) => @log 'debug', message
     info: (message) => @log 'info', message
     warn: (message) => @log 'warn', message

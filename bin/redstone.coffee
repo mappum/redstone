@@ -9,6 +9,7 @@ program
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('-S, --suppress', 'Supress logging')
     .option('-v, --verbose', 'Log more detailed stuff')
+    .option('-C, --chat', 'Log chat')
     .option('--config [file]', 'Loads the specified config file', '../config')
     .parse process.argv
 
@@ -35,19 +36,26 @@ if not config.master?
 # logging
 winston = require 'winston'
 levels =
+    chat: -1
     debug: 0
     info: 1
     warn: 2
     error: 3
 colors =
+    chat: 'green'
     debug: 'white'
     info: 'cyan'
     warn: 'yellow'
     error: 'red'
 transports = []
+level =
+    if program.suppress then 'error'
+    else if program.chat then 'chat'
+    else if program.verbose then 'debug'
+    else 'info'
 transports.push new winston.transports.Console
     colorize: true
-    level: if program.suppress then 'error' else if program.verbose then 'debug' else 'info'
+    level: level
 logger = new winston.Logger transports: transports, levels: levels
 winston.addColors colors
 

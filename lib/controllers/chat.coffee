@@ -28,4 +28,4 @@ module.exports = ->
     @on 'message', (e, player, message) =>
         formatted = "<#{player.username}> #{message}"
         player.region.broadcast formatted
-        @debug "[#{player.region.id}] #{formatted}"
+        @log 'chat', "[#{player.region.id}] #{formatted}"
