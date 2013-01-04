@@ -5,6 +5,9 @@ class Server extends Component
     constructor: (@master, iface) ->
         super iface
 
+    use: (middleware) => middleware.call @
+
+    start: =>
         # register with master
         @master.request 'init',
             type: 'server'
@@ -24,7 +27,5 @@ class Server extends Component
 
         updateMaster()
         @updateMasterInterval = setInterval updateMaster, 60 * 1000
-
-    use: (middleware) => middleware.call @
 
 module.exports = Server

@@ -13,7 +13,7 @@ module.exports = ->
             fn.apply @, args if player?
 
     @on 'peer.connector', (e, connector, connection) =>
-        connection.on 'join', (player) =>
+        connection.on 'join', (player, state) =>
             player.connector = connector
             player = new Player player
             @players.connectionIds[player.connectionId] = player
@@ -26,7 +26,7 @@ module.exports = ->
             @players.push player
             @players.usernames[player.userId] = player
 
-            @emit 'join', player
+            @emit 'join', player, state
 
         connection.on 'quit', getPlayer (player) =>
             if not player.kicked
@@ -39,7 +39,7 @@ module.exports = ->
             player.emit 'data', id, data
             player.emit 'data.0x'+id.toString(16), data
 
-    @on 'join', (e, player) =>
+    @on 'join', (e, player, state) =>
         @info "#{player.username} joined (connector:#{player.connector.id})"
 
         player.send 0x1,

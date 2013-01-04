@@ -78,10 +78,11 @@ if config.server
 
     # TODO: handle module loading
     server.use require '../lib/controllers/players'
+    server.use require '../lib/controllers/regions'
     server.use require '../lib/controllers/chat'
     server.use require '../lib/controllers/commands'
-    server.use require '../lib/controllers/regions'
 
+    server.start()
 
 if config.connector
     logger.info 'Initializing connector'

@@ -31,6 +31,8 @@ class Master extends Component
                     serverId: server.id
                     interfaceType: server.interfaceType
                     interface: iface
+                    state: # TODO: lookup actual state
+                        regionId: @regions[0].id
 
         @on 'peer.server', (e, server, connection) =>
             server.stats = {}
@@ -47,8 +49,8 @@ class Master extends Component
             # TODO: rethink server region apportionment
             region = @regionQueue.shift()
             if region?
+                @info "assigning region:#{region.id} to server:#{server.id}"
                 connection.emit 'region', region
                 region.server = server
-                @info "assinging region:#{region.id} to server:#{server.id}"
 
 module.exports = Master

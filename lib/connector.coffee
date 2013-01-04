@@ -60,7 +60,7 @@ class Connector extends Component
             client.socket.on 'data', (packet) =>
                 client.server.emit 'data', client.connectionId, packet.id, packet.data
 
-            @emit 'join', client
-            client.server.emit 'join', handshake
+            @emit 'join', client, res.state
+            client.server.emit 'join', handshake, res.state
 
 module.exports = Connector
