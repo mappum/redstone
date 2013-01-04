@@ -9,6 +9,9 @@ class Region extends Model
 		if not @tickInterval? then @tickInterval = 20
 
 		@ticks = 0
+		
+		@players = []
+		@players.usernames = {}
 
 	start: =>
 		if not @ticking
