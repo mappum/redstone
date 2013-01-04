@@ -8,6 +8,7 @@ program
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('-S, --suppress', 'Supress logging')
+    .option('-v, --verbose', 'Log more detailed stuff')
     .option('--config [file]', 'Loads the specified config file', '../config')
     .parse process.argv
 
@@ -33,14 +34,22 @@ if not config.master?
 
 # logging
 winston = require 'winston'
-transports = []
-transports.push new winston.transports.Console colorize: true
-logger = new winston.Logger transports: transports
-winston.addColors
+levels =
+    debug: 0
+    info: 1
+    warn: 2
+    error: 3
+colors =
     debug: 'white'
     info: 'cyan'
     warn: 'yellow'
     error: 'red'
+transports = []
+transports.push new winston.transports.Console
+    colorize: true
+    level: if program.suppress then 'error' else if program.verbose then 'debug' else 'info'
+logger = new winston.Logger transports: transports, levels: levels
+winston.addColors colors
 
 # if running a local master, use direct interface, otherwise use websocket
 Interface = require '../lib/interface'
