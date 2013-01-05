@@ -98,7 +98,8 @@ if config.connector
     Connector = require '../lib/connector'
 
     connector = new Connector(new Interface(masterInterface),
-        requireAuth: config.requireAuth or false
+        'online-mode': config['online-mode'] or false
+        encryption: false
         port: if config.connector != true then Number(config.connector)
     )
     connector.on 'log', (e, level, message) ->
