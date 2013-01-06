@@ -8,7 +8,8 @@ class Player extends Model
 
         @userId = @username.toLowerCase()
 
-    send: (id, data) => @connector.connection.emit 'data', @connectionId, id, data
+    send: (id, data) =>
+        @connector.connection.emit 'data', @connectionId, id, data
 
     kick: (reason) =>
         @kicked = true
