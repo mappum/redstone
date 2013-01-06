@@ -1,8 +1,5 @@
 EVENT_SEPARATOR = ':'
 
-class Event
-    constructor: (@origin) ->
-
 class EventStack
     constructor: ->
         @stacks = {}
@@ -30,7 +27,7 @@ class EventStack
         event = event.trim().toLowerCase()
 
         # create array to be emitted as handler arguments
-        e = new Event @
+        e = origin: @
         args = Array::slice.call arguments, 1
         args.splice 0, 0, e
 
