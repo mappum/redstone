@@ -37,7 +37,7 @@ module.exports = ->
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
-            player.emit 'data.0x'+id.toString(16), data
+            player.emit id, data
 
     @on 'join', (e, player, state) =>
         @info "#{player.username} joined (connector:#{player.connector.id})"
@@ -53,8 +53,8 @@ module.exports = ->
         player.send 0xd,
             x: 0
             y: 64
-            stance: 65.5
             z: 0
+            stance: 65.5
             yaw: 0
             pitch: 0
             onGround: false

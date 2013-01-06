@@ -22,10 +22,12 @@ class EventStack
         stacks[priority].splice 0, 0, handler
 
     emit: (event) =>
+        event = String(event)
+
         if event.indexOf(EVENT_SEPARATOR) != -1
             throw new Error "Tried to emit an event that contained a modifier (#{event})"
 
-        event = String(event).trim().toLowerCase()
+        event = event.trim().toLowerCase()
 
         # create array to be emitted as handler arguments
         e = new Event @

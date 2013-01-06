@@ -18,7 +18,7 @@ module.exports = ->
     @on 'join', (e, player) =>
         player.region.broadcast @prefixes.system + "#{player.username} joined the game"
 
-        player.on 'data.0x3', (e, data) =>
+        player.on 0x3, (e, data) =>
             player.emit 'message', data.message
             @emit 'message', player, data.message
 

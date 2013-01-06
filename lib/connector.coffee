@@ -1,6 +1,6 @@
 Component = require './component'
 Interface = require './interface'
-mcnet = require 'minecraft-protocol'
+mcnet = require 'minecraft-net'
 _ = require 'underscore'
 
 class Connector extends Component
@@ -14,11 +14,11 @@ class Connector extends Component
         @servers = []
 
         # listen for client connections
-        @mcserver = mcnet.createServer options
-        @mcserver.on 'error', @error
-        @mcserver.on 'login', @connection
-        @info "listening for Minecraft connections on port #{@mcserver.port}"
-        @emit 'listening'
+        @mcserver = mcnet.createServer options, @connection
+        @mcserver.on 'error', @error        
+        @mcserver.listen options.port or 25565, =>
+            @info "listening for Minecraft connections on port #{@mcserver.port}"
+            @emit 'listening'
 
         # register with master
         @master.request 'init', type: 'connector', (@id) =>
