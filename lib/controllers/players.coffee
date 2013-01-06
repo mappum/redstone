@@ -1,6 +1,9 @@
 Player = require '../models/player'
 _ = require 'underscore'
 
+packAngle = (degrees) ->
+    Math.floor (degrees % 360 + if degrees < 0 then 360 else 0) * (0xff / 360)
+
 module.exports = ->
     @players = []
     @players.usernames = {}
@@ -71,6 +74,20 @@ module.exports = ->
             player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
             player.position.onGround = Boolean player.position.onGround
 
+        player.on 'move:after', ->
+            pos =
+                entityId: player.entityId
+                x: Math.round player.position.x * 32
+                y: Math.round player.position.y * 32
+                z: Math.round player.position.z * 32
+                yaw: packAngle player.position.yaw
+                pitch: packAngle player.position.pitch
+
+            for p in player.region.players
+                if p != player
+                    p.send 0x22, pos
+                    p.send 0x23, entityId: pos.entityId, headYaw: pos.yaw if player.positionDelta.yaw
+
         # TODO: get from state
         player.send 0x1,
             entityId: player.entityId
@@ -88,8 +105,8 @@ module.exports = ->
             x: Math.floor player.position.x * 32
             y: Math.floor player.position.y * 32
             z: Math.floor player.position.z * 32
-            yaw: 0#(Math.abs Math.floor (player.position.yaw % 360)) * (255 / 360)
-            pitch: 0#(Math.abs Math.floor (player.position.pitch % 360)) * (255 / 360)
+            yaw: packAngle player.position.yaw
+            pitch: packAngle player.position.pitch
             currentItem: 0
             metaData: 0
 
@@ -102,25 +119,10 @@ module.exports = ->
                     x: Math.floor p.position.x * 32
                     y: Math.floor p.position.y * 32
                     z: Math.floor p.position.z * 32
-                    yaw: 0#(Math.abs Math.floor (p.position.yaw % 360)) * (255 / 360)
-                    pitch: 0#(Math.abs Math.floor (p.position.pitch % 360)) * (255 / 360)
+                    yaw: packAngle p.position.yaw
+                    pitch: packAngle p.position.pitch
                     currentItem: 0
                     metaData: 0
-
-        setInterval ->
-            pos =
-                entityId: player.entityId
-                x: Math.round player.position.x * 32
-                y: Math.round player.position.y * 32
-                z: Math.round player.position.z * 32
-                yaw: 0#(Math.abs Math.floor (player.position.yaw % 360)) * (255 / 360)
-                pitch: 0#(Math.abs Math.floor (player.position.pitch % 360)) * (255 / 360)
-
-            for p in player.region.players
-                if p != player
-                    #console.log "#{p.entityId} -> #{player.entityId}"
-                    p.send 0x22, pos
-        , 100
             
     @on 'quit', (e, player) =>
         @info "#{player.username} quit (connector:#{player.connector.id})"
