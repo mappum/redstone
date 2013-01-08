@@ -17,7 +17,7 @@ module.exports = ->
             fn.apply @, args if player?
 
     @on 'peer.connector', (e, connector, connection) =>
-        connection.on 'join', (player, state) =>
+        connection.on 'join', (player) =>
             player.connector = connector
             player = new Player player
             @players.connectionIds[player.connectionId] = player
@@ -30,7 +30,7 @@ module.exports = ->
             @players.push player
             @players.usernames[player.userId] = player
 
-            @emit 'join', player, state
+            @emit 'join', player
 
         connection.on 'quit', getPlayer (player) =>
             if not player.kicked
@@ -43,7 +43,7 @@ module.exports = ->
             player.emit 'data', id, data
             player.emit id, data
 
-    @on 'join', (e, player, state) =>
+    @on 'join', (e, player) =>
         @info "#{player.username} joined (connector:#{player.connector.id})"
 
         player.entityId = Math.floor Math.random() * 0xffff
@@ -51,9 +51,9 @@ module.exports = ->
         # TODO: get initial position from state
         player.position =
             x: 0
-            y: 64
+            y: 256
             z: 0
-            stance: 65.8
+            stance: 257.8
             yaw: 0
             pitch: 0
             onGround: false
@@ -69,6 +69,8 @@ module.exports = ->
         player.on 0xb, onMovement
         player.on 0xc, onMovement
         player.on 0xd, onMovement
+
+        player.on 'quit', => @emit 'quit', player
 
         player.on 'move', (e, d) ->
             player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
