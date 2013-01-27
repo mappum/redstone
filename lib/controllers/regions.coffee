@@ -4,8 +4,7 @@ module.exports = ->
     @regions = []
     @regions.ids = {}
 
-    @master.on 'regions', (regions) =>
-        console.log regions
+    @master.on 'neighbors', (@neighbors) =>
 
     @master.on 'region', (region) =>
         region = new Region region
@@ -13,10 +12,13 @@ module.exports = ->
         @regions.push region
         @regions.ids[region.id] = region
 
+        @info "starting region:#{region.id}"
+
         @emit 'region', region
+        region.start()
 
     @on 'join:before', (e, player) =>
-        region = @regions.ids[player.regionId]
+        region = @regions.ids[player.state.regionId]
 
         region.players.push player
         region.players.usernames[player.username] = player
@@ -25,5 +27,14 @@ module.exports = ->
 
         @debug "#{player.username} added to region:#{region.id}"
 
+    @on 'quit:before', (e, player) =>
+        region = @regions.ids[player.state.regionId]
+
+        region.players.splice region.players.indexOf(player), 1
+        region.players.usernames[player.username] = undefined
+
+        @debug "#{player.username} removed from region:#{region.id}"
+
     @on 'command.s', (e, player) =>
         console.log "/s from #{player.username}"
+        console.log @neighbors

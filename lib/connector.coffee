@@ -34,19 +34,12 @@ class Connector extends Component
 
         # request server to forward player connection to
         @master.request 'connection', handshake, (res) =>
-            if not @servers[res.serverId]
-                server = @servers[res.serverId] = new Interface[res.interfaceType](res.interface)
-                server.request 'init',
-                    type: 'connector'
-                    id: @id,
-                    =>
-                server.on 'data', (connectionId, id, data) =>
-                    client = @clients.connectionIds[connectionId]
-                    if client? then client.socket.write id, data
+            server = @connectServer res.serverId, res.interfaceType, res.interface
 
-            client = _.clone handshake
+            client = handshake
             client.socket = socket
             client.server = @servers[res.serverId]
+            client.state = res.state
 
             @clients.push client
             @clients.usernames[client.username.toLowerCase()] = client
@@ -60,7 +53,35 @@ class Connector extends Component
             client.socket.on 'data', (packet) =>
                 client.server.emit 'data', client.connectionId, packet.id, packet.data
 
-            @emit 'join', client, res.state
-            client.server.emit 'join', handshake, res.state
+            @emit 'join', client
+            client.server.emit 'join', _.omit(client, 'socket', 'server')
+
+    connectServer: (id, type, iface, callback) =>
+        server = @servers[id]
+        if typeof callback != 'function' then callback = ->
+
+        if not server?
+            server = @servers[id] = new Interface[type](iface)
+
+            server.request 'init',
+                type: 'connector'
+                id: @id,
+                -> callback server
+
+            server.on 'data', (connectionId, id, data) =>
+                client = @clients.connectionIds[connectionId]
+                if client? then client.socket.write id, data
+
+            server.on 'handoff', (connectionId, id, type, iface) =>
+                newServer = @connectServer id, type, iface
+                client = @clients.connectionIds[connectionId]
+
+                if client?
+                    @debug "handing off #{client.username}/#{client.connectionId} to server:#{newServer.id}"
+                    client.server = newServer
+                    client.server.emit 'join', _.omit(client, 'socket', 'server')
+
+
+        else callback server
 
 module.exports = Connector

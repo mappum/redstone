@@ -17,7 +17,7 @@ module.exports = ->
             fn.apply @, args if player?
 
     @on 'peer.connector', (e, connector, connection) =>
-        connection.on 'join', (player) =>
+        connection.on 'join', (player, state) =>
             player.connector = connector
             player = new Player player
             @players.connectionIds[player.connectionId] = player
@@ -33,11 +33,11 @@ module.exports = ->
             @emit 'join', player
 
         connection.on 'quit', getPlayer (player) =>
-            if not player.kicked
-                @emit 'quit', player
-                @players.splice @players.indexOf(player), 1
-                @players.usernames[player.userId] = undefined
-                @players.connectionIds[player.connectionId] = undefined
+            @players.splice @players.indexOf(player), 1
+            @players.usernames[player.userId] = undefined
+            @players.connectionIds[player.connectionId] = undefined
+
+            @emit 'quit', player if not player.kicked
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
@@ -70,7 +70,15 @@ module.exports = ->
         player.on 0xc, onMovement
         player.on 0xd, onMovement
 
-        player.on 'quit', => @emit 'quit', player
+        player.on 'quit', (e) =>
+            @info "#{player.username} quit (connector:#{player.connector.id})"
+            @emit 'quit', player
+
+        player.on 'quit:after', (e) =>
+            console.log 'quit:after', player
+            packet = entityIds: [player.entityId]
+            for p in player.region.players
+                p.send 0x1d, packet
 
         player.on 'move', (e, d) ->
             player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
@@ -125,6 +133,3 @@ module.exports = ->
                     pitch: packAngle p.position.pitch
                     currentItem: 0
                     metaData: 0
-            
-    @on 'quit', (e, player) =>
-        @info "#{player.username} quit (connector:#{player.connector.id})"
