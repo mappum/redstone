@@ -37,7 +37,7 @@ module.exports = ->
             @players.usernames[player.userId] = undefined
             @players.connectionIds[player.connectionId] = undefined
 
-            @emit 'quit', player if not player.kicked
+            player.emit 'quit' if not player.kicked
 
         connection.on 'data', getPlayer (player, id, data) =>
             player.emit 'data', id, data
@@ -75,7 +75,6 @@ module.exports = ->
             @emit 'quit', player
 
         player.on 'quit:after', (e) =>
-            console.log 'quit:after', player
             packet = entityIds: [player.entityId]
             for p in player.region.players
                 p.send 0x1d, packet
