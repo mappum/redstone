@@ -78,11 +78,12 @@ class Connector extends Component
             server.connection.on 'handoff', @getClient (client, server, region) =>
                 if client?
                     @connectServer server.id, server.interfaceType, server.interfaceId, (newServer) =>
+                        oldServer = client.server
                         @debug "handing off #{client.username}/#{client.connectionId} to server:#{newServer.id}"
                         client.server.connection.emit 'quit', client.connectionId
                         client.server = newServer
                         client.region = region
-                        client.server.connection.emit 'join', _.omit(client, 'socket', 'server'), handoff: true
+                        client.server.connection.emit 'join', _.omit(client, 'socket', 'server'), handoff: oldServer.id
 
         else callback server
 
