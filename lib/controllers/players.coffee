@@ -101,6 +101,13 @@ module.exports = ->
                 difficulty: 0
                 maxPlayers: 64
         else
+            # change dimension in order to make sure client unloads everything
+            player.send 0x9,
+                dimension: 1
+                difficulty: 0
+                gameMode: 1
+                worldHeight: 256
+                levelType: 'default'
             player.send 0x9,
                 dimension: 0
                 difficulty: 0

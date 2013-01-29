@@ -16,10 +16,6 @@ class Player extends Model
     send: (id, data) =>
         @_send 'data', id, data
 
-    handoff: (server, region) =>
-        @emit 'quit'
-        @_send 'handoff', server, region
-
     kick: (reason) =>
         @kicked = true
         @send 0xff, reason: reason
