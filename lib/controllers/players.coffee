@@ -74,11 +74,6 @@ module.exports = ->
             @info "#{player.username} quit (connector:#{player.connector.id})"
             @emit 'quit', player
 
-        player.on 'quit:after', (e) =>
-            packet = entityIds: [player.entityId]
-            for p in player.region.players
-                p.send 0x1d, packet
-
         player.on 'move', (e, d) ->
             player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
             player.position.onGround = Boolean player.position.onGround

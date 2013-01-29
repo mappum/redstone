@@ -29,4 +29,8 @@ module.exports = ->
         region.players.splice region.players.indexOf(player), 1
         region.players.usernames[player.username] = undefined
 
+        packet = entityIds: [player.entityId]
+        for p in player.region.players
+            p.send 0x1d, packet
+
         @debug "#{player.username} removed from region:#{region.id}"
