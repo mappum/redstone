@@ -8,8 +8,16 @@ class Player extends Model
 
         @userId = @username.toLowerCase()
 
+    _send: (event) =>
+        args = [event, @connectionId]
+        args = args.concat Array::slice.call(arguments, 1)
+        @connector.connection.emit.apply @connector.connection, args
+
     send: (id, data) =>
-        @connector.connection.emit 'data', @connectionId, id, data
+        @_send 'data', id, data
+
+    handoff: (server, region) =>
+        @_send 'handoff', server, region
 
     kick: (reason) =>
         @kicked = true

@@ -1,0 +1,146 @@
+0 info it worked if it ends with ok
+1 verbose cli [ 'C:\\Program Files\\nodejs\\\\node.exe',
+1 verbose cli   'C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js',
+1 verbose cli   'install',
+1 verbose cli   'rsautl' ]
+2 info using npm@1.1.66
+3 info using node@v0.8.15
+4 verbose node symlink C:\Program Files\nodejs\\node.exe
+5 verbose read json D:\projects\redstone\package.json
+6 warn package.json redstone@0.0.0 No README.md file found!
+7 verbose read json D:\projects\redstone\node_modules\coffee-script\package.json
+8 verbose read json D:\projects\redstone\node_modules\commander\package.json
+9 verbose read json D:\projects\redstone\node_modules\minecraft-net\package.json
+10 verbose read json D:\projects\redstone\node_modules\socket.io\package.json
+11 verbose read json D:\projects\redstone\node_modules\socket.io-client\package.json
+12 verbose read json D:\projects\redstone\node_modules\underscore\package.json
+13 verbose read json D:\projects\redstone\node_modules\winston\package.json
+14 verbose from cache D:\projects\redstone\package.json
+15 verbose readDependencies using package.json deps
+16 verbose cache add [ 'rsautl', null ]
+17 silly cache add name=undefined spec="rsautl" args=["rsautl",null]
+18 verbose parsed url { pathname: 'rsautl', path: 'rsautl', href: 'rsautl' }
+19 silly lockFile c3d94e06-rsautl rsautl
+20 verbose lock rsautl C:\Users\Matt\AppData\Roaming\npm-cache\c3d94e06-rsautl.lock
+21 silly lockFile c3d94e06-rsautl rsautl
+22 verbose addNamed [ 'rsautl', '' ]
+23 verbose addNamed [ null, '' ]
+24 silly lockFile 25f15176-rsautl rsautl@
+25 verbose lock rsautl@ C:\Users\Matt\AppData\Roaming\npm-cache\25f15176-rsautl.lock
+26 silly addNameRange { name: 'rsautl', range: '', hasData: false }
+27 verbose url raw rsautl
+28 verbose url resolving [ 'https://registry.npmjs.org/', './rsautl' ]
+29 verbose url resolved https://registry.npmjs.org/rsautl
+30 info trying registry request attempt 1 at 14:53:06
+31 http GET https://registry.npmjs.org/rsautl
+32 http 200 https://registry.npmjs.org/rsautl
+33 silly registry.get cb [ 200,
+33 silly registry.get   { vary: 'Accept',
+33 silly registry.get     server: 'CouchDB/1.2.1 (Erlang OTP/R15B)',
+33 silly registry.get     etag: '"5HZG8XXO4OUEX2952D1Z78ZPH"',
+33 silly registry.get     date: 'Mon, 28 Jan 2013 22:51:26 GMT',
+33 silly registry.get     'content-type': 'application/json',
+33 silly registry.get     'content-length': '3790' } ]
+34 silly addNameRange number 2 { name: 'rsautl', range: '', hasData: true }
+35 silly addNameRange versions [ 'rsautl', [ '0.1.0' ] ]
+36 verbose addNamed [ 'rsautl', '0.1.0' ]
+37 verbose addNamed [ '0.1.0', '0.1.0' ]
+38 silly lockFile 8c2ac332-rsautl-0-1-0 rsautl@0.1.0
+39 verbose lock rsautl@0.1.0 C:\Users\Matt\AppData\Roaming\npm-cache\8c2ac332-rsautl-0-1-0.lock
+40 silly lockFile b3193cb6-pmjs-org-rsautl-rsautl-0-1-0-tgz https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz
+41 verbose lock https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz C:\Users\Matt\AppData\Roaming\npm-cache\b3193cb6-pmjs-org-rsautl-rsautl-0-1-0-tgz.lock
+42 verbose addRemoteTarball [ 'https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz',
+42 verbose addRemoteTarball   'e1ef68af943e81dd8fd7640fe4e09a88a762f987' ]
+43 info retry fetch attempt 1 at 14:53:08
+44 verbose fetch to= C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\tmp.tgz
+45 http GET https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz
+46 http 200 https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz
+47 silly shasum updated bytes 3610
+48 info shasum e1ef68af943e81dd8fd7640fe4e09a88a762f987
+48 info shasum C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\tmp.tgz
+49 verbose tar unpack C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\tmp.tgz
+50 silly lockFile 9125aa13-88076-0-5261147003620863-package C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package
+51 verbose lock C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package C:\Users\Matt\AppData\Roaming\npm-cache\9125aa13-88076-0-5261147003620863-package.lock
+52 silly gunzTarPerm modes [ '755', '644' ]
+53 silly gunzTarPerm extractEntry package.json
+54 silly gunzTarPerm extractEntry .npmignore
+55 silly gunzTarPerm extractEntry README.md
+56 silly gunzTarPerm extractEntry LICENSE
+57 silly gunzTarPerm extractEntry lib/rsautl.js
+58 silly gunzTarPerm extractEntry lib/runner.js
+59 silly gunzTarPerm extractEntry test/operations.js
+60 verbose read json C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package\package.json
+61 silly lockFile 9125aa13-88076-0-5261147003620863-package C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package
+62 verbose from cache C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package\package.json
+63 verbose tar pack [ 'C:\\Users\\Matt\\AppData\\Roaming\\npm-cache\\rsautl\\0.1.0\\package.tgz',
+63 verbose tar pack   'C:\\Users\\Matt\\AppData\\Local\\Temp\\npm-6072\\1359413588076-0.5261147003620863\\package' ]
+64 verbose tarball C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+65 verbose folder C:\Users\Matt\AppData\Local\Temp\npm-6072\1359413588076-0.5261147003620863\package
+66 silly lockFile 360b5c29-m-cache-rsautl-0-1-0-package-tgz C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+67 verbose lock C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz C:\Users\Matt\AppData\Roaming\npm-cache\360b5c29-m-cache-rsautl-0-1-0-package-tgz.lock
+68 silly lockFile 360b5c29-m-cache-rsautl-0-1-0-package-tgz C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+69 silly lockFile fb034edd-g-npm-cache-rsautl-0-1-0-package C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package
+70 verbose lock C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package C:\Users\Matt\AppData\Roaming\npm-cache\fb034edd-g-npm-cache-rsautl-0-1-0-package.lock
+71 silly lockFile fb034edd-g-npm-cache-rsautl-0-1-0-package C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package
+72 verbose tar unpack C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+73 silly lockFile fb034edd-g-npm-cache-rsautl-0-1-0-package C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package
+74 verbose lock C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package C:\Users\Matt\AppData\Roaming\npm-cache\fb034edd-g-npm-cache-rsautl-0-1-0-package.lock
+75 silly gunzTarPerm modes [ '755', '644' ]
+76 silly gunzTarPerm extractEntry package.json
+77 silly gunzTarPerm modified mode [ 'package.json', 438, 420 ]
+78 silly gunzTarPerm extractEntry .npmignore
+79 silly gunzTarPerm modified mode [ '.npmignore', 438, 420 ]
+80 silly gunzTarPerm extractEntry README.md
+81 silly gunzTarPerm modified mode [ 'README.md', 438, 420 ]
+82 silly gunzTarPerm extractEntry LICENSE
+83 silly gunzTarPerm modified mode [ 'LICENSE', 438, 420 ]
+84 silly gunzTarPerm extractEntry lib/rsautl.js
+85 silly gunzTarPerm modified mode [ 'lib/rsautl.js', 438, 420 ]
+86 silly gunzTarPerm extractEntry lib/runner.js
+87 silly gunzTarPerm modified mode [ 'lib/runner.js', 438, 420 ]
+88 silly gunzTarPerm extractEntry test/operations.js
+89 silly gunzTarPerm modified mode [ 'test/operations.js', 438, 420 ]
+90 verbose read json C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package\package.json
+91 silly lockFile fb034edd-g-npm-cache-rsautl-0-1-0-package C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package
+92 silly shasum updated bytes 3607
+93 info shasum af6d14733ce87daaa6f91533e7245cb928a99b38
+93 info shasum C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+94 verbose from cache C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package\package.json
+95 verbose chmod C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz 644
+96 silly chown skipping for windows C:\Users\Matt\AppData\Roaming\npm-cache\rsautl\0.1.0\package.tgz
+97 silly lockFile b3193cb6-pmjs-org-rsautl-rsautl-0-1-0-tgz https://registry.npmjs.org/rsautl/-/rsautl-0.1.0.tgz
+98 silly lockFile 8c2ac332-rsautl-0-1-0 rsautl@0.1.0
+99 silly lockFile 25f15176-rsautl rsautl@
+100 silly resolved [ { name: 'rsautl',
+100 silly resolved     version: '0.1.0',
+100 silly resolved     description: 'A wrapper for OpenSSL\'s rsautl',
+100 silly resolved     keywords: [ 'rsa', 'encrypt', 'decrypt' ],
+100 silly resolved     author: { name: 'Ragnar B. Johannsson', email: 'ragnar@igo.is' },
+100 silly resolved     dependencies: { temp: '*' },
+100 silly resolved     devDependencies: { nodeunit: '*' },
+100 silly resolved     scripts: { test: 'node_modules/.bin/nodeunit test' },
+100 silly resolved     repository:
+100 silly resolved      { type: 'git',
+100 silly resolved        url: 'git://github.com/ragnar-johannsson/rsautl.git' },
+100 silly resolved     os: [ '!win32' ],
+100 silly resolved     main: './lib/rsautl',
+100 silly resolved     readme: '## RSA utility for Node\n\nA thin wrapper for OpenSSL\'s rsautl(1) for those precious few cases where native bindings won\'t work.\n\n\n### Installation\n\n```bash\n$ npm install rsautl\n```\n\n\n### Usage\n\n```javascript\nvar rsautl = require(\'rsautl\');\n\nvar privateKey = \'...\'; \nvar publicKey = \'...\';\n\nrsautl.encrypt(\'Encrypt me please!\', publicKey, function (err, encrypted) {\n    // encrypted contains a base64 encoded encrypted string\n    if (err) return console.log(err);\n    rsautl.decrypt(encrypted, privateKey, function (err, decrypted) {\n        if (err) return console.log(err);\n        console.log(decrypted); // Encrypt me please!    \n    });\n});\n\nrsautl.sign(\'Sign me please!\', privateKey, function (err, signed) {\n    // signed contains a base64 encoded signed string\n    if (err) return console.log(err);\n    rsautl.verify(signed, publicKey, function (err, verified) {\n        if (err) return console.log(err);\n        console.log(verified); // Sign me please!    \n    });\n});\n\n```\n\n\n### Notes\n\nThis code writes private keys to temporary files in order for openssl(1) to read them. Make sure your tempfs is based in memory. If you can, use native binding implementations.\n\n\n### License\n\nThis is free software released under the Simplified BSD License. See the LICENSE file for further information.\n',
+100 silly resolved     readmeFilename: 'README.md',
+100 silly resolved     _id: 'rsautl@0.1.0',
+100 silly resolved     dist: { shasum: 'af6d14733ce87daaa6f91533e7245cb928a99b38' },
+100 silly resolved     _from: 'rsautl' } ]
+101 info install rsautl@0.1.0 into D:\projects\redstone
+102 info installOne rsautl@0.1.0
+103 error notsup Unsupported
+103 error notsup Not compatible with your operating system or architecture: rsautl@0.1.0
+103 error notsup Valid OS:    !win32
+103 error notsup Valid Arch:  any
+103 error notsup Actual OS:   win32
+103 error notsup Actual Arch: x64
+104 error System Windows_NT 6.1.7601
+105 error command "C:\\Program Files\\nodejs\\\\node.exe" "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js" "install" "rsautl"
+106 error cwd D:\projects\redstone
+107 error node -v v0.8.15
+108 error npm -v 1.1.66
+109 error code EBADPLATFORM
+110 verbose exit [ 1, true ]

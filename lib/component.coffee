@@ -25,6 +25,13 @@ class Component extends EventStack
             peer.connection = connection
             peer.id = Math.floor(Math.random() * 0xffffffff).toString(36) while not peer.id or @peers.all[peer.id]?
 
+            if peer.interfaceType?
+                if peer.interfaceType == 'websocket'
+                    address = peer.connection.socket.handshake.address
+                    peer.interfaceId = "#{address.address}:#{peer.port}"
+                else if peer.interfaceType == 'direct'
+                    peer.interfaceId = peer.port
+
             @peers[options.type+'s'].push peer
             @peers.all[peer.id] = peer
 

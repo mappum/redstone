@@ -7,6 +7,7 @@ program
     .option('-c, --connector [port]', 'Run a connector instance, and optionally specify a port')
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
+    .option('--control <port>', 'Changes the port used for control protocol')
     .option('-S, --suppress', 'Supress logging')
     .option('-v, --verbose', 'Log more detailed stuff')
     .option('-C, --chat', 'Log chat')
@@ -19,6 +20,7 @@ else config = {}
 config.connector = program.connector if program.connector?
 config.server = program.server if program.server?
 config.master = program.master if program.master?
+config.control = program.control if program.control?
 
 # if no components specified, run them all
 if not config.connector and not config.server and not config.master
@@ -32,6 +34,8 @@ if Number(config.connector?) + Number(config.server) + Number(config.master == t
 if not config.master?
     console.log 'You must either specify a master to connect to or run a master instance'
     program.help()
+
+config.control = Number config.control if config.control?
 
 # logging
 winston = require 'winston'
@@ -69,7 +73,7 @@ if config.master == true
 
     Master = require '../lib/master'
 
-    master = new Master(new Interface().listen(8000))
+    master = new Master(new Interface().listen(config.control or 8000))
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ' else '') + message
     
@@ -80,7 +84,7 @@ if config.server
 
     Server = require '../lib/server'
 
-    server = new Server(new Interface(masterInterface), new Interface().listen(8001))
+    server = new Server(new Interface(masterInterface), new Interface().listen(config.control or 8001))
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
 
@@ -89,6 +93,7 @@ if config.server
     server.use require '../lib/controllers/regions'
     server.use require '../lib/controllers/chat'
     server.use require '../lib/controllers/commands'
+    server.use require '../lib/controllers/handoff'
 
     server.start()
 

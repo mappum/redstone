@@ -30,7 +30,7 @@ module.exports = ->
             @players.push player
             @players.usernames[player.userId] = player
 
-            @emit 'join', player
+            @emit 'join', player, state
 
         connection.on 'quit', getPlayer (player) =>
             @players.splice @players.indexOf(player), 1
@@ -43,7 +43,7 @@ module.exports = ->
             player.emit 'data', id, data
             player.emit id, data
 
-    @on 'join', (e, player) =>
+    @on 'join', (e, player, state) =>
         @info "#{player.username} joined (connector:#{player.connector.id})"
 
         player.entityId = Math.floor Math.random() * 0xffff
@@ -97,14 +97,21 @@ module.exports = ->
                     p.send 0x22, pos
                     p.send 0x23, entityId: pos.entityId, headYaw: pos.yaw if player.positionDelta.yaw
 
-        # TODO: get from state
-        player.send 0x1,
-            entityId: player.entityId
-            levelType: 'default'
-            gameMode: 1
-            dimension: 0
-            difficulty: 0
-            maxPlayers: 64
+        if not state.handoff
+            player.send 0x1,
+                entityId: player.entityId
+                levelType: 'default'
+                gameMode: 1
+                dimension: 0
+                difficulty: 0
+                maxPlayers: 64
+        else
+            player.send 0x9,
+                dimension: 0
+                difficulty: 0
+                gameMode: 1
+                worldHeight: 256
+                levelType: 'default'
 
         player.send 0xd, player.position
 

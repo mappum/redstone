@@ -34,54 +34,62 @@ class Connector extends Component
 
         # request server to forward player connection to
         @master.request 'connection', handshake, (res) =>
-            server = @connectServer res.serverId, res.interfaceType, res.interface
+            @connectServer res.serverId, res.interfaceType, res.interfaceId, (server) =>
+                client = handshake
+                client.socket = socket
+                client.server = @servers[res.serverId]
+                client.region = res.region
 
-            client = handshake
-            client.socket = socket
-            client.server = @servers[res.serverId]
-            client.state = res.state
+                @clients.push client
+                @clients.usernames[client.username.toLowerCase()] = client
+                @clients.connectionIds[client.connectionId] = client
 
-            @clients.push client
-            @clients.usernames[client.username.toLowerCase()] = client
-            @clients.connectionIds[client.connectionId] = client
+                client.socket.on 'close', =>
+                    client.server.connection.emit 'quit', client.connectionId
+                    @master.emit 'quit', client.connectionId
+         
+                # when we recieve data from the client, send it to the corresponding server
+                client.socket.on 'data', (packet) =>
+                    client.server.connection.emit 'data', client.connectionId, packet.id, packet.data
 
-            client.socket.on 'close', =>
-                client.server.emit 'quit', client.connectionId
-                @master.emit 'quit', client.connectionId
-     
-            # when we recieve data from the client, send it to the corresponding server
-            client.socket.on 'data', (packet) =>
-                client.server.emit 'data', client.connectionId, packet.id, packet.data
+                @emit 'join', client
+                client.server.connection.emit 'join', _.omit(client, 'socket', 'server'), {}
 
-            @emit 'join', client
-            client.server.emit 'join', _.omit(client, 'socket', 'server')
-
-    connectServer: (id, type, iface, callback) =>
+    connectServer: (id, interfaceType, interfaceId, callback) =>
         server = @servers[id]
         if typeof callback != 'function' then callback = ->
 
         if not server?
-            server = @servers[id] = new Interface[type](iface)
+            # TODO: make a server model
+            server = @servers[id] =
+                id: id
+                connection: new Interface[interfaceType](interfaceId)
+                interfaceId: interfaceId
+                interfaceType: interfaceType
 
-            server.request 'init',
+            server.connection.request 'init',
                 type: 'connector'
                 id: @id,
                 -> callback server
 
-            server.on 'data', (connectionId, id, data) =>
-                client = @clients.connectionIds[connectionId]
+            server.connection.on 'data', @getClient (client, id, data) =>
                 if client? then client.socket.write id, data
 
-            server.on 'handoff', (connectionId, id, type, iface) =>
-                newServer = @connectServer id, type, iface
-                client = @clients.connectionIds[connectionId]
-
+            server.connection.on 'handoff', @getClient (client, server, region) =>
                 if client?
-                    @debug "handing off #{client.username}/#{client.connectionId} to server:#{newServer.id}"
-                    client.server = newServer
-                    client.server.emit 'join', _.omit(client, 'socket', 'server')
-
+                    @connectServer server.id, server.interfaceType, server.interfaceId, (newServer) =>
+                        @debug "handing off #{client.username}/#{client.connectionId} to server:#{newServer.id}"
+                        client.server.connection.emit 'quit', client.connectionId
+                        client.server = newServer
+                        client.region = region
+                        client.server.connection.emit 'join', _.omit(client, 'socket', 'server'), handoff: true
 
         else callback server
+
+    getClient: (cb) => (connectionId) =>
+        client = @clients.connectionIds[connectionId]
+        args = [client]
+        args = args.concat Array::slice.call(arguments, 1)
+        cb.apply @, args
 
 module.exports = Connector
