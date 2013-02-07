@@ -2,7 +2,8 @@ Player = require '../models/player'
 _ = require 'underscore'
 
 packAngle = (degrees) ->
-    Math.floor (degrees % 360 + if degrees < 0 then 360 else 0) * (0xff / 360)
+    degrees = degrees % 360 + if degrees < 0 then 360 else 0
+    Math.floor (degrees - if degrees > 180 then 360 else 0) * (0xff / 360)
 
 module.exports = ->
     @players = []
@@ -127,7 +128,10 @@ module.exports = ->
             yaw: packAngle player.position.yaw
             pitch: packAngle player.position.pitch
             currentItem: 0
-            metaData: 0
+            metadata: [
+                {key: 0, type: 'byte', value: 0}
+                {key: 8, type: 'int', value: 0}
+            ]
 
         for p in player.region.players
             if p != player
@@ -141,4 +145,7 @@ module.exports = ->
                     yaw: packAngle p.position.yaw
                     pitch: packAngle p.position.pitch
                     currentItem: 0
-                    metaData: 0
+                    metadata: [
+                        {key: 0, type: 'byte', value: 0}
+                        {key: 8, type: 'int', value: 0}
+                    ]
