@@ -58,7 +58,6 @@ class Connector extends Component
          
                 # when we recieve data from the client, send it to the corresponding server
                 client.connection.on 'packet', (packet) =>
-                    console.log arguments
                     client.server.connection.emit 'data', client.connectionId, packet.id, packet
 
                 @emit 'join', client
