@@ -5,8 +5,6 @@ class Server extends Component
     constructor: (@master, iface) ->
         super iface
 
-    use: (middleware) => middleware.call @
-
     start: =>
         # register with master
         @master.request 'init',

@@ -22,19 +22,19 @@ module.exports = ->
             player = new Player player
             @players.connectionIds[player.connectionId] = player
 
-            if @players.usernames[player.userId]?
+            if @players.usernames[player.username]?
                 player.kick "Someone named '#{player.username}' is already connected."
                 @players.connectionIds[player.connectionId] = undefined
                 return
 
             @players.push player
-            @players.usernames[player.userId] = player
+            @players.usernames[player.username] = player
 
             @emit 'join', player, state
 
         connection.on 'quit', getPlayer (player) =>
             @players.splice @players.indexOf(player), 1
-            @players.usernames[player.userId] = undefined
+            @players.usernames[player.username] = undefined
             @players.connectionIds[player.connectionId] = undefined
 
             player.emit 'quit' if not player.kicked

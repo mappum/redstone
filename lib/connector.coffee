@@ -1,6 +1,6 @@
 Component = require './component'
 Interface = require './interface'
-mcnet = require 'minecraft-net'
+mcnet = require 'minecraft-protocol'
 _ = require 'underscore'
 
 class Connector extends Component
@@ -14,46 +14,55 @@ class Connector extends Component
         @servers = []
 
         # listen for client connections
-        @mcserver = mcnet.createServer options, @connection
-        @mcserver.on 'error', @error        
-        @mcserver.listen options.port or 25565, =>
-            @info "listening for Minecraft connections on port #{@mcserver.port}"
+        @mcserver = mcnet.createServer options
+        @mcserver.on 'error', @error
+        @mcserver.on 'login', @connection
+        @mcserver.on 'listening', =>
+            @info "listening for Minecraft connections on port #{options.port or 25565}"
             @emit 'listening'
 
         # register with master
         @master.request 'init', type: 'connector', (@id) =>
 
-    connection: (socket, handshake) =>
-        while not handshake.connectionId? or @clients.connectionIds[handshake.connectionId]?
-            handshake.connectionId = Math.floor(Math.random() * 0xffffffff).toString(36)
+    connection: (connection) =>
+        while not connectionId? or @clients.connectionIds[connectionId]?
+            connectionId = Math.floor(Math.random() * 0xffffffff).toString(36)
 
-        address = "#{socket.socket.remoteAddress}:#{socket.socket.remotePort}"
-        @info "#{handshake.username}/#{handshake.connectionId} [#{address}] connected"
-        socket.on 'close', (id, packet) =>
-            @info "#{handshake.username}/#{handshake.connectionId} [#{address}] disconnected"
+        address = "#{connection.socket.remoteAddress}:#{connection.socket.remotePort}"
+        @info "#{connection.username}/#{connectionId} [#{address}] connected"
+        connection.on 'close', (id, packet) =>
+            @info "#{connection.username}/#{connectionId} [#{address}] disconnected"
+
+        clientJson =
+            connectionId: connectionId
+            username: connection.username
+            ip: connection.socket.remoteAddress
 
         # request server to forward player connection to
-        @master.request 'connection', handshake, (res) =>
+        @master.request 'connection', clientJson, (res) =>
             @connectServer res.serverId, res.interfaceType, res.interfaceId, (server) =>
-                client = handshake
-                client.socket = socket
-                client.server = @servers[res.serverId]
-                client.region = res.region
+                client =
+                    connection: connection
+                    server: server
+                    connectionId: connectionId
+                    username: connection.username
+                    region: res.region
 
                 @clients.push client
                 @clients.usernames[client.username.toLowerCase()] = client
                 @clients.connectionIds[client.connectionId] = client
 
-                client.socket.on 'close', =>
+                client.connection.on 'close', =>
                     client.server.connection.emit 'quit', client.connectionId
                     @master.emit 'quit', client.connectionId
          
                 # when we recieve data from the client, send it to the corresponding server
-                client.socket.on 'data', (packet) =>
-                    client.server.connection.emit 'data', client.connectionId, packet.id, packet.data
+                client.connection.on 'packet', (packet) =>
+                    console.log arguments
+                    client.server.connection.emit 'data', client.connectionId, packet.id, packet
 
                 @emit 'join', client
-                client.server.connection.emit 'join', _.omit(client, 'socket', 'server'), {}
+                client.server.connection.emit 'join', _.omit(client, 'connection', 'server'), {}
 
     connectServer: (id, interfaceType, interfaceId, callback) =>
         server = @servers[id]
@@ -73,7 +82,7 @@ class Connector extends Component
                 -> callback server
 
             server.connection.on 'data', @getClient (client, id, data) =>
-                if client? then client.socket.write id, data
+                if client? then client.connection.write id, data
 
             server.connection.on 'handoff', @getClient (client, server, region) =>
                 if client?
@@ -87,8 +96,8 @@ class Connector extends Component
 
         else callback server
 
-    getClient: (cb) => (connectionId) =>
-        client = @clients.connectionIds[connectionId]
+    getClient: (cb) => (id) =>
+        client = @clients.connectionIds[id]
         args = [client]
         args = args.concat Array::slice.call(arguments, 1)
         cb.apply @, args

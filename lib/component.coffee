@@ -19,6 +19,10 @@ class Component extends EventStack
     warn: (message) => @log 'warn', message
     error: (message) => @log 'error', message
 
+    use: (module) =>
+        if typeof module == 'function' then module.call @
+        else if Array.isArray module then m.call @ for m in module
+
     connection: (connection) =>
         connection.respond 'init', (res, options) =>
             peer = options or {}
