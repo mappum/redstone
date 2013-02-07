@@ -1,4 +1,26 @@
-text = require('minecraft-net').text
+text =
+    black:          '§0',
+    darkBlue:       '§1',
+    darkGreen:      '§2',
+    darkAqua:       '§3',
+    darkRed:        '§4',
+    purple:         '§5',
+    gold:           '§6',
+    grey:           '§7',
+    darkGrey:       '§8',
+    indigo:         '§9',
+    green:          '§a',
+    aqua:           '§b',
+    red:            '§c',
+    pink:           '§d',
+    yellow:         '§e',
+    white:          '§f',
+    random:         '§k',
+    bold:           '§l',
+    strike:         '§m',
+    underline:      '§n',
+    italic:         '§o',
+    reset:          '§r'
 
 module.exports = ->
     @prefixes =
