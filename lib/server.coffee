@@ -6,6 +6,13 @@ class Server extends Component
         super iface
 
     start: =>
+        # load core modules
+        @use require '../lib/controllers/server/players'
+        @use require '../lib/controllers/server/regions'
+        @use require '../lib/controllers/server/chat'
+        @use require '../lib/controllers/server/commands'
+        @use require '../lib/controllers/server/handoff'
+
         # register with master
         @master.request 'init',
             type: 'server'

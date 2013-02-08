@@ -13,12 +13,15 @@ class Connector extends Component
 
         @servers = []
 
+        @options = options
+
+    start: =>
         # listen for client connections
-        @mcserver = mcnet.createServer options
+        @mcserver = mcnet.createServer @options
         @mcserver.on 'error', @error
         @mcserver.on 'login', @connection
         @mcserver.on 'listening', =>
-            @info "listening for Minecraft connections on port #{options.port or 25565}"
+            @info "listening for Minecraft connections on port #{@options.port or 25565}"
             @emit 'listening'
 
         # register with master

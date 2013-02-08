@@ -8,6 +8,7 @@ class Master extends Component
         @regions = []
         @regionQueue = []
 
+    start: =>
         # TODO: load persistent regions
         region = 
             id: 'main'

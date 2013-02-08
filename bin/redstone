@@ -76,6 +76,8 @@ if config.master == true
     master = new Master(new Interface().listen(config.control or 8000))
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ' else '') + message
+
+    master.start()
     
 masterInterface = if config.master == true then master.interface else config.master
 
@@ -87,13 +89,6 @@ if config.server
     server = new Server(new Interface(masterInterface), new Interface().listen(config.control or 8001))
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
-
-    # TODO: handle module loading
-    server.use require '../lib/controllers/server/players'
-    server.use require '../lib/controllers/server/regions'
-    server.use require '../lib/controllers/server/chat'
-    server.use require '../lib/controllers/server/commands'
-    server.use require '../lib/controllers/server/handoff'
 
     server.start()
 
@@ -109,6 +104,8 @@ if config.connector
     )
     connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ' else '') + message
+
+    connector.start()
 
 setInterval ->
   0
