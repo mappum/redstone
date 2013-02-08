@@ -1,4 +1,4 @@
-Player = require '../models/player'
+Player = require '../../models/server/player'
 _ = require 'underscore'
 
 packAngle = (degrees) ->

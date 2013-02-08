@@ -1,4 +1,4 @@
-Region = require '../models/region'
+Region = require '../../models/server/region'
 
 module.exports = ->
     @regions = []

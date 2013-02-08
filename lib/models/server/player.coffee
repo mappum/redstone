@@ -1,4 +1,4 @@
-Model = require './model'
+Model = require '../model'
 
 class Player extends Model
     constructor: (options) ->

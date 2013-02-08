@@ -89,11 +89,11 @@ if config.server
         logger.log level, (if multipleComponents then '[server] ' else '') + message
 
     # TODO: handle module loading
-    server.use require '../lib/controllers/players'
-    server.use require '../lib/controllers/regions'
-    server.use require '../lib/controllers/chat'
-    server.use require '../lib/controllers/commands'
-    server.use require '../lib/controllers/handoff'
+    server.use require '../lib/controllers/server/players'
+    server.use require '../lib/controllers/server/regions'
+    server.use require '../lib/controllers/server/chat'
+    server.use require '../lib/controllers/server/commands'
+    server.use require '../lib/controllers/server/handoff'
 
     server.start()
 

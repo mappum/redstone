@@ -1,4 +1,4 @@
-Model = require './model'
+Model = require '../model'
 
 class Region extends Model
 	constructor: (options) ->
