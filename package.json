@@ -2,7 +2,7 @@
   "name": "redstone",
   "version": "0.0.0",
   "description": "A fast, scalable Minecraft server",
-  "main": "bin/server.coffee",
+  "main": "bin/redstone",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
