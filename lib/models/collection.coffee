@@ -21,6 +21,7 @@ class Collection extends Model
     model.id = @generateId model if not model.id?
     @setIndex key, model for key of @_indexes
     @_models.push model
+    @emit 'insert', model
 
   get: (key, value) =>
     if not value?
@@ -40,6 +41,8 @@ class Collection extends Model
     @_models.splice index, 1 if index != -1
     for key of @_indexes
       delete @_indexes[key][model[key]]
+
+    @emit 'remove', model if model?
 
     model
 
