@@ -1,4 +1,5 @@
 Player = require '../../models/server/player'
+Collection = require '../../models/collection'
 _ = require 'underscore'
 
 packAngle = (degrees) ->
@@ -6,13 +7,11 @@ packAngle = (degrees) ->
     Math.floor (degrees - if degrees > 180 then 360 else 0) * (0xff / 360)
 
 module.exports = ->
-    @players = []
-    @players.usernames = {}
-    @players.connectionIds = {}
+    @players = new Collection [], indexes: ['username']
 
     getPlayer = (fn) =>
-        return (connectionId) =>
-            player = @players.connectionIds[connectionId]
+        return (id) =>
+            player = @players.get id
             args = Array::slice.call arguments, 1
             args.splice 0, 0, player
             fn.apply @, args if player?
@@ -21,23 +20,16 @@ module.exports = ->
         connection.on 'join', (player, state) =>
             player.connector = connector
             player = new Player player
-            @players.connectionIds[player.id] = player
 
-            if @players.usernames[player.username]?
+            if @players.get('username', player.username)?
                 player.kick "Someone named '#{player.username}' is already connected."
-                @players.connectionIds[player.id] = undefined
                 return
 
-            @players.push player
-            @players.usernames[player.username] = player
-
+            @players.insert player
             @emit 'join', player, state
 
         connection.on 'quit', getPlayer (player) =>
-            @players.splice @players.indexOf(player), 1
-            @players.usernames[player.username] = undefined
-            @players.connectionIds[player.id] = undefined
-
+            @players.remove player
             player.emit 'quit' if not player.kicked
 
         connection.on 'data', getPlayer (player, id, data) =>
