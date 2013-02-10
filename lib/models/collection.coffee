@@ -4,6 +4,8 @@ class Collection extends Model
   indexes: []
 
   constructor: (models, options) ->
+    super()
+    
     models = models or []
 
     indexes = if options?.indexes then options.indexes else @indexes
