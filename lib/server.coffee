@@ -2,8 +2,8 @@ Component = require './component'
 os = require 'os'
 
 class Server extends Component
-    constructor: (@master, iface) ->
-        super iface
+    constructor: (config, iface, @master) ->
+        super config, iface
 
     start: =>
         # load core modules

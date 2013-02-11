@@ -7,13 +7,13 @@ mcnet = require 'minecraft-protocol'
 _ = require 'underscore'
 
 class Connector extends Component
-    constructor: (@master, options) ->
-        super()
+    constructor: (config, @master) ->
+        super config
         
         @clients = new Collection [], indexes: ['username']
         @servers = new Collection
 
-        @options = options
+        @config = config
 
     start: =>
         # load core modules
@@ -21,11 +21,11 @@ class Connector extends Component
         @use require '../lib/controllers/connector/handoff'
 
         # listen for client connections
-        @mcserver = mcnet.createServer @options
+        @mcserver = mcnet.createServer @config.connector
         @mcserver.on 'error', @error
         @mcserver.on 'login', @connection
         @mcserver.on 'listening', =>
-            @info "listening for Minecraft connections on port #{@options.port or 25565}"
+            @info "listening for Minecraft connections on port #{@config.port or 25565}"
             @emit 'listening'
 
         # register with master

@@ -4,7 +4,7 @@ program = require 'commander'
 
 program
     .version('0.0.0')
-    .option('-c, --connector [port]', 'Run a connector instance, and optionally specify a port')
+    .option('-c, --connector', 'Run a connector instance')
     .option('-s, --server', 'Run a server instance')
     .option('-m, --master [master]', 'Run a master instance, or specify a master to connect to')
     .option('--control <port>', 'Changes the port used for control protocol')
@@ -17,25 +17,29 @@ program
 if program.config? then config = require program.config
 else config = {}
 
-config.connector = program.connector if program.connector?
-config.server = program.server if program.server?
-config.master = program.master if program.master?
-config.control = program.control if program.control?
+
+components = {}
+components.connector = program.connector if program.connector == true
+components.server = program.server if program.server == true
+components.master = program.master if program.master == true
 
 # if no components specified, run them all
-if not config.connector and not config.server and not config.master
-    config.connector = config.server = config.master = true
+unless components.connector or components.server or components.master
+    components.connector = components.server = components.master = true
 
 # check if more than one component is running
-if Number(config.connector?) + Number(config.server) + Number(config.master == true) > 1
+if Number(components.connector?) + Number(components.server) + Number(components.master) > 1
     multipleComponents = true
 
+
+config.control = Number (program.control or config.control or 8000)
+config.master = program.master or config.master
+
 # we either need a master to connect to, or we should run a local master
-if not config.master?
+unless config.master or components.master
     console.log 'You must either specify a master to connect to or run a master instance'
     program.help()
 
-config.control = Number config.control if config.control?
 
 # logging
 winston = require 'winston'
@@ -63,45 +67,44 @@ transports.push new winston.transports.Console
 logger = new winston.Logger transports: transports, levels: levels
 winston.addColors colors
 
+
 # if running a local master, use direct interface, otherwise use websocket
 Interface = require '../lib/interface'
-Interface = Interface.websocket if config.master != true or (config.master == true and not multipleComponents)
+Interface = Interface.websocket if not components.master or (components.master and not multipleComponents)
+
+control = config.control
 
 # start components
-if config.master == true
+if components.master
     logger.info 'Initializing master'
 
     Master = require '../lib/master'
 
-    master = new Master(new Interface().listen(config.control or 8000))
+    master = new Master config, new Interface().listen(control++)
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ' else '') + message
 
     master.start()
     
-masterInterface = if config.master == true then master.interface else config.master
+masterInterface = if components.master then master.interface else config.master
 
-if config.server
+if components.server
     logger.info 'Initializing server'
 
     Server = require '../lib/server'
 
-    server = new Server(new Interface(masterInterface), new Interface().listen(config.control or 8001))
+    server = new Server config, new Interface().listen(control++), new Interface(masterInterface)
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
 
     server.start()
 
-if config.connector
+if components.connector
     logger.info 'Initializing connector'
 
     Connector = require '../lib/connector'
 
-    connector = new Connector(new Interface(masterInterface),
-        'online-mode': config['online-mode'] or false
-        encryption: false
-        port: if config.connector != true then Number(config.connector)
-    )
+    connector = new Connector config, new Interface(masterInterface)
     connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ' else '') + message
 

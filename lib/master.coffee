@@ -2,8 +2,8 @@ Component = require './component'
 _ = require 'underscore'
 
 class Master extends Component
-    constructor: (iface) ->
-        super iface
+    constructor: (config, iface) ->
+        super config, iface
 
         @regions = []
         @regionQueue = []

@@ -1,7 +1,7 @@
 EventStack = require './eventstack'
 
 class Component extends EventStack
-    constructor: (@interface) ->
+    constructor: (@config, @interface) ->
         super()
 
         if @interface?
@@ -20,8 +20,10 @@ class Component extends EventStack
     error: (message) => @log 'error', message
 
     use: (module) =>
-        if typeof module == 'function' then module.call @
-        else if Array.isArray module then m.call @ for m in module
+        args = [@config]
+
+        if typeof module == 'function' then module.apply @, args
+        else if Array.isArray module then m.apply @, args for m in module
 
     connection: (connection) =>
         connection.respond 'init', (res, options) =>
