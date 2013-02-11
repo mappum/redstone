@@ -13,8 +13,6 @@ class Connector extends Component
         @clients = new Collection [], indexes: ['username']
         @servers = new Collection
 
-        @config = config
-
     start: =>
         # load core modules
         @use require '../lib/controllers/connector/data'
@@ -25,7 +23,7 @@ class Connector extends Component
         @mcserver.on 'error', @error
         @mcserver.on 'login', @connection
         @mcserver.on 'listening', =>
-            @info "listening for Minecraft connections on port #{@config.port or 25565}"
+            @info "listening for Minecraft connections on port #{@config.connector.port or 25565}"
             @emit 'listening'
 
         # register with master

@@ -72,15 +72,13 @@ winston.addColors colors
 Interface = require '../lib/interface'
 Interface = Interface.websocket if not components.master or (components.master and not multipleComponents)
 
-control = config.control
-
 # start components
 if components.master
     logger.info 'Initializing master'
 
     Master = require '../lib/master'
 
-    master = new Master config, new Interface().listen(control++)
+    master = new Master config, new Interface().listen(config.control)
     master.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[master] ' else '') + message
 
@@ -93,7 +91,7 @@ if components.server
 
     Server = require '../lib/server'
 
-    server = new Server config, new Interface().listen(control++), new Interface(masterInterface)
+    server = new Server config, new Interface().listen(config.control), new Interface(masterInterface)
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
 
