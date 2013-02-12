@@ -18,7 +18,11 @@ class Client extends Model
     @server.connection.emit 'join', @toJson(), {}
 
   send: (id, data) =>
-    @connection.write id, data
+    if id == 0xff then @connection.end data.reason
+    else @connection.write id, data
+
+  kick: (reason) =>
+    @connection.end reason
 
   sendServer: =>
     args = Array::slice.call arguments, 0

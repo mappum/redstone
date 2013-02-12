@@ -43,6 +43,8 @@ class Connector extends Component
                     username: connection.username
                     region: res.region
 
+                if @clients.get 'username', client.username
+                    return client.kick("Someone named '#{client.username}' is already connected.")
                 @clients.insert client
 
                 address = "#{client.connection.socket.remoteAddress}:#{client.connection.socket.remotePort}"
