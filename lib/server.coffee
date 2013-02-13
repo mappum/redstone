@@ -8,6 +8,7 @@ class Server extends Component
     start: =>
         # load core modules
         @use require '../lib/controllers/server/players'
+        @use require '../lib/controllers/server/playerStorage'
         @use require '../lib/controllers/server/regions'
         @use require '../lib/controllers/server/chat'
         @use require '../lib/controllers/server/commands'
