@@ -58,6 +58,5 @@ module.exports = (config) ->
           connection.respond 'db.'+name, (res) =>
             args = Array::slice.call arguments, 1
             args.push res
-            console.log args
             method.apply @, args
         )(name, method)
