@@ -9,6 +9,10 @@ class Master extends Component
         @regionQueue = []
 
     start: =>
+        # load core modules
+        @use require '../lib/controllers/master/db'
+
+
         # TODO: load persistent regions
         region = 
             id: 'main'

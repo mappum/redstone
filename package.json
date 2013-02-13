@@ -17,6 +17,7 @@
     "commander": "1.1.1",
     "socket.io": "0.9.13",
     "socket.io-client": "0.9.11",
-    "underscore": "1.4.3"
+    "underscore": "1.4.3",
+    "mongoose": "1.2.x"
   }
 }
