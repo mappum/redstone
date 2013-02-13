@@ -18,6 +18,7 @@
     "socket.io": "0.9.13",
     "socket.io-client": "0.9.11",
     "underscore": "1.4.3",
-    "mongodb": "1.2.x"
+    "mongodb": "1.2.x",
+    "watchjs": "0.0.x"
   }
 }
