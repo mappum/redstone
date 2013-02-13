@@ -6,39 +6,58 @@ module.exports = (config) ->
     return @error "Error connecting to database: #{err}" if err
     @info 'Connected to database'
 
-    @on 'peer', (e, peer, connection) =>
-      connection.respond 'db.find', (res, collectionName, query, fields, options) =>
+    # TODO: make sure calling db.collection every query isn't too slow
+    @db =
+      find: (collectionName, query, fields, options, cb) =>
+        cb = arguments[arguments.length-1]
         collection = db.collection collectionName
-        collection.find(query, fields, options).toArray res
+        collection.find(query, fields, options).toArray cb
 
-      connection.respond 'db.findOne', (res, collectionName, query, fields, options) =>
+      findOne: (collectionName, query, fields, options, cb) =>
+        cb = arguments[arguments.length-1]
         collection = db.collection collectionName
-        collection.findOne query, fields, options, res
+        collection.findOne query, fields, options, cb
 
-      connection.respond 'db.count', (res, collectionName, query, options) =>
+      count: (collectionName, query, options, cb) =>
+        cb = arguments[arguments.length-1]
         collection = db.collection collectionName
-        collection.count query, options, res
+        collection.count query, options, cb
 
-      connection.respond 'db.insert', (res, collectionName, docs, options) =>
+      insert: (collectionName, docs, options, cb) =>
+        cb = arguments[arguments.length-1]
         options = options or {}
         options.safe = true if not options.safe?
         collection = db.collection collectionName
-        collection.insert docs, options, res
+        collection.insert docs, options, cb
 
-      connection.respond 'db.update', (res, collectionName, crtiteria, objNew, options) =>
+      update: (collectionName, crtiteria, objNew, options, cb) =>
+        cb = arguments[arguments.length-1]
         options = options or {}
         options.safe = true if not options.safe?
         collection = db.collection collectionName
-        collection.update crtiteria, objNew, options, res
+        collection.update crtiteria, objNew, options, cb
 
-      connection.respond 'db.remove', (res, collectionName, selector, options) =>
+      remove: (collectionName, selector, options, cb) =>
+        cb = arguments[arguments.length-1]
         options = options or {}
         options.safe = true if not options.safe?
         collection = db.collection collectionName
-        collection.remove crtiteria, objNew, options, res
+        collection.remove crtiteria, objNew, options, cb
 
-      connection.respond 'db.ensureIndex', (res, collectionName, keys, options) =>
+      ensureIndex: (collectionName, keys, options, cb) =>
+        cb = arguments[arguments.length-1]
         collection = db.collection collectionName
-        collection.ensureIndex keys, options, res
+        collection.ensureIndex keys, options, cb
 
       # TODO: add other methods if needed
+
+    # listen for peer db requests
+    @on 'peer', (e, peer, connection) =>
+      for name, method of @db
+        ((name, method) =>
+          connection.respond 'db.'+name, (res) =>
+            args = Array::slice.call arguments, 1
+            args.push res
+            console.log args
+            method.apply @, args
+        )(name, method)
