@@ -67,13 +67,13 @@ module.exports = ->
         player.on 0xd, onMovement
 
         player.on 'quit', (e) =>
+            @emit 'quit', player
+
             @info "#{player.username} quit (connector:#{player.connector.id})"
 
             # TODO: maybe save this stuff periodically while logged in
             player.storage.position = _.pick player.position, 'x', 'y', 'z', 'yaw', 'pitch'
             player.save()
-
-            @emit 'quit', player
 
         player.on 'move', (e, d) ->
             player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
