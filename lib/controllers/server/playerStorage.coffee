@@ -6,11 +6,15 @@ module.exports = (config) ->
 
   @on 'join', (e, player) =>
     player.storage = {} if not player.storage?
-    timer = null
+    timeout = null
 
-    update = ->
-      timer = null
-      @master.request 'db.update', {username: player.username}, player.storage, cb
+    player.save = =>
+      if timeout
+        clearTimeout timeout
+        timeout = null
+
+      @master.request 'db.update', 'users', {username: player.username},
+        {$set: {storage: player.storage}}, cb
 
     watchjs.watch player.storage, ->
-      timer = setTimeout update, delay if not timer
+      timeout = setTimeout player.save, delay if not timeout
