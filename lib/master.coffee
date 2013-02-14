@@ -14,12 +14,12 @@ class Master extends Component
 
 
         # TODO: load persistent regions
-        region = 
+        region =
             id: 'main'
             type: 'flat'
         @regions.push region
         @regionQueue.push region
-        region2 = 
+        region2 =
             id: 'main2'
             type: 'flat'
         @regions.push region2
