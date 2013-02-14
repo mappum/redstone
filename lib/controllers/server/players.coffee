@@ -42,15 +42,17 @@ module.exports = ->
 
         player.entityId = Math.floor Math.random() * 0xffff
 
-        # TODO: get initial position from state
-        player.position =
+        # TODO: get a real spawn point
+        spawn =
             x: 0
             y: 256
             z: 0
-            stance: 257.8
             yaw: 0
             pitch: 0
-            onGround: false
+
+        player.position = player.storage.position or _.clone spawn
+        player.position.stance = 257.8
+        player.position.onGround = false
 
         onMovement = (e, packet) ->
             d = player.positionDelta = _.clone player.position
@@ -66,6 +68,11 @@ module.exports = ->
 
         player.on 'quit', (e) =>
             @info "#{player.username} quit (connector:#{player.connector.id})"
+
+            # TODO: maybe save this stuff periodically while logged in
+            player.storage.position = _.pick player.position, 'x', 'y', 'z', 'yaw', 'pitch'
+            player.save()
+
             @emit 'quit', player
 
         player.on 'move', (e, d) ->
