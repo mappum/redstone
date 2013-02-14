@@ -27,18 +27,29 @@ class Master extends Component
 
         # TODO: spawn servers to hold regions
 
-        @on 'peer.connector', (e, connector, connection) =>
-            connection.respond 'connection', (res, handshake) =>
-                server = @peers.servers[0]
-                # TODO: lookup position and find correct server
+        @on 'join', (e, player, res) =>
+            @db.findOne 'users', _.pick(player, 'username'), (err, doc) =>
+                return @error err if err
 
-                res
-                    serverId: server.id
-                    interfaceType: server.interfaceType
-                    interfaceId: server.interfaceId
-                    # TODO: lookup actual state
-                    region:
-                        id: @regions[0].id
+                storage = doc?.storage
+                player.storage = storage or {
+                    region: 'main'
+                    # TODO: handle default region
+                }
+
+                server = @peers.servers[0]
+                # TODO: find correct server
+
+                res _.pick(server, 'id', 'interfaceType', 'interfaceId'), player
+
+                if not storage
+                    player.created = Date.now()
+                    @db.insert 'users', player, (err) => @error err if err
+
+        @on 'peer.connector', (e, connector, connection) =>
+            connection.respond 'connection', (res, player) =>
+                @emit 'join', player, res
+
 
         @on 'peer.server', (e, server, connection) =>
             server.stats = {}

@@ -35,13 +35,11 @@ class Connector extends Component
             ip: connection.socket.remoteAddress
 
         # request server to forward player connection to
-        @master.request 'connection', connectionJson, (res) =>
-            @connect res.serverId, res.interfaceType, res.interfaceId, (server) =>
-                client = new Client
-                    connection: connection
-                    server: server
-                    username: connection.username
-                    region: res.region
+        @master.request 'connection', connectionJson, (server, player) =>
+            @connect server.id, server.interfaceType, server.interfaceId, (server) =>
+                player.server = server
+                player.connection = connection
+                client = new Client player
 
                 if @clients.get 'username', client.username
                     return client.kick("Someone named '#{client.username}' is already connected.")
