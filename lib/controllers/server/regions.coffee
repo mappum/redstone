@@ -16,7 +16,7 @@ module.exports = ->
         region.start()
 
     @on 'join:before', (e, player) =>
-        region = player.region = @regions.ids[player.region.id]
+        region = player.region = @regions.ids[player.storage.region]
 
         region.players.push player
         region.players.usernames[player.username] = player
