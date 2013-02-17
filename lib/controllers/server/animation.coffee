@@ -1,5 +1,5 @@
 module.exports = ->
-  
+
   sendHeldItem = (player, slotId) ->
     packet =
       entityId: player.entityId
@@ -10,9 +10,7 @@ module.exports = ->
       p.send 0x5, packet if p != player
 
   @on 'join', (e, player) ->
-    setTimeout ->
-      sendHeldItem player, 0
-    , 600
+    player.on 'ready', -> sendHeldItem player, 0
 
     player.on 0x12, (e, packet) ->
       if packet.animation == 1 and packet.entityId == player.entityId

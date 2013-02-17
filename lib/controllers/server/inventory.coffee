@@ -24,8 +24,7 @@ module.exports = (config) ->
     player.inventory = if player.storage.inventory then _.clone(player.storage.inventory) else []
     player.sendInventory = sendInventory.bind player
 
-    # don't send the inventory too fast or we will crash the client
-    setTimeout player.sendInventory, 500
+    player.on 'ready', player.sendInventory
 
     player.on 0x6b, (e, packet) ->
       if 0 <= packet.slot <= 44
