@@ -18,6 +18,15 @@ class EventStack
         #stacks[priority].push handler
         stacks[priority].splice 0, 0, handler
 
+    off: (event, handler) =>
+        event = String(event).trim().toLowerCase()
+
+        stacks = @stacks[event]
+        for priority in stacks
+            if priority?
+                i = priority.indexOf(handler)
+                return priority.splice i, 1 if i != -1
+
     emit: (event) =>
         event = String(event)
 
