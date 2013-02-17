@@ -18,6 +18,14 @@ class EventStack
         #stacks[priority].push handler
         stacks[priority].splice 0, 0, handler
 
+    once: (event, handler, priority) =>
+        _off = @off
+        f = ->
+            args = Array::slice.call arguments, 0
+            handler.apply @, args
+            _off event, f
+        @on event, f, priority
+
     off: (event, handler) =>
         event = String(event).trim().toLowerCase()
 
