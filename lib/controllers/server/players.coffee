@@ -42,11 +42,16 @@ module.exports = ->
 
         player.entityId = Math.floor Math.random() * 0xffff
 
-        onReady = -> player.emit 'ready'
-        player.once 0xa, onReady
-        player.once 0xb, onReady
-        player.once 0xc, onReady
-        player.once 0xd, onReady
+        onReady = ->
+            player.emit 'ready'
+            player.off 0xa, onReady
+            player.off 0xb, onReady
+            player.off 0xc, onReady
+            player.off 0xd, onReady
+        player.on 0xa, onReady
+        player.on 0xb, onReady
+        player.on 0xc, onReady
+        player.on 0xd, onReady
 
         # TODO: get a real spawn point
         spawn =
