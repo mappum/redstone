@@ -48,12 +48,13 @@ class MapCollection extends Collection
     model.off 'move:after', @onMove
 
   getRadius: (model, radius) ->
-    x = model[@positionKey].x
-    z = model[@positionKey].z
+    position = model[@positionKey]
+    if not position.x? and position.y?
+      position = model
     range = Math.ceil radius / @cellSize
     cells = []
-    for i in [x-range..x+range]
-      for j in [z-range..z+range]
+    for i in [position.x-range..position.x+range]
+      for j in [position.z-range..position.z+range]
         cell = @grid[i]?[j]
         cells.push cell._models if cell
     return Array::concat.apply [], cells
