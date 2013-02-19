@@ -1,7 +1,7 @@
 module.exports = (config) ->
   cb = (err) => @error err if err
 
-  @on 'join', (e, player) =>
+  @on 'join:before', (e, player) =>
     player.storage = {} if not player.storage?
 
     player.save = =>
