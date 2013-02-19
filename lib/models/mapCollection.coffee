@@ -56,7 +56,7 @@ class MapCollection extends Collection
     for i in [position.x-range..position.x+range]
       for j in [position.z-range..position.z+range]
         cell = @grid[i]?[j]
-        cells.push cell._models if cell
+        cells.push cell.models if cell
     return Array::concat.apply [], cells
 
 module.exports = MapCollection

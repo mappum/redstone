@@ -11,18 +11,18 @@ class Collection extends Model
     indexes = if options?.indexes then options.indexes else @indexes
     indexes.push 'id' if indexes.indexOf('id') == -1
 
-    @_models = []
+    @models = []
     @_indexes = {}
     @_indexes[index] = {} for index in indexes
 
-    @__defineGetter__ 'length', => @_models.length
+    @__defineGetter__ 'length', => @models.length
 
     @insert model for model in models
 
   insert: (model) =>
     model.id = @generateId model if not model.id?
     @setIndex key, model for key of @_indexes
-    @_models.push model
+    @models.push model
     @emit 'insert', model
 
   get: (key, value) =>
@@ -33,14 +33,14 @@ class Collection extends Model
     if key?
       return @_indexes[key][value]
     else
-      return @_models[value]
+      return @models[value]
 
   remove: (key, value) =>
     model = if typeof key == 'object' then key else @get key, value
     return if not model?
 
-    index = @_models.indexOf(model)
-    @_models.splice index, 1 if index != -1
+    index = @models.indexOf(model)
+    @models.splice index, 1 if index != -1
     for key of @_indexes
       delete @_indexes[key][model[key]]
 
