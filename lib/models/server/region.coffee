@@ -13,16 +13,16 @@ class Region extends Model
 		@players = []
 		@players.usernames = {}
 
-	start: =>
-		if not @ticking
-			@ticking = true
-			@tick()
+	start: ->
+		if not @tickTimer
+			@tickTimer = setInterval @tick.bind @
 
-	stop: => @ticking = false
+	stop: ->
+		clearInterval @tickTimer
+		@tickTimer = null
 
-	tick: =>
+	tick: ->
 		@emit 'tick'
 		@ticks++
-		setTimeout @tick, @tickInterval if @ticking
 
 module.exports = Region
