@@ -18,16 +18,13 @@ module.exports = ->
     @on 'join:before', (e, player) =>
         region = player.region = @regions.ids[player.storage.region]
 
-        region.players.push player
-        region.players.usernames[player.username] = player
+        region.players.insert player
 
         @debug "#{player.username} added to region:#{region.id}"
 
     @on 'quit:before', (e, player) =>
         region = player.region
-
-        region.players.splice region.players.indexOf(player), 1
-        region.players.usernames[player.username] = undefined
+        region.players.remove player
 
         packet = entityIds: [player.entityId]
         for p in region.players

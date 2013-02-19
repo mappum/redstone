@@ -36,7 +36,7 @@ module.exports = ->
             player.emit 'data', id, data
             player.emit id, data
 
-    @on 'join', (e, player, state) =>
+    @on 'join:before', (e, player, state) =>
         handoff = if state.handoff then "(handoff:#{state.handoff}) " else ''
         @info "#{player.username} joined #{handoff}(connector:#{player.connector.id})"
 
@@ -64,6 +64,9 @@ module.exports = ->
         player.position = player.storage.position or _.clone spawn
         player.position.stance = 257.8
         player.position.onGround = false
+
+
+    @on 'join:after', (e, player, state) =>
 
         onMovement = (e, packet) ->
             d = player.positionDelta = _.clone player.position
@@ -99,7 +102,7 @@ module.exports = ->
                 yaw: packAngle player.position.yaw
                 pitch: packAngle player.position.pitch
 
-            for p in player.region.players
+            for p in player.region.players.models
                 if p != player
                     p.send 0x22, pos
                     p.send 0x23, entityId: pos.entityId, headYaw: pos.yaw if player.positionDelta.yaw
@@ -143,7 +146,7 @@ module.exports = ->
                 {key: 8, type: 'int', value: 0}
             ]
 
-        for p in player.region.players
+        for p in player.region.players.models
             if p != player
                 p.send 0x14, selfSpawn
                 player.send 0x14,
