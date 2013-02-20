@@ -27,17 +27,19 @@ class Region extends Model
 		@emit 'tick'
 		@ticks++
 
-	send: (position, options, event) ->
-		eventIndex = 2
-		if typeof position == 'string'
-			event = position
+	send: (position, options, id, data) ->
+		idIndex = 2
+		if typeof position == 'number'
+			id = position
+			data = options
 			position = null
 			options = null
-			eventIndex = 0
-		else if typeof options == 'string'
-			event = options
+			idIndex = 0
+		else if typeof options == 'number'
+			data = id
+			id = options
 			options = null
-			eventIndex = 1
+			idIndex = 1
 
 		options = options or
 			radius: 32
@@ -46,7 +48,6 @@ class Region extends Model
 		players = if not position then @players.models else @players.getRadius position, options.radius
 		players = _.difference players, options.exclude if options.exclude
 
-		args = Array::slice.call arguments, eventIndex
-		player.send.apply player, args for player in players
+		player.send id, data for player in players
 
 module.exports = Region

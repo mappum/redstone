@@ -1,33 +1,24 @@
 Region = require '../../models/server/region'
+Collection = require '../../models/collection'
 
 module.exports = ->
-    @regions = []
-    @regions.ids = {}
+    @regions = new Collection
 
     @master.on 'region', (region) =>
         region = new Region region
-
-        @regions.push region
-        @regions.ids[region.id] = region
-
-        @info "starting region:#{region.id}"
-
+        @regions.insert region
         @emit 'region', region
         region.start()
+        @info "starting region:#{region.id}"
 
     @on 'join:before', (e, player) =>
-        region = player.region = @regions.ids[player.storage.region]
-
+        region = player.region = @regions.get player.storage.region
         region.players.insert player
-
         @debug "#{player.username} added to region:#{region.id}"
 
     @on 'quit:before', (e, player) =>
         region = player.region
         region.players.remove player
-
         packet = entityIds: [player.entityId]
-        for p in region.players
-            p.send 0x1d, packet
-
+        region.send 0x1d, packet
         @debug "#{player.username} removed from region:#{region.id}"
