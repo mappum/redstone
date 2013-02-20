@@ -1,4 +1,5 @@
 Model = require '../model'
+zlib = require 'zlib'
 
 getNibble = (buf, offset) ->
   offset /= 2
@@ -37,24 +38,46 @@ class Chunk extends Model
     @[k] = @buf.slice offset, offset += v for k, v of sizes
 
   getBlock: (x, y, z) ->
-    offset = @getOffset x, y, z
-    return @types[offset]
+    # TODO: set add values
+    @types[@getOffset x, y, z]
 
   setBlock: (value, x, y, z) ->
-    offset = @getOffset x, y, z
-    @types[offset] = value
+    # TODO: get add values
+    @types[@getOffset x, y, z] = value
 
-  getField: (field, x, y, z) -> getNibble @[field], @getOffset(x, y, z)
+  getField: (field, x, y, z) ->
+    getNibble @[field], @getOffset(x, y, z)
 
-  setField: (field, value, x, y, z) -> setNibble @[field], value, @getOffset(x, y, z)
+  setField: (field, value, x, y, z) ->
+    setNibble @[field], value, @getOffset(x, y, z)
 
-  getOffset: (x, y, z) ->
-    subchunk = @getSubChunk y
-    offset = subchunk * 16 * 16 * 16
-    offset += x * 16 * 16 + y % 16 + z * 16
-    return offset
+  getOffset: (x, y, z) -> y * 16 * 16 + z * 16 + x
 
-  getSubChunk: (y) ->
-    return Math.floor y / 16
+  toPacket: (options, cb) ->
+    if typeof options == 'function'
+      cb = options
+      options = null
+
+    options = options or {}
+    x = options.x or 0
+    z = options.z or 0
+    compress = if options.compress? then options.compress else true
+
+    # TODO: don't always send the whole thing
+    output =
+      x: x
+      z: z
+      groundUp: true
+      bitMap: 0xffff
+      addBitMap: 0
+
+    if compress
+      zlib.deflate @buf, (err, data) ->
+        return cb err if err
+        output.compressedChunkData = data
+        cb null, output
+    else
+      output.data = @buf
+      cb null, output
 
 module.exports = Chunk
