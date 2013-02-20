@@ -102,10 +102,15 @@ module.exports = ->
                 yaw: packAngle player.position.yaw
                 pitch: packAngle player.position.pitch
 
-            for p in player.region.players.models
-                if p != player
-                    p.send 0x22, pos
-                    p.send 0x23, entityId: pos.entityId, headYaw: pos.yaw if player.positionDelta.yaw
+            options =
+                radius: 64
+                exclude: [player]
+
+            player.region.send player.position, options, 0x22, pos
+            
+            if player.positionDelta.yaw
+                headYaw = entityId: pos.entityId, headYaw: pos.yaw
+                player.region.send player.position, options, 0x23, headYaw
 
         if not state.handoff
             player.send 0x1,
@@ -146,9 +151,9 @@ module.exports = ->
                 {key: 8, type: 'int', value: 0}
             ]
 
-        for p in player.region.players.models
+        player.region.send player.position, {radius: 64, exclude: [player]}, 0x14, selfSpawn
+        for p in player.region.players.getRadius player, 64
             if p != player
-                p.send 0x14, selfSpawn
                 player.send 0x14,
                     entityId: p.entityId
                     name: p.username
