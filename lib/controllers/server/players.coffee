@@ -67,6 +67,7 @@ module.exports = ->
 
 
     @on 'join:after', (e, player, state) =>
+        emitMoving = -> player.emit 'moving'
 
         onMovement = (e, packet) ->
             d = player.positionDelta = _.clone player.position
@@ -84,10 +85,13 @@ module.exports = ->
             if moved
                 if player.stopped
                     player.stopped = false
+                    player.movingInterval = setInterval emitMoving, 1000 if not player.movingInterval
                     player.emit 'start'
                 player.emit 'move', d
             else if not player.stopped
                 player.stopped = true
+                clearInterval player.movingInterval
+                player.movingInterval = null
                 player.emit 'stop'
 
         player.on 0xb, onMovement
