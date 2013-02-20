@@ -1,6 +1,8 @@
 Model = require '../model'
 _ = require 'underscore'
 
+ignore = {0xa: 1}
+
 class Client extends Model
   constructor: (options) ->
     super()
@@ -13,7 +15,7 @@ class Client extends Model
 
     # when we recieve data from the client, send it to the server
     @connection.on 'packet', (packet) =>
-      @sendServer 'data', packet.id, packet
+      @sendServer 'data', packet.id, packet if not ignore[packet.id]
 
     @server.connection.emit 'join', @toJson(), {}
 
