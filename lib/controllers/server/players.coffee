@@ -72,10 +72,24 @@ module.exports = ->
             d = player.positionDelta = _.clone player.position
             d[k] = (Number(packet[k]) - Number(v)) || 0 for k,v of d
 
-            # TODO: separate look event
-            player.emit 'move', d if d.x or d.y or d.z or d.yaw or d.pitch
+            moved = Math.abs(d.x) > 0.01 or Math.abs(d.y) > 0.01 or Math.abs(d.z) > 0.01
+            looked = d.yaw or d.pitch
 
-        player.on 0xa, onMovement
+            if moved or looked
+                player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
+                player.position.onGround = Boolean player.position.onGround
+
+            player.emit 'look', d if looked
+
+            if moved
+                if player.stopped
+                    player.stopped = false
+                    player.emit 'start'
+                player.emit 'move', d
+            else if not player.stopped
+                player.stopped = true
+                player.emit 'stop'
+
         player.on 0xb, onMovement
         player.on 0xc, onMovement
         player.on 0xd, onMovement
@@ -89,9 +103,19 @@ module.exports = ->
             player.storage.position = _.pick player.position, 'x', 'y', 'z', 'yaw', 'pitch'
             player.save()
 
-        player.on 'move', (e, d) ->
-            player.position[k] = Number(player.position[k]) + Number(v) for k,v of d
-            player.position.onGround = Boolean player.position.onGround
+        options =
+            radius: 64
+            exclude: [player]
+
+        player.on 'look', (e, d) ->
+            look =
+                entityId: player.entityId
+                yaw: packAngle player.position.yaw
+                pitch: packAngle player.position.pitch
+            headYaw = entityId: player.entityId, headYaw: look.yaw
+            
+            player.region.send player.position, options, 0x20, look
+            player.region.send player.position, options, 0x23, headYaw
 
         player.on 'move:after', ->
             pos =
@@ -102,15 +126,7 @@ module.exports = ->
                 yaw: packAngle player.position.yaw
                 pitch: packAngle player.position.pitch
 
-            options =
-                radius: 64
-                exclude: [player]
-
             player.region.send player.position, options, 0x22, pos
-            
-            if player.positionDelta.yaw
-                headYaw = entityId: pos.entityId, headYaw: pos.yaw
-                player.region.send player.position, options, 0x23, headYaw
 
         if not state.handoff
             player.send 0x1,
