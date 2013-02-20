@@ -1,6 +1,9 @@
 #!/usr/bin/env coffee
 
+require 'coffee-script'
 program = require 'commander'
+cluster = require 'cluster'
+os = require 'os'
 
 program
     .version('0.0.0')
@@ -28,9 +31,8 @@ unless components.connector or components.server or components.master
     components.connector = components.server = components.master = true
 
 # check if more than one component is running
-if Number(components.connector?) + Number(components.server) + Number(components.master) > 1
-    multipleComponents = true
-
+componentCount = Number(components.connector) + Number(components.server) + Number(components.master)
+multipleComponents = componentCount > 1
 
 config.control = Number (program.control or config.control or 8000)
 config.master = program.master or config.master
@@ -98,15 +100,18 @@ if components.server
     server.start()
 
 if components.connector
-    logger.info 'Initializing connector'
-
     Connector = require '../lib/connector'
 
-    connector = new Connector config, new Interface(masterInterface)
-    connector.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[connector] ' else '') + message
+    if cluster.isMaster
+        cpus = if os.platform().indexOf('win') == 0 then 1 else os.cpus().length
+        cluster.fork() for i in [0...cpus]
+    else
+        logger.info 'Initializing connector'
+        connector = new Connector config, new Interface(masterInterface)
+        connector.on 'log', (e, level, message) ->
+            logger.log level, (if multipleComponents then '[connector] ' else '') + message
 
-    connector.start()
+        connector.start()
 
 setInterval ->
   0
