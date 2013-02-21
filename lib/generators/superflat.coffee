@@ -1,6 +1,19 @@
-module.exports = (chunk, chunkX, chunkZ) ->
-  chunk.skylight.fill 255
-  for x in [0...16]
-    for y in [60..64]
-      for z in [0...16]
-        chunk.setBlock (if y == 64 then 2 else 3), x, y, z
+module.exports = (options) ->
+  blocks = options?.blocks or [
+    {type: 7, height: 1}
+    {type: 3, height: 2}
+    {type: 2, height: 1}
+  ]
+
+  (chunk, chunkX, chunkZ) ->
+    chunk.type = 'flat'
+
+    y = 1
+    for block, i in blocks
+      for j in [0...block.height]
+        for x in [0...16]
+          for z in [0...16]
+            chunk.setBlock block.type, x, y, z
+            chunk.setField 'skylight', 15, x-1, y+1, z if i == blocks.length-1 and j == block.height-1
+
+        y++

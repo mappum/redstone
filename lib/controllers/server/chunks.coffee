@@ -1,8 +1,8 @@
 ChunkCollection = require '../../models/server/chunkCollection'
-SuperflatGenerator = require '../../generators/superflat'
+superflatGenerator = require('../../generators/superflat')()
 
 module.exports = ->
-  chunks = @chunks = new ChunkCollection {generator: SuperflatGenerator}
+  chunks = @chunks = new ChunkCollection {generator: superflatGenerator}
 
   for x in [-1..1]
     for z in [-1..1]
