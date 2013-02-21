@@ -17,6 +17,7 @@ class Server extends Component
         @use require '../lib/controllers/server/inventory'
         @use require '../lib/controllers/server/animation'
         @use require '../lib/controllers/server/chunks'
+        @use require '../lib/controllers/server/build'
 
         # register with master
         @master.request 'init',
