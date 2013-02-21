@@ -9,6 +9,7 @@ module.exports = ->
       @chunks.getChunk x, z
 
   sendChunks = (player) ->
+    # TODO: get view distance from settings
     viewDistance = 5
     playerX = Math.floor player.position.x / 16
     playerZ = Math.floor player.position.z / 16
