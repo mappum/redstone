@@ -1,19 +1,35 @@
-Chunk = require '../../models/server/chunk'
+ChunkCollection = require '../../models/server/chunkCollection'
+SuperflatGenerator = require '../../generators/superflat'
 
 module.exports = ->
-  c = new Chunk
-  for x in [0...16]
-    for y in [240..250]
-      for z in [0...16]
-        c.setBlock (if y == 250 then 2 else 3), x, y, z
-  c.skylight.fill 255
+  chunks = @chunks = new ChunkCollection {generator: SuperflatGenerator}
+
+  for x in [-1..1]
+    for z in [-1..1]
+      @chunks.getChunk x, z
+
+  sendChunks = (player) ->
+    viewDistance = 5
+    playerX = Math.floor player.position.x / 16
+    playerZ = Math.floor player.position.z / 16
+
+    # TODO: send in bulk packet rather than one by one
+    for x in [-viewDistance+playerX..viewDistance+playerX]
+      for z in [-viewDistance+playerZ..viewDistance+playerZ]
+        ((x, z) =>
+          if not player.loadedChunks["#{x}.#{z}"]
+            chunks.getChunk x, z, (err, chunk) =>
+              return @error err if err?
+              chunk.toPacket {x: x, z: z}, (err, packet) =>
+                return @error err if err?
+                player.send 0x33, packet
+                player.loadedChunks["#{x}.#{z}"] = true
+        )(x, z)
 
   @on 'join:after', (e, player) =>
-    c.toPacket (err, packet) =>
-      return @error err if err
+    player.loadedChunks = {}
+    sendChunks player
 
-      for x in [-1..1]
-        for z in [-1..1]
-          packet.x = x
-          packet.z = z
-          player.send 0x33, packet
+    player.on 'moving:after', ->
+      # TODO: mark chunks as out of range
+      sendChunks player
