@@ -29,7 +29,7 @@ module.exports = ->
     player.on 0xf, (e, packet) =>
       # TODO: make sure player isn't cheating
 
-      return if packet.heldItem.id < 0 or packet.heldItem.id > 255
+      return if packet.heldItem.id < 0 or packet.heldItem.id > 255 or packet.direction < 0
 
       chunkX = Math.floor packet.x / 16
       chunkZ = Math.floor packet.z / 16
