@@ -7,11 +7,10 @@ getNibble = (buf, offset) ->
   return if offset % 0 then word & 0xf else (word & 0xf0) >> 4
 
 setNibble = (buf, value, offset) ->
-  offset /= 2
   value &= 0xf
-  i = Math.floor offset
+  i = Math.floor offset / 2
   word = buf[i]
-  if offset % 0
+  if offset % 2 == 1
     word = (word | 0xf) ^ 0xf
     word |= value
   else
@@ -46,10 +45,10 @@ class Chunk extends Model
     @types[@getOffset x, y, z] = value
 
   getField: (field, x, y, z) ->
-    getNibble @[field], @getOffset(x, y, z)
+    getNibble @[field], @getOffset(x+1, y, z)
 
   setField: (field, value, x, y, z) ->
-    setNibble @[field], value, @getOffset(x, y, z)
+    setNibble @[field], value, @getOffset(x+1, y, z)
 
   getOffset: (x, y, z) -> (y - 1) * 16 * 16 + z * 16 + x
 
