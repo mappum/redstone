@@ -17,7 +17,7 @@ class Region extends Model
 
 	start: ->
 		if not @tickTimer
-			@tickTimer = setInterval @tick.bind @
+			@tickTimer = setInterval @tick.bind(@), 1000 / @tickInterval
 
 	stop: ->
 		clearInterval @tickTimer
