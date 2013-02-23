@@ -6,8 +6,6 @@ module.exports = (options) ->
   ]
 
   (chunk, chunkX, chunkZ) ->
-    chunk.type = 'flat'
-
     y = 1
     for block, i in blocks
       for j in [0...block.height]
