@@ -88,7 +88,7 @@ module.exports = ->
     if not state.handoff
       player.send 0x1,
         entityId: player.entityId
-        levelType: 'default'
+        levelType: 'flat'
         gameMode: 1
         dimension: 0
         difficulty: 0
@@ -100,13 +100,13 @@ module.exports = ->
         difficulty: 0
         gameMode: 1
         worldHeight: 256
-        levelType: 'default'
+        levelType: 'flat'
       player.send 0x9,
         dimension: 0
         difficulty: 0
         gameMode: 1
         worldHeight: 256
-        levelType: 'default'
+        levelType: 'flat'
 
     player.send 0xd, player.position
 
