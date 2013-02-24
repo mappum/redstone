@@ -60,3 +60,5 @@ module.exports = (config) ->
             args.push res
             method.apply @, args
         )(name, method)
+
+    @emit 'db.ready'
