@@ -1,33 +1,27 @@
 Collection = require '../../models/collection'
 Region = require '../../models/master/region'
 
-module.exports = ->
-  @regions = new Collection
+module.exports = ->  
+  @on 'db.ready:after', (e) =>
+    @regions = new Collection
 
-  # TODO: get rid of region queue
-  @regionQueue = []
-  @regions.on 'insert', (e, region) => @regionQueue.push region
+    @remapRegions = =>
+      # TODO: actually split up regions and assign chunks to servers
+      for region in @regions.models
+        server = @peers.servers[0]
+        @info "assigning region:#{region.id} to server:#{server.id}"
+        server.connection.emit 'region', region
 
-  # TODO: load persistent regions from db
-  @regions.insert new Region
-    id: 'main'
-    type: 'flat'
-  @regions.insert new Region
-    id: 'main2'
-    type: 'flat'
+    @db.find 'regions', {}, (err, regions) =>
+      return @error err if err
+      @regions.insert new Region region for region in regions
 
-  # TODO: spawn servers to hold regions
+    # TODO: spawn servers to hold regions
 
-  @on 'peer.server', (e, server, connection) =>
-    # TODO: rethink server region apportionment
-    region = @regionQueue.shift()
-    if region?
-      @info "assigning region:#{region.id} to server:#{server.id}"
-      connection.emit 'region', region
-      region.server = server
-      server.regions.push region
+    @on 'peer.server:after', (e, server, connection) =>
+      @remapRegions()
 
-    connection.respond 'newRegion', (res, region) =>
-      @regions.push region
-      # TODO: spawn server (or select existing server) and tell it about new region
-      # TODO: respond info about new region
+      connection.respond 'newRegion', (res, region) =>
+        #@regions.insert region
+        # TODO: spawn server (or select existing server) and tell it about new region
+        # TODO: respond info about new region
