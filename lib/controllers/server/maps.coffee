@@ -79,7 +79,6 @@ module.exports = ->
 
   @on 'join:after', (e, player) ->
     player.on 'ready:after', ->
-      console.log 'ready'
       for col in image
         player.send 0x83,
           type: 358
