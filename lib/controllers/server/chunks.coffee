@@ -1,14 +1,17 @@
 ChunkCollection = require '../../models/server/chunkCollection'
 superflatGenerator = require('../../generators/superflat')()
+simpleStorage = require('../../storage/simple')
 
 module.exports = ->
-  chunks = @chunks = new ChunkCollection {generator: superflatGenerator}
+  chunks = @chunks = new ChunkCollection
+    generator: superflatGenerator
+    storage: simpleStorage('data/chunks/main')
 
   for x in [-1..1]
     for z in [-1..1]
       @chunks.getChunk x, z
 
-  sendChunks = (player) ->
+  sendChunks = (player) =>
     # TODO: get view distance from settings
     viewDistance = 5
     playerX = Math.floor player.position.x / 16

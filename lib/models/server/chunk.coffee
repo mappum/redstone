@@ -30,9 +30,10 @@ size = 0
 size += v for k, v of sizes
 
 class Chunk extends Model
-  constructor: ->
-    @buf = new Buffer size
-    @buf.fill 0
+  constructor: (@buf) ->
+    if not @buf?
+      @buf = new Buffer size
+      @buf.fill 0
     offset = 0
     @[k] = @buf.slice offset, offset += v for k, v of sizes
 

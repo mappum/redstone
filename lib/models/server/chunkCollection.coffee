@@ -5,14 +5,23 @@ class ChunkCollection extends Model
   constructor: (options) ->
     @storage = options?.storage
     @generator = options?.generator
+    @saveInterval = options?.saveInterval or 10 * 1000
 
-    @chunks = []
+    @chunks = {}
+
+    # TODO: only save if chunk changed
+    @saveTimer = setInterval =>
+      for x of @chunks
+        for z of @chunks[x]
+          @storeChunk x, z
+    , @saveInterval
 
   getChunk: (x, z, cb) ->
     cb = cb or ->
     col = @chunks[x]
-    col = @chunks[x] = [] if not col?
+    col = @chunks[x] = {} if not col?
     chunk = col[z]
+
     if not chunk
       chunk = col[z] = new Chunk
 
@@ -22,11 +31,12 @@ class ChunkCollection extends Model
         if err? or chunk? then cb err, chunk
         else generate()
       else generate()
-    else cb null, chunk
+    else
+      cb null, chunk
 
   setChunk: (chunk, x, z) ->
     col = @chunks[x]
-    col = @chunks[x] = [] if not col?
+    col = @chunks[x] = {} if not col?
     col[z] = chunk
 
   generateChunk: (x, z, cb) ->
@@ -39,14 +49,16 @@ class ChunkCollection extends Model
     cb null, chunk
 
   loadChunk: (x, z, cb) ->
-    @storage.getChunk x, z, (err, chunk) =>
+    @storage.get x, z, (err, chunk) =>
       return cb err if err?
       @setChunk chunk, x, z if chunk?
       cb null, chunk
 
   storeChunk: (x, z, cb) ->
     cb = cb or ->
-    @storage.setChunk @getChunk(x, z), x, z, cb
+    @getChunk x, z, (err, chunk) =>
+      return cb err if err
+      @storage.set chunk, x, z, cb
 
   unloadChunk: (x, z) -> @setChunk null, x, z
 
