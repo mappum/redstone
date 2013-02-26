@@ -50,7 +50,7 @@ class Chunk extends Model
   setField: (field, value, x, y, z) ->
     setNibble @[field], value, @getOffset(x+1, y, z)
 
-  getOffset: (x, y, z) -> (y - 1) * 16 * 16 + z * 16 + x
+  getOffset: (x, y, z) -> y * 16 * 16 + z * 16 + x % 16
 
   toPacket: (options, cb) ->
     if typeof options == 'function'

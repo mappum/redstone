@@ -32,12 +32,16 @@ module.exports = ->
       return if packet.heldItem.id < 0 or packet.heldItem.id > 255 or packet.direction < 0 or
         coords.y < 0 or coords.y > 255
 
-      chunkX = Math.floor packet.x / 16
-      chunkZ = Math.floor packet.z / 16
+      chunkX = Math.floor coords.x / 16
+      chunkZ = Math.floor coords.z / 16
 
       @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
         return @error err if err
-        chunk.setBlock packet.heldItem.id, coords.x, coords.y, coords.z
+        chunk.setBlock packet.heldItem.id,
+          (coords.x + if coords.x < 0 then 1 else 0) % 16 + if coords.x < 0 then 15 else 0,
+          coords.y,
+          (coords.z + if coords.z < 0 then 1 else 0) % 16 + if coords.z < 0 then 15 else 0
+
         player.region.send player.position, 0x35,
           x: coords.x
           y: coords.y
