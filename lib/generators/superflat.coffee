@@ -6,7 +6,7 @@ module.exports = (options) ->
   ]
 
   (chunk, chunkX, chunkZ) ->
-    y = 1
+    y = 0
     for block, i in blocks
       for j in [0...block.height]
         for x in [0...16]
