@@ -28,15 +28,15 @@ module.exports = ->
 
     player.on 0xf, (e, packet) =>
       # TODO: make sure player isn't cheating
-
-      return if packet.heldItem.id < 0 or packet.heldItem.id > 255 or packet.direction < 0
+      coords = getCoordinates packet.x, packet.y, packet.z, packet.direction
+      return if packet.heldItem.id < 0 or packet.heldItem.id > 255 or packet.direction < 0 or
+        coords.y < 0 or coords.y > 255
 
       chunkX = Math.floor packet.x / 16
       chunkZ = Math.floor packet.z / 16
 
       @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
         return @error err if err
-        coords = getCoordinates packet.x, packet.y, packet.z, packet.direction
         chunk.setBlock packet.heldItem.id, coords.x, coords.y, coords.z
         player.region.send player.position, 0x35,
           x: coords.x
