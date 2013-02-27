@@ -16,23 +16,25 @@ class Map extends Model
       buf[1] = x
       @cols[x] =
         buf: buf
-        dStart: 0
-        dEnd: MAP_SIZE-1
+        updated: false
 
   getPixel: (x, y) ->
     @cols[x].buf[y+HEADER_LENGTH]
 
   setPixel: (value, x, y) ->
     @cols[x].buf[y+HEADER_LENGTH] = value
+    @cols[x].updated = true
 
-  sendTo: (player) ->
+  sendTo: (player, all) ->
     packet =
       type: 358
       itemId: @id
 
     for col in @cols
-      packet.text = col.buf.toString 'ascii'
-      player.send 0x83, packet
+      if col.updated or all
+        col.updated = false if not all
+        packet.text = col.buf.toString 'ascii'
+        player.send 0x83, packet
 
 
 module.exports = Map
