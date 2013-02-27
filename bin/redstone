@@ -102,8 +102,8 @@ if components.server
 if components.connector
     Connector = require '../lib/connector'
 
-    if cluster.isMaster
-        cpus = if os.platform().indexOf('win') == 0 then 1 else os.cpus().length
+    if cluster.isMaster and os.platform().indexOf('win') != 0
+        cpus = os.cpus().length
         cluster.fork() for i in [0...cpus]
     else
         logger.info 'Initializing connector'
