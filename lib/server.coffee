@@ -21,6 +21,7 @@ class Server extends Component
         @use require '../lib/controllers/server/time'
         @use require '../lib/controllers/server/maps'
         @use require '../lib/controllers/server/keys'
+        @use require '../lib/controllers/server/snake'
 
         # register with master
         @master.request 'init',
