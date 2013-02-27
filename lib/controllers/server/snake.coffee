@@ -79,6 +79,7 @@ module.exports = ->
       start = ->
         placeApple()
         startTimer()
+        map.sendTo player, true
         drawTimer = setInterval draw, 1000 / drawFps
 
       stop = ->
