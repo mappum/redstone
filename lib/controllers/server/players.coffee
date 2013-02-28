@@ -1,6 +1,8 @@
 Player = require '../../models/server/player'
 Collection = require '../../models/collection'
 
+PLAYER_ENTITY_PREFIX = 1 << 28
+
 module.exports = ->
     @players = new Collection [], indexes: ['username']
 
@@ -35,7 +37,7 @@ module.exports = ->
         handoff = if state.handoff then "(handoff:#{state.handoff}) " else ''
         @info "#{player.username} joined #{handoff}(connector:#{player.connector.id})"
 
-        player.entityId = Math.floor Math.random() * 0xffff
+        player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
 
         onReady = ->
             player.emit 'ready'
