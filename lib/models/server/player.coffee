@@ -20,4 +20,14 @@ class Player extends Model
         @kicked = true
         @send 0xff, reason: reason
 
+    ping: (cb) ->
+        id = Math.floor Math.random() * 0xffffffff / 2
+        start = Date.now()
+        onPong = (e, packet) ->
+            if packet.keepAliveId == id
+                @off 0x0, onPong
+                cb Date.now() - start
+        @on 0x0, onPong
+        @send 0x0, keepAliveId: id
+
 module.exports = Player
