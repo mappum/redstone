@@ -18,11 +18,15 @@ toSlot = (input, cb) ->
 sendInventory = ->
   toSlot @inventory, (err, items) => @send 0x68, {windowId: 0, items: items}
 
+sendSlot = (slotId) ->
+  toSlot @inventory[slotId], (err, item) => @send 0x67, {windowId: 0, slot: slotId, item: item}
+
 # TODO: survival inventory
 module.exports = (config) ->
   @on 'join', (e, player) =>
     player.inventory = if player.storage.inventory then _.clone(player.storage.inventory) else []
     player.sendInventory = sendInventory.bind player
+    player.sendSlot = sendSlot.bind player
 
     player.on 'ready', player.sendInventory
 
