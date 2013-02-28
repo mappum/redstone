@@ -12,23 +12,25 @@ module.exports = ->
 
     player.on 0xe, (e, packet) =>
       # TODO: make sure player isn't cheating
+      # TODO: support non-creative digging
 
-      chunkX = Math.floor packet.x / 16
-      chunkZ = Math.floor packet.z / 16
+      if packet.status == 0
+        chunkX = Math.floor packet.x / 16
+        chunkZ = Math.floor packet.z / 16
 
-      @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
-        return @error err if err
-        chunk.setBlock 0,
-          (packet.x + if packet.x < 0 then 1 else 0) % 16 + if packet.x < 0 then 15 else 0,
-          packet.y,
-          (packet.z + if packet.z < 0 then 1 else 0) % 16 + if packet.z < 0 then 15 else 0
+        @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
+          return @error err if err
+          chunk.setBlock 0,
+            (packet.x + if packet.x < 0 then 1 else 0) % 16 + if packet.x < 0 then 15 else 0,
+            packet.y,
+            (packet.z + if packet.z < 0 then 1 else 0) % 16 + if packet.z < 0 then 15 else 0
 
-        player.region.send player.position, 0x35,
-          x: packet.x
-          y: packet.y
-          z: packet.z
-          type: 0
-          metadata: 0
+          player.region.send player.position, 0x35,
+            x: packet.x
+            y: packet.y
+            z: packet.z
+            type: 0
+            metadata: 0
 
     player.on 0xf, (e, packet) =>
       # TODO: make sure player isn't cheating
