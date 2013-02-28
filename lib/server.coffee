@@ -42,6 +42,6 @@ class Server extends Component
             @debug 'sending stats to master'
 
         updateMaster()
-        @updateMasterInterval = setInterval updateMaster, 60 * 1000
+        @updateMasterInterval = setInterval updateMaster, 10 * 1000
 
 module.exports = Server

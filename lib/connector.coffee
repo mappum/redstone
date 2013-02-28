@@ -13,6 +13,8 @@ class Connector extends Component
         @clients = new Collection [], indexes: ['username']
         @servers = new Collection
 
+        @stats = {}
+
     start: =>
         # load core modules
         @use require '../lib/controllers/connector/data'
@@ -55,6 +57,11 @@ class Connector extends Component
 
                 @emit 'join', client
                 client.start()
+
+        @master.on 'update', (data) =>
+            @stats = _.extend @stats, data
+
+            @mcserver.playerCount = @stats.players
 
     connect: (id, interfaceType, interfaceId, callback) =>
         server = @servers.get id

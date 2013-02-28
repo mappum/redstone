@@ -19,4 +19,15 @@ class Master extends Component
                 server.stats = _.extend server.stats, data
                 @debug "got stats from server:#{server.id}"
 
+        @connectorUpdateTimer = setInterval @updateConnectors, 10 * 1000
+
+    updateConnectors: =>
+        players = 0
+        players += server.stats.players for server in @peers.servers
+
+        data =
+            players: players
+
+        connector.connection.emit 'update', data for connector in @peers.connectors
+
 module.exports = Master
