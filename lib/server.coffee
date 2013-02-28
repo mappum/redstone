@@ -37,6 +37,7 @@ class Server extends Component
                 totalmem: os.totalmem()
                 freemem: os.freemem()
                 cpus: os.cpus().length
+            @emit 'stats', data
             @master.emit 'update', data
             @debug 'sending stats to master'
 

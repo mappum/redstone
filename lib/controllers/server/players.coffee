@@ -47,3 +47,6 @@ module.exports = ->
         player.on 0xb, onReady
         player.on 0xc, onReady
         player.on 0xd, onReady
+
+    @on 'stats:before', (e, data) =>
+        data.players = @players.length
