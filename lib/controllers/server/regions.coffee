@@ -16,7 +16,7 @@ module.exports = ->
         region.players.insert player
         @debug "#{player.username} added to region:#{region.id}"
 
-    @on 'quit:before', (e, player) =>
+    @on 'quit:after', (e, player) =>
         region = player.region
         region.players.remove player
         packet = entityIds: [player.entityId]
