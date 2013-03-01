@@ -8,7 +8,7 @@ module.exports = ->
     @remapRegions = =>
       # TODO: actually split up regions and assign chunks to servers
       for region in @regions.models
-        server = @peers.servers[0]
+        server = @peers.servers.get 0
         @info "assigning region:#{region.id} to server:#{server.id}"
         server.connection.emit 'region', region
 

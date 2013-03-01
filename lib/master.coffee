@@ -23,11 +23,11 @@ class Master extends Component
 
     updateConnectors: =>
         players = 0
-        players += server.stats.players for server in @peers.servers
+        players += server.stats.players for server in @peers.servers.models
 
         data =
             players: players
 
-        connector.connection.emit 'update', data for connector in @peers.connectors
+        connector.connection.emit 'update', data for connector in @peers.connectors.models
 
 module.exports = Master

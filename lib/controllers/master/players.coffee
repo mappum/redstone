@@ -12,7 +12,7 @@ module.exports = ->
           # TODO: handle default region
         }
 
-        server = @peers.servers[0]
+        server = @peers.servers.get 0
         # TODO: find correct server
 
         res _.pick(server, 'id', 'interfaceType', 'interfaceId'), player

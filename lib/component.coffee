@@ -1,14 +1,14 @@
 EventStack = require './eventstack'
+Collection = require './models/collection'
 
 class Component extends EventStack
     constructor: (@config, @interface) ->
         super()
 
         if @interface?
-            @peers = {}
-            @peers.connectors = []
-            @peers.servers = []
-            @peers.all = {}
+            @peers = new Collection
+            @peers.connectors = new Collection
+            @peers.servers = new Collection
 
             # listen for connections from servers/connectors
             @interface.on 'connection', @connection
@@ -29,7 +29,6 @@ class Component extends EventStack
         connection.respond 'init', (res, options) =>
             peer = options or {}
             peer.connection = connection
-            peer.id = Math.floor(Math.random() * 0xffffffff).toString(36) while not peer.id or @peers.all[peer.id]?
 
             if peer.interfaceType?
                 if peer.interfaceType == 'websocket'
@@ -38,8 +37,8 @@ class Component extends EventStack
                 else if peer.interfaceType == 'direct'
                     peer.interfaceId = peer.port
 
-            @peers[options.type+'s'].push peer
-            @peers.all[peer.id] = peer
+            @peers.insert peer
+            @peers[options.type+'s'].insert peer
 
             @info "incoming connection from #{options.type}:#{peer.id}"
 
@@ -49,8 +48,8 @@ class Component extends EventStack
             @emit 'peer.'+options.type, peer, connection
 
             connection.on 'disconnect', =>
-                @peers[options.type+'s'].splice @peers[options.type+'s'].indexOf(peer), 1
-                @peers.all[peer.id] = undefined
+                @peers.remove peer
+                @peers[options.type+'s'].remove peer
 
                 @info "#{options.type}:#{peer.id} disconnected"
             
