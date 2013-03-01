@@ -18,7 +18,7 @@ module.exports = ->
         chunkX = Math.floor packet.x / 16
         chunkZ = Math.floor packet.z / 16
 
-        @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
+        player.region.chunks.getChunk chunkX, chunkZ, (err, chunk) =>
           return @error err if err
           chunk.setBlock 0,
             (packet.x + if packet.x < 0 then 1 else 0) % 16 + if packet.x < 0 then 15 else 0,
@@ -41,7 +41,7 @@ module.exports = ->
       chunkX = Math.floor coords.x / 16
       chunkZ = Math.floor coords.z / 16
 
-      @chunks.getChunk chunkX, chunkZ, (err, chunk) =>
+      player.region.chunks.getChunk chunkX, chunkZ, (err, chunk) =>
         return @error err if err
         chunk.setBlock packet.heldItem.id,
           (coords.x + if coords.x < 0 then 1 else 0) % 16 + if coords.x < 0 then 15 else 0,
