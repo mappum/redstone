@@ -2,6 +2,8 @@ _ = require 'underscore'
 
 module.exports = ->
   @on 'db.ready:after', =>
+    @db.ensureIndex 'users', {username: 1}, ->
+
     @on 'join', (e, player, res) =>
       @db.findOne 'users', _.pick(player, 'username'), (err, doc) =>
         return @error err if err
