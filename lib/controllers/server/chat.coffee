@@ -32,7 +32,7 @@ module.exports = ->
             region.send 0x3, {message: message}
             
     @on 'join:before', (e, player) ->
-        player.message = (message) => player.send 0x3, message: @prefixes.chat + message
+        player.message = (message) => player.send 0x3, message: message
 
     @on 'join:after', (e, player) =>
         player.region.broadcast @prefixes.system + "#{player.username} joined the game"

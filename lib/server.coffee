@@ -23,6 +23,7 @@ class Server extends Component
         @use require '../lib/controllers/server/keys'
         @use require '../lib/controllers/server/snake'
         @use require '../lib/controllers/server/playerList'
+        @use require '../lib/controllers/server/motd'
 
         # register with master
         @master.request 'init',
