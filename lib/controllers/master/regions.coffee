@@ -12,6 +12,8 @@ module.exports = ->
         @info "assigning region:#{region.id} to server:#{server.id}"
         server.connection.emit 'region', region
 
+    @db.ensureIndex 'regions', {id: 1}, ->
+
     @db.find 'regions', {}, (err, regions) =>
       return @error err if err
       @regions.insert new Region region for region in regions
