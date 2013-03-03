@@ -36,6 +36,6 @@ module.exports = ->
     player.loadedChunks = {}
     sendChunks player, player.region.chunks
 
-    player.on 'moving:after', ->
+    player.on 'moveChunk:after', ->
       # TODO: mark chunks as out of range
       sendChunks player, player.region.chunks
