@@ -85,6 +85,17 @@ module.exports = ->
 
       player.region.send player.position, options, 0x22, pos
 
+    player.on 'moving:after', ->
+      lastX = player.chunkX
+      lastZ = player.chunkZ
+
+      player.chunkX = Math.floor player.position.x / 16
+      player.chunkZ = Math.floor player.position.z / 16
+
+      if lastX? and lastZ?
+        if lastX != player.chunkX or lastZ != player.chunkZ
+          player.emit 'moveChunk', player.chunkX, player.chunkZ
+
     if not state.handoff
       player.send 0x1,
         entityId: player.entityId
