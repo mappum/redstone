@@ -30,9 +30,7 @@ class Region extends Model
     for chunk in chunks
       col = @map[chunk.x]
       col = @map[chunk.x] = {} if not col?
-      mapChunk = col[chunk.y] =
-        population: 0
-        server: null
+      mapChunk = col[chunk.y] = population: 0
 
     @map.length = chunks.length
 

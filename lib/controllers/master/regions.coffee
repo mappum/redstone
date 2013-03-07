@@ -1,5 +1,6 @@
 Collection = require '../../models/collection'
 Region = require '../../models/master/region'
+_ = require 'underscore'
 
 module.exports = (config) ->  
   @on 'db.ready:after', (e) =>
@@ -11,6 +12,10 @@ module.exports = (config) ->
       region = @regions.get 0
       region.remap areas: @peers.servers.length
 
+      servers = []
+      for server in @peers.servers.models
+        servers.push _.pick server, 'id', 'interfaceType', 'interfaceId'
+
       for area, i in region.areas
         server = @peers.servers.get i
         @info "assigning region:#{region.id} area:#{i} to server:#{server.id}"
@@ -19,6 +24,8 @@ module.exports = (config) ->
           type: region.type
           chunks: area
           area: i
+          map: region.map
+          servers: servers
 
     @db.ensureIndex 'regions', {id: 1}, ->
 
