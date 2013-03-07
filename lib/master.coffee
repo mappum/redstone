@@ -11,6 +11,7 @@ class Master extends Component
         @use require '../lib/controllers/master/regions'
         @use require '../lib/controllers/master/players'
 
+        @players = 0
         @on 'peer.server', (e, server, connection) =>
             server.stats = {}
             server.regions = []
@@ -22,11 +23,11 @@ class Master extends Component
         @connectorUpdateTimer = setInterval @updateConnectors, 10 * 1000
 
     updateConnectors: =>
-        players = 0
-        players += server.stats.players for server in @peers.servers.models
+        @players = 0
+        @players += server.stats.players for server in @peers.servers.models
 
         data =
-            players: players
+            players: @players
 
         connector.connection.emit 'update', data for connector in @peers.connectors.models
 
