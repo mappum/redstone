@@ -47,7 +47,7 @@ class Region extends Model
       chunk = @map[x][z]
       chunk.area = area
       @areas[area] = @areas[area] or []
-      @areas[area].push chunk
+      @areas[area].push {x: x, z: z}
       remaining--
 
     chunks = []
