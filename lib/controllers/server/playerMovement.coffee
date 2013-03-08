@@ -1,8 +1,12 @@
 _ = require 'underscore'
 
 packAngle = (degrees) ->
-    degrees = degrees % 360 + if degrees < 0 then 360 else 0
-    Math.floor (degrees - if degrees > 180 then 360 else 0) * (0xff / 360)
+  degrees = degrees % 360 + if degrees < 0 then 360 else 0
+  Math.floor (degrees - if degrees > 180 then 360 else 0) * (0xff / 360)
+
+updateChunkCoordinates = (player) ->
+  player.chunkX = Math.floor player.position.x / 16
+  player.chunkZ = Math.floor player.position.z / 16
 
 module.exports = ->
 
@@ -18,6 +22,8 @@ module.exports = ->
     player.position = if player.storage.position then _.clone player.storage.position else _.clone spawn
     player.position.stance = player.position.y + 1.8
     player.position.onGround = false
+
+    updateChunkCoordinates player
 
   @on 'join:after', (e, player, state) =>
     emitMoving = -> player.emit 'moving'
@@ -47,9 +53,10 @@ module.exports = ->
         player.movingInterval = null
         player.emit 'stop'
 
-    player.on 0xb, onMovement
-    player.on 0xc, onMovement
-    player.on 0xd, onMovement
+    player.on 'ready:after', (e) ->
+      player.on 0xb, onMovement
+      player.on 0xc, onMovement
+      player.on 0xd, onMovement
 
     player.on 'quit', (e) =>
       @emit 'quit', player
@@ -89,8 +96,7 @@ module.exports = ->
       lastX = player.chunkX
       lastZ = player.chunkZ
 
-      player.chunkX = Math.floor player.position.x / 16
-      player.chunkZ = Math.floor player.position.z / 16
+      updateChunkCoordinates player
 
       if lastX? and lastZ?
         if lastX != player.chunkX or lastZ != player.chunkZ
