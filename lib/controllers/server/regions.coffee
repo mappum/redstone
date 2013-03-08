@@ -9,7 +9,7 @@ module.exports = ->
         @regions.insert region
         @emit 'region', region
         region.start()
-        @info "starting region:#{region.id}"
+        @info "starting region:#{region.id} area:#{region.areaId}"
 
     @on 'join:before', (e, player) =>
         region = player.region = @regions.get player.storage.region
