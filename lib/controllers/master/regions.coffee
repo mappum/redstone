@@ -22,8 +22,8 @@ module.exports = (config) ->
         server.connection.emit 'region',
           id: region.id
           type: region.type
-          chunks: area
-          area: i
+          area: area
+          areaId: i
           map: region.map
           servers: servers
 

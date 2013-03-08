@@ -5,13 +5,11 @@ simpleStorage = require('../../storage/simple')
 sendChunks = (player, chunks) =>
   # TODO: get view distance from settings
   viewDistance = 5
-  playerX = Math.floor player.position.x / 16
-  playerZ = Math.floor player.position.z / 16
 
   # TODO: send in bulk packet rather than one by one
-  for x in [-viewDistance+playerX..viewDistance+playerX]
-    for z in [-viewDistance+playerZ..viewDistance+playerZ]
-      ((x, z) =>
+  for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
+    for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
+      do (x, z) =>
         if not player.loadedChunks["#{x}.#{z}"]
           chunks.getChunk x, z, (err, chunk) =>
             return @error err if err?
@@ -19,7 +17,6 @@ sendChunks = (player, chunks) =>
               return @error err if err?
               player.send 0x33, packet
               player.loadedChunks["#{x}.#{z}"] = true
-      )(x, z)
 
 module.exports = ->
   @on 'region:before', (e, region) =>
@@ -27,12 +24,12 @@ module.exports = ->
       generator: superflatGenerator
       storage: simpleStorage('data/chunks/'+region.id)
 
-    # TODO: figure out which initial chunks to load
-    for x in [-1..1]
-      for z in [-1..1]
-        region.chunks.getChunk x, z
+    # TODO: maybe we shouldn't always load all the chunks we are assigned?
+    if region.area
+      for chunk in region.area
+        region.chunks.getChunk chunk.x, chunk.z
 
-  @on 'join:after', (e, player) =>
+  @on 'join:before', (e, player) =>
     player.loadedChunks = {}
     sendChunks player, player.region.chunks
 
