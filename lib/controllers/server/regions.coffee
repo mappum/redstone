@@ -2,17 +2,18 @@ Region = require '../../models/server/region'
 Collection = require '../../models/collection'
 
 module.exports = ->
-    @regions = new Collection
+    @regions = new Collection indexes: ['id', 'world.id']
+    @regions.generateId = (region) -> "#{region.world.id}.#{region.regionId}"
 
     @master.on 'region', (region) =>
         region = new Region region
         @regions.insert region
         @emit 'region', region
         region.start()
-        @info "starting region:#{region.id} area:#{region.areaId}"
+        @info "starting region #{region.id}"
 
     @on 'join:before', (e, player) =>
-        region = player.region = @regions.get player.storage.region
+        region = player.region = @regions.get 'world.id', player.storage.world
         region.players.insert player
         @debug "#{player.username} added to region:#{region.id}"
 
@@ -21,4 +22,4 @@ module.exports = ->
         region.players.remove player
         packet = entityIds: [player.entityId]
         region.send 0x1d, packet
-        @debug "#{player.username} removed from region:#{region.id}"
+        @debug "#{player.username} removed from region #{region.id}"

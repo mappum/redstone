@@ -10,7 +10,7 @@ module.exports = ->
 
         storage = doc?.storage
         player.storage = storage or {
-          region: 'main'
+          world: 'main'
           # TODO: handle default region
         }
 

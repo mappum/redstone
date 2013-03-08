@@ -22,12 +22,11 @@ module.exports = ->
   @on 'region:before', (e, region) =>
     region.chunks = new ChunkCollection
       generator: superflatGenerator
-      storage: simpleStorage('data/chunks/'+region.id)
+      storage: simpleStorage "data/chunks/#{region.world.id}"
 
     # TODO: maybe we shouldn't always load all the chunks we are assigned?
-    if region.area
-      for chunk in region.area
-        region.chunks.getChunk chunk.x, chunk.z
+    if region.assignment?
+      region.chunks.getChunk chunk.x, chunk.z for chunk in region.assignment
 
   @on 'join:before', (e, player) =>
     player.loadedChunks = {}

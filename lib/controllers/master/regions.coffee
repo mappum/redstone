@@ -1,45 +1,30 @@
-Collection = require '../../models/collection'
-Region = require '../../models/master/region'
 _ = require 'underscore'
 
 module.exports = (config) ->  
-  @on 'db.ready:after', (e) =>
-    @regions = new Collection
 
-    @remapRegions = =>
-      # TODO: handle more than one region
-      #for region in @regions.models
-      region = @regions.get 0
-      region.remap areas: @peers.servers.length
+  # assign servers to worlds, map chunks to them, then notify servers of mappings
+  @remapRegions = =>
+    # TODO: handle more than one world
+    #for world in @worlds.models
+    world = @worlds.get 0
+    world.remap @peers.servers.length
 
-      servers = []
-      for server in @peers.servers.models
-        servers.push _.pick server, 'id', 'interfaceType', 'interfaceId'
+    servers = []
+    for server in @peers.servers.models
+      servers.push _.pick server, 'id', 'interfaceType', 'interfaceId'
 
-      for area, i in region.areas
-        server = @peers.servers.get i
-        @info "assigning region:#{region.id} area:#{i} to server:#{server.id}"
-        server.connection.emit 'region',
-          id: region.id
-          type: region.type
-          area: area
-          areaId: i
-          map: region.map
+    for region, i in world.regions
+      # TODO: figure out how servers should be assigned to worlds
+      server = @peers.servers.get i
+      @info "assigning region #{world.id}.#{i} to server:#{server.id}"
+      server.connection.emit 'region',
+        regionId: i
+        world:
+          # TODO: include world meta info (dimension, difficulty, etc)
+          id: world.id
+          map: world.map
           servers: servers
+        assignment: region
 
-    @db.ensureIndex 'regions', {id: 1}, ->
-
-    @db.find 'regions', {}, (err, regions) =>
-      return @error err if err
-
-      @regions.insert new Region region for region in regions
-
-      # TODO: spawn servers to hold regions
-
-      @on 'peer.server:after', (e, server, connection) =>
-        @remapRegions()
-
-        connection.respond 'newRegion', (res, region) =>
-          #@regions.insert region
-          # TODO: spawn server (or select existing server) and tell it about new region
-          # TODO: respond info about new region
+  @on 'peer.server:after', (e, server, connection) =>
+    @remapRegions()

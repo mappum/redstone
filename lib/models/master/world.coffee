@@ -2,12 +2,12 @@ Model = require '../model'
 Collection = require '../collection'
 _ = require 'underscore'
 
-class Region extends Model
+class World extends Model
   constructor: (options) ->
     _.extend @, options
     @generateMap()
 
-  # creates an empty map of chunks that will be mapped to servers (used when starting up a region)
+  # creates an empty map of chunks that will be mapped into regions (used when starting up a world)
   generateMap: ->
     @map = {}
 
@@ -34,20 +34,19 @@ class Region extends Model
 
     @map.length = chunks.length
 
-  # maps chunks into areas based on population
-  remap: (options) ->
-    # TODO: refactor to minimize moving areas to new servers
+  # maps chunks into regions based on population
+  remap: (regions, options) ->
+    # TODO: refactor to minimize moving regions to new servers
     # TODO: use historical population statistics to guess best mapping
-    # TODO: make less shitty
-    areaN = options?.areas or 1
-    @areas = []
+    # TODO: make less shitty after seeing player behavior (hire someone who is pro?)
+    regions = regions or 1
+    @regions = []
     remaining = @map.length
 
-    setChunk = (x, z, area) =>
-      chunk = @map[x][z]
-      chunk.area = area
-      @areas[area] = @areas[area] or []
-      @areas[area].push {x: x, z: z}
+    setChunk = (x, z, region) =>
+      @map[x][z].region = region
+      @regions[region] = @regions[region] or []
+      @regions[region].push {x: x, z: z}
       remaining--
 
     chunks = []
@@ -61,8 +60,8 @@ class Region extends Model
       else if diff < 0 then return 1
       else return 0
 
-    centers = chunks.slice 0, areaN
-    chunk.area = area for chunk, area in centers
+    centers = chunks.slice 0, regions
+    chunk.region = region for chunk, region in centers
 
     for chunk in chunks
       closestD = null
@@ -71,8 +70,8 @@ class Region extends Model
         if not closestD? or d < closestD
           closestD = d
           closestCenter = center
-      setChunk chunk.x, chunk.z, closestCenter.area
+      setChunk chunk.x, chunk.z, closestCenter.region
 
-    # TODO: balance areas
+    # TODO: balance regions
 
-module.exports = Region
+module.exports = World

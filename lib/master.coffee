@@ -8,6 +8,7 @@ class Master extends Component
     start: =>
         # load core modules
         @use require '../lib/controllers/master/db'
+        @use require '../lib/controllers/master/worlds'
         @use require '../lib/controllers/master/regions'
         @use require '../lib/controllers/master/players'
 
