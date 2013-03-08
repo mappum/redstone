@@ -12,8 +12,7 @@ class Region extends Model
 		if not @tickInterval? then @tickInterval = 20
 
 		@ticks = 0
-		
-		@players = new MapCollection null, {indexes: ['username']}
+		@players = new MapCollection null, {indexes: ['username'], cellSize: 16}
 
 	start: ->
 		if not @tickTimer
