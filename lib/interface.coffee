@@ -91,7 +91,7 @@ class Interface extends EventEmitter
 
     type: 'direct'
 
-bufferEscape = '\u001bBUF'
+bufferEscape = '\u001b'
 toBuffer = (value) ->
     if typeof value == 'string' and value.substr(0, bufferEscape.length) == bufferEscape
         return new Buffer value.substr(bufferEscape.length), 'base64'
