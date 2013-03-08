@@ -2,15 +2,23 @@ Region = require '../../models/server/region'
 Collection = require '../../models/collection'
 
 module.exports = ->
-    @regions = new Collection indexes: ['id', 'world.id']
+    @regions = new Collection indexes: [{key: 'world.id', replace: true}, 'id']
     @regions.generateId = (region) -> "#{region.world.id}.#{region.regionId}"
 
     @master.on 'region', (region) =>
+        previous = @regions.get 'world.id', region.world.id
         region = new Region region
         @regions.insert region
-        @emit 'region', region
+
+        if previous?
+            # TODO: hand off players to their new locations
+            previous.stop()
+            @info "reassigning from #{previous.id} to region #{region.id}"
+        else
+            @info "starting region #{region.id}"
+
+        @emit 'region', region, previous
         region.start()
-        @info "starting region #{region.id}"
 
     @on 'join:before', (e, player) =>
         region = player.region = @regions.get 'world.id', player.storage.world
