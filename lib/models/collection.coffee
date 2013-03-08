@@ -26,9 +26,9 @@ remove = (array, model) ->
 
 # index options:
 #   sparse - only indexed if model has that value
-#   duplicate - multiple models can be indexed by the same value (can't be used w/ override)
-#   override - overrides models indexed by the same value (can't be used w/ duplicate)
-# TODO: replace option (like override, but deletes old value)
+#   duplicate - multiple models can be indexed by the same value (can't be used w/ override or replace)
+#   override - overrides models indexed by the same value (can't be used w/ duplicate or replace)
+#   replace - like override, but deletes old values (can't be used w/ override or duplicate)
 
 # TODO: make option to listen for changes to indexed values, and/or regenerate indexes
 
@@ -115,7 +115,8 @@ class Collection extends Model
     else if typeof index == 'object'
       throw new Error 'No key specified for index' if not index.key?
     throw new Error "Tried to create duplicate index '#{index.key}'" if @_indexes[index.key]?
-    throw new Error "Cannot use 'duplicate' with 'override'" if index.duplicate and index.override
+    if +(index.duplicate or false) + +(index.override or false) + +(index.replace or false) > 1
+      throw new Error "Cannot use 'duplicate', 'override', or 'replace' together"
 
     index.models = {}
     @_indexes[index.key] = index
@@ -133,8 +134,11 @@ class Collection extends Model
       arr = index.models[value] = [] if not arr?
       arr.push model if arr.indexOf(model) == -1
     else
-      if not index.override and index.models[value]?
-        throw new Error "Duplicate indexed value (#{key} -> #{value})"
+      if index.models[value]?
+        if index.replace
+          @removeModel index.models[value]
+        else if not index.override
+          throw new Error "Duplicate indexed value (#{key} -> #{value})"
       index.models[value] = model
 
   getIndex: (index, key) ->
