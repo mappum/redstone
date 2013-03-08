@@ -1,9 +1,14 @@
 Collection = require './collection'
 
 class MapCollection extends Collection
-  constructor: (models, @options) ->
-    super models, @options
-    @options = @options or {}
+  constructor: (models, options) ->
+    if not options? and not (models instanceof Array)
+      options = models
+      models = null
+
+    super models, options
+
+    @options = options or {}
     @cellSize = @options.cellSize or 32
     @positionKey = @options.positionKey or 'position'
     @grid = []
@@ -17,7 +22,7 @@ class MapCollection extends Collection
     col = @grid[x] = [] if not col
     cell = col[z]
     if not cell
-      cell = col[z] = new Collection(null, @options)
+      cell = col[z] = new Collection @options
       cell.x = x
       cell.z = z
     return cell
