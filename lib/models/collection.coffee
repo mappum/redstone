@@ -47,10 +47,22 @@ class Collection extends Model
     model
 
   setIndex: (key, model) ->
-    if model[key]?
-      if @_indexes[key][model[key]]?
-        throw new Error("Duplicate indexed value (#{key} -> #{model[key]})")
-      @_indexes[key][model[key]] = model
+    key += ''
+    keys = key.split '.'
+    cursor = model
+
+    for k, i in keys
+      getKey = ->  key = ''; key += keys[j] for j in [0..i]; key
+      cursor = cursor[k]
+      throw new Error "Model had no value at indexed key '#{getKey()}'" if not cursor?
+      throw new Error "Indexed key #{getKey()} is not an object" if i < keys.length-1 and typeof cursor != 'object'
+    value = cursor + ''
+
+    # TODO: allow overriding duplicates
+    if @_indexes[key][value]?
+      throw new Error "Duplicate indexed value (#{key} -> #{value})"
+
+    @_indexes[key][value] = model
 
   generateId: (model) ->
     return model.id if model.id?
