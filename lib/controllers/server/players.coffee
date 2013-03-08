@@ -50,5 +50,29 @@ module.exports = ->
         player.on 0xc, onReady
         player.on 0xd, onReady
 
+        # TODO: get world info
+        if not state.handoff
+          player.send 0x1,
+            entityId: player.entityId
+            levelType: 'flat'
+            gameMode: 1
+            dimension: 0
+            difficulty: 0
+            maxPlayers: 64
+        else
+          # change dimension in order to make sure client unloads everything
+          player.send 0x9,
+            dimension: 1
+            difficulty: 0
+            gameMode: 1
+            worldHeight: 256
+            levelType: 'flat'
+          player.send 0x9,
+            dimension: 0
+            difficulty: 0
+            gameMode: 1
+            worldHeight: 256
+            levelType: 'flat'
+
     @on 'stats:before', (e, data) =>
         data.players = @players.length

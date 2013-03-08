@@ -96,29 +96,6 @@ module.exports = ->
         if lastX != player.chunkX or lastZ != player.chunkZ
           player.emit 'moveChunk', player.chunkX, player.chunkZ
 
-    if not state.handoff
-      player.send 0x1,
-        entityId: player.entityId
-        levelType: 'flat'
-        gameMode: 1
-        dimension: 0
-        difficulty: 0
-        maxPlayers: 64
-    else
-      # change dimension in order to make sure client unloads everything
-      player.send 0x9,
-        dimension: 1
-        difficulty: 0
-        gameMode: 1
-        worldHeight: 256
-        levelType: 'flat'
-      player.send 0x9,
-        dimension: 0
-        difficulty: 0
-        gameMode: 1
-        worldHeight: 256
-        levelType: 'flat'
-
     player.send 0xd, player.position
 
     selfSpawn =
