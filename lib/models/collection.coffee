@@ -34,11 +34,13 @@ remove = (array, model) ->
 
 class Collection extends Model
   constructor: (models, options) ->
-    # TODO: make models optional
     super()
-    
+
+    if not options? and not (models instanceof Array)
+      options = models
+      models = null
+
     models = models or []
-    @models = []
 
     indexes = if options?.indexes? then options.indexes else []
     @_indexes = {}
@@ -47,6 +49,7 @@ class Collection extends Model
 
     @__defineGetter__ 'length', => @models.length
 
+    @models = []
     @insert model for model in models
 
   insert: (model) ->
