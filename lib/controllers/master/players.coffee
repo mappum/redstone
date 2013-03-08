@@ -2,10 +2,10 @@ _ = require 'underscore'
 
 module.exports = ->
   @on 'db.ready:after', =>
-    @db.ensureIndex 'users', {username: 1}, ->
+    @db.ensureIndex 'players', {username: 1}, ->
 
     @on 'join', (e, player, res) =>
-      @db.findOne 'users', _.pick(player, 'username'), (err, doc) =>
+      @db.findOne 'players', _.pick(player, 'username'), (err, doc) =>
         return @error err if err
 
         storage = doc?.storage
@@ -21,7 +21,7 @@ module.exports = ->
 
         if not storage
           player.created = Date.now()
-          @db.insert 'users', player, (err) => @error err if err
+          @db.insert 'players', player, (err) => @error err if err
 
     @on 'peer.connector', (e, connector, connection) =>
       connection.respond 'connection', (res, player) =>

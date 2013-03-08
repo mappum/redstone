@@ -5,5 +5,5 @@ module.exports = (config) ->
     player.storage = {} if not player.storage?
 
     player.save = =>
-      @master.request 'db.update', 'users', {username: player.username},
+      @master.request 'db.update', 'players', {username: player.username},
         {$set: {storage: player.storage}}, cb
