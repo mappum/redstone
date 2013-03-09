@@ -90,15 +90,14 @@ module.exports = ->
 
       player.region.send player.position, options, 0x22, pos
 
-    player.on 'moving:after', ->
+    player.on 'move:after', ->
       lastX = player.chunkX
       lastZ = player.chunkZ
 
       updateChunkCoordinates player
 
-      if lastX? and lastZ?
-        if lastX != player.chunkX or lastZ != player.chunkZ
-          player.emit 'moveChunk', player.chunkX, player.chunkZ
+      if lastX? and (lastX != player.chunkX or lastZ != player.chunkZ)
+        player.emit 'moveChunk', player.chunkX, player.chunkZ
 
     player.send 0xd, player.position
 
