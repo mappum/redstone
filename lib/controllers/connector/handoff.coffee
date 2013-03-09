@@ -6,6 +6,6 @@ module.exports = ->
       if client?
         @connect server.id, server.interfaceType, server.interfaceId, (newServer) =>
           oldServer = client.server
-          @info "handing off #{client.username}/#{client.id} to server:#{newServer.id}"
+          @debug "handing off #{client.username}/#{client.id} to server:#{newServer.id}"
           client.server = newServer
           client.server.connection.emit 'join', player, options

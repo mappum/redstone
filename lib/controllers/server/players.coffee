@@ -38,8 +38,10 @@ module.exports = ->
             player.emit id, data
 
     @on 'join:before', (e, player, options) =>
-        handoff = if options.handoff then "(handoff:#{options.handoff}) " else ''
-        @info "#{player.username} joined #{handoff}(connector:#{player.connector.id})"
+        if not options.handoff?.transparent
+            @info "#{player.username} joined (connector:#{player.connector.id})"
+        else
+            @debug "#{player.username} joined (handoff) (connector:#{player.connector.id})"
 
         player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
 
