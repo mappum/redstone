@@ -1,4 +1,5 @@
 Model = require '../model'
+_ = require 'underscore'
 
 class Player extends Model
     constructor: (options) ->
@@ -29,5 +30,10 @@ class Player extends Model
                 cb Date.now() - start
         @on 0x0, onPong
         @send 0x0, keepAliveId: id
+
+    toJson: ->
+        json = _.omit @, 'connector', 'stacks', _.functions(@)
+        @emit 'toJson', json
+        json
 
 module.exports = Player

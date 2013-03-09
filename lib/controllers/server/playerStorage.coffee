@@ -7,3 +7,7 @@ module.exports = (config) ->
     player.save = =>
       @master.request 'db.update', 'players', {username: player.username},
         {$set: {storage: player.storage}}, cb
+
+    # TODO: save on an interval?
+
+    player.on 'quit', player.save

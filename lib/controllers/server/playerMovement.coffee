@@ -19,7 +19,8 @@ module.exports = ->
       yaw: 0
       pitch: 0
 
-    player.position = if player.storage.position then _.clone player.storage.position else _.clone spawn
+    if not player.position?
+      player.position = if player.storage.position? then _.clone player.storage.position else _.clone spawn
     player.position.stance = player.position.y + 1.8
     player.position.onGround = false
 
@@ -59,13 +60,10 @@ module.exports = ->
       player.on 0xd, onMovement
 
     player.on 'quit', (e) =>
-      @emit 'quit', player
-
-      @info "#{player.username} quit (connector:#{player.connector.id})"
-
-      # TODO: maybe save this stuff periodically while logged in
+      # TODO: save position at other times, too
       player.storage.position = _.pick player.position, 'x', 'y', 'z', 'yaw', 'pitch'
-      player.save()
+      @emit 'quit', player
+      @info "#{player.username} quit (connector:#{player.connector.id})"
 
     options =
       radius: 64

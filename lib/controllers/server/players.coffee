@@ -26,8 +26,11 @@ module.exports = ->
             @players.insert player
             @emit 'join', player, state
 
+            player.on 'leave:after', (e) =>
+                @players.remove player
+
         connection.on 'quit', getPlayer (player) =>
-            @players.remove player
+            player.emit 'leave'
             player.emit 'quit' if not player.kicked
 
         connection.on 'data', getPlayer (player, id, data) =>
@@ -51,13 +54,14 @@ module.exports = ->
         player.on 0xc, onReady
         player.on 0xd, onReady
 
-    @on 'join:after', (e, player, options) ->
+    @on 'join:after', (e, player, options) =>
         worldMeta =
             levelType: 'flat'
             gameMode: 1
             dimension: 0
             difficulty: 0
             maxPlayers: 64
+            worldHeight: 256
         _.extend worldMeta, player.region.world.meta if player.region.world.meta?
 
         # player just joined
@@ -65,18 +69,23 @@ module.exports = ->
             worldMeta.entityId = player.entityId
             player.send 0x1, worldMeta
 
-        # transparent handoff
-        else if options.handoff.transparent
-            # TODO: do server handoff stuff
-
-        # hard handoff
+        # player was handed off
         else
-            # change dimension, then go back in order to make sure client unloads everything
-            fakeWorldMeta = _.clone worldMeta
-            fakeWorldMeta.dimension++
-            fakeWorldMeta.dimension = 0 if fakeWorldMeta.dimension > 1
-            player.send 0x9, fakeWorldMeta
-            player.send 0x9, worldMeta
+            # transparent handoff
+            if options.handoff.transparent
+                # TODO: do server handoff stuff
+
+            # hard handoff
+            else
+                # change dimension, then go back in order to make sure client unloads everything
+                fakeWorldMeta = _.clone worldMeta
+                fakeWorldMeta.dimension++
+                fakeWorldMeta.dimension = 0 if fakeWorldMeta.dimension > 1
+                player.send 0x9, fakeWorldMeta
+                player.send 0x9, worldMeta
+
+            player.on 'ready:after', =>
+                player.message "§aNow connected to server:#{@id}"
 
     @on 'update:before', (e, data) =>
         data.players = @players.length
