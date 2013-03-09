@@ -11,8 +11,10 @@ class MapCollection extends Collection
     @options = options or {}
     @cellSize = @options.cellSize or 32
     @positionKey = @options.positionKey or 'position'
-    @grid = []
+    @grid = {}
     @cellMap = {}
+
+    @onMove = @onMove.bind @
 
   getCell: (model) ->
     position = model[@positionKey]
@@ -35,7 +37,7 @@ class MapCollection extends Collection
     z = Math.floor position.z / @cellSize
     if x != cell.x or z != cell.z
       cell.remove model
-      cell = @getCell(model)
+      cell = @getCell model
       cell.insert model
       @cellMap[model.id] = cell
 
