@@ -13,7 +13,6 @@ class Server extends Component
         @use require '../lib/controllers/server/regions'
         @use require '../lib/controllers/server/chat'
         @use require '../lib/controllers/server/commands'
-        @use require '../lib/controllers/server/handoff'
         @use require '../lib/controllers/server/inventory'
         @use require '../lib/controllers/server/animation'
         @use require '../lib/controllers/server/chunks'
