@@ -1,5 +1,6 @@
 Player = require '../../models/server/player'
 Collection = require '../../models/collection'
+_ = require 'underscore'
 
 PLAYER_ENTITY_PREFIX = 1 << 28
 
@@ -33,8 +34,8 @@ module.exports = ->
             player.emit 'data', id, data
             player.emit id, data
 
-    @on 'join:before', (e, player, state) =>
-        handoff = if state.handoff then "(handoff:#{state.handoff}) " else ''
+    @on 'join:before', (e, player, options) =>
+        handoff = if options.handoff then "(handoff:#{options.handoff}) " else ''
         @info "#{player.username} joined #{handoff}(connector:#{player.connector.id})"
 
         player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
@@ -50,29 +51,32 @@ module.exports = ->
         player.on 0xc, onReady
         player.on 0xd, onReady
 
-        # TODO: get world info
-        if not state.handoff
-          player.send 0x1,
-            entityId: player.entityId
+    @on 'join:after', (e, player, options) ->
+        worldMeta =
             levelType: 'flat'
             gameMode: 1
             dimension: 0
             difficulty: 0
             maxPlayers: 64
+        _.extend worldMeta, player.region.world.meta if player.region.world.meta?
+
+        # player just joined
+        if not options.handoff
+            worldMeta.entityId = player.entityId
+            player.send 0x1, worldMeta
+
+        # transparent handoff
+        else if options.handoff.transparent
+            # TODO: do server handoff stuff
+
+        # hard handoff
         else
-          # change dimension in order to make sure client unloads everything
-          player.send 0x9,
-            dimension: 1
-            difficulty: 0
-            gameMode: 1
-            worldHeight: 256
-            levelType: 'flat'
-          player.send 0x9,
-            dimension: 0
-            difficulty: 0
-            gameMode: 1
-            worldHeight: 256
-            levelType: 'flat'
+            # change dimension, then go back in order to make sure client unloads everything
+            fakeWorldMeta = _.clone worldMeta
+            fakeWorldMeta.dimension++
+            fakeWorldMeta.dimension = 0 if fakeWorldMeta.dimension > 1
+            player.send 0x9, fakeWorldMeta
+            player.send 0x9, worldMeta
 
     @on 'update:before', (e, data) =>
         data.players = @players.length
