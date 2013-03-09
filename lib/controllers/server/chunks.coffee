@@ -9,12 +9,14 @@ sendChunks = (player, chunks) =>
     for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
       do (x, z) =>
         if not player.loadedChunks["#{x}.#{z}"]
-          chunks.getChunk x, z, (err, chunk) =>
-            return @error err if err?
-            chunk.toPacket {x: x, z: z}, (err, packet) =>
+          d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
+          if d < viewDistance
+            chunks.getChunk x, z, (err, chunk) =>
               return @error err if err?
-              player.send 0x33, packet
-              player.loadedChunks["#{x}.#{z}"] = true
+              chunk.toPacket {x: x, z: z}, (err, packet) =>
+                return @error err if err?
+                player.send 0x33, packet
+                player.loadedChunks["#{x}.#{z}"] = true
 
 module.exports = ->
   @on 'region:before', (e, region) =>
