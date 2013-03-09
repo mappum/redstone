@@ -1,22 +1,25 @@
 ChunkCollection = require '../../models/server/chunkCollection'
 
-sendChunks = (player, chunks) =>
+sendChunk = (player, x, z) ->
+  player.region.chunks.getChunk x, z, (err, chunk) =>
+    return @error err if err?
+    chunk.toPacket {x: x, z: z}, (err, packet) =>
+      return @error err if err?
+      player.send 0x33, packet
+      player.loadedChunks["#{x}.#{z}"] = true
+
+sendChunks = (player) ->
   # TODO: get view distance from settings
   viewDistance = 5
 
   # TODO: send in bulk packet rather than one by one
   for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
     for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
-      do (x, z) =>
-        if not player.loadedChunks["#{x}.#{z}"]
-          d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
-          if d < viewDistance
-            chunks.getChunk x, z, (err, chunk) =>
-              return @error err if err?
-              chunk.toPacket {x: x, z: z}, (err, packet) =>
-                return @error err if err?
-                player.send 0x33, packet
-                player.loadedChunks["#{x}.#{z}"] = true
+        d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
+
+        if d < viewDistance and not player.loadedChunks["#{x}.#{z}"]
+          mappedChunk = player.region.world.map[x]?[z]?
+          sendChunk player, x, z unless (player.region.world.static and not mappedChunk)
 
 module.exports = ->
   @on 'region:before', (e, region) =>
@@ -38,8 +41,8 @@ module.exports = ->
 
   @on 'join:before', (e, player) =>
     player.loadedChunks = {}
-    sendChunks player, player.region.chunks
+    sendChunks player
 
     player.on 'moveChunk:after', ->
       # TODO: mark chunks as out of range
-      sendChunks player, player.region.chunks
+      sendChunks player

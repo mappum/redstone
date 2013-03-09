@@ -22,7 +22,6 @@ module.exports = (config) ->
       #   regionId: the id of this region (0-indexed)
       #   world: info about the world this region is a part of
       #   assignment: an array of the chunks in this region (in the format [{x: x, z: z}, ...])
-      #   static: if true, the server should not expand to unmapped chunks (it should only handle chunks it was assigned to)
 
       # world options
       #   id: the id of the world this region is in (a string)
@@ -34,6 +33,7 @@ module.exports = (config) ->
       #   storage: an object that contains the chunk storage type and options
       #   size: the size limit of the world, either a number, or an object like {width: x, height: x}
       #   pregen: whether or not to pregenerate all chunks (size must be defined)
+      #   static: whether or not to expand to unmapped chunks (servers should only load assigned chunks)
 
       server.connection.emit 'region',
         regionId: i
