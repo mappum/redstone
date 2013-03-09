@@ -17,12 +17,16 @@ module.exports = (config) ->
       for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
           d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
 
-          if d < viewDistance and not player.loadedChunks["#{x}.#{z}"]
+          if d < viewDistance and not player.loadedChunks[x]?[z]
             mappedChunk = player.region.world.map[x]?[z]?
 
             if not (player.region.world.static and not mappedChunk)
               sendChunk player, x, z
               player.region.chunkList.push {x: x, z: z} if not mappedChunk
+
+              col = player.loadedChunks[x]
+              col = player.loadedChunks[x] = {} if not col?
+              col[z] = true
 
   @on 'region:before', (e, region) =>
     options = {}
@@ -41,8 +45,9 @@ module.exports = (config) ->
     if region.assignment?
       region.chunks.getChunk chunk.x, chunk.z for chunk in region.assignment
 
-  @on 'join:before', (e, player) =>
-    player.loadedChunks = {}
+  @on 'join:before', (e, player, options) =>
+    player.loadedChunks = {} if not options.handoff?.transparent
+    
     sendChunks player
 
     player.on 'moveChunk:after', ->
