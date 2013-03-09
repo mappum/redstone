@@ -39,3 +39,21 @@ module.exports = ->
         packet = entityIds: [player.entityId]
         region.send 0x1d, packet
         @debug "#{player.username} removed from region #{region.id}"
+
+    @on 'update:before', (e, data) =>
+        data.regions = []
+
+        for region in @regions.models
+            r =
+                chunks: []
+                players: region.players.length
+
+            for chunk in region.chunkList
+                r.chunks.push
+                    x: chunk.x
+                    z: chunk.z
+                    players: region.players.grid[chunk.x]?[chunk.z]?.length or 0
+                    regionId: region.regionId
+                    worldId: region.world.id
+
+            data.regions.push r

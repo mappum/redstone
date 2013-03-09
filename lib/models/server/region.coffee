@@ -9,14 +9,18 @@ class Region extends Model
 		options = options or {}
 		@[k] = v for k,v of options
 
-		if not @tickInterval? then @tickInterval = 20
+		if not @tickInterval? then @tickInterval = 1000 / 20
 
 		@ticks = 0
 		@players = new MapCollection {indexes: ['username'], cellSize: 16}
 
+		# TODO: on chunk unload, remove from chunkList
+		@chunkList = []
+		@chunkList.push chunk for chunk in options.assignment if options.assignment?
+
 	start: ->
 		if not @tickTimer
-			@tickTimer = setInterval @tick.bind(@), 1000 / @tickInterval
+			@tickTimer = setInterval @tick.bind(@), @tickInterval
 
 	stop: ->
 		clearInterval @tickTimer

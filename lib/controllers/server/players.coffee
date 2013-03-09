@@ -74,5 +74,5 @@ module.exports = ->
             worldHeight: 256
             levelType: 'flat'
 
-    @on 'stats:before', (e, data) =>
+    @on 'update:before', (e, data) =>
         data.players = @players.length

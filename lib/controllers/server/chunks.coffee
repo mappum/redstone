@@ -19,7 +19,10 @@ sendChunks = (player) ->
 
         if d < viewDistance and not player.loadedChunks["#{x}.#{z}"]
           mappedChunk = player.region.world.map[x]?[z]?
-          sendChunk player, x, z unless (player.region.world.static and not mappedChunk)
+
+          if not (player.region.world.static and not mappedChunk)
+            sendChunk player, x, z
+            player.region.chunkList.push {x: x, z: z} if not mappedChunk
 
 module.exports = ->
   @on 'region:before', (e, region) =>
