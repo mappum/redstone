@@ -1,6 +1,4 @@
 ChunkCollection = require '../../models/server/chunkCollection'
-superflatGenerator = require('../../generators/superflat')()
-simpleStorage = require('../../storage/simple')
 
 sendChunks = (player, chunks) =>
   # TODO: get view distance from settings
@@ -20,9 +18,17 @@ sendChunks = (player, chunks) =>
 
 module.exports = ->
   @on 'region:before', (e, region) =>
-    region.chunks = new ChunkCollection
-      generator: superflatGenerator
-      storage: simpleStorage "data/chunks/#{region.world.id}"
+    options = {}
+
+    if not region.static
+      generator = require '../../generators/' + (region.world.generator?.type or 'superflat')
+      options.generator = generator region.world.generator?.options
+
+    if region.world.persistent
+      storage = require '../../storage/' + (region.world.storage?.type or 'simple')
+      options.storage = storage region.world.storage?.options or {path: "data/chunks/#{region.world.id}"}
+
+    region.chunks = new ChunkCollection options
 
     # TODO: maybe we shouldn't always load all the chunks we are assigned?
     if region.assignment?

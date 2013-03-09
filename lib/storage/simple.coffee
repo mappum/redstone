@@ -1,8 +1,8 @@
 fs = require 'fs'
 Chunk = require '../models/server/chunk'
 
-module.exports = (path) ->
-  getFilename = (x, z) -> path + "/#{x}.#{z}.chunk"
+module.exports = (options) ->
+  getFilename = (x, z) -> options.path + "/#{x}.#{z}.chunk"
 
   get: (x, z, cb) ->
     filename = getFilename(x, z)
