@@ -24,8 +24,6 @@ module.exports = ->
         @emit 'region', region, previous
         region.start()
 
-        console.log region.world.map
-
     @on 'join:before', (e, player) =>
         region = player.region = @regions.get 'world.id', player.storage.world
         region.players.insert player
