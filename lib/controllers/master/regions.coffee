@@ -3,7 +3,7 @@ _ = require 'underscore'
 module.exports = (config) ->  
 
   # assign servers to worlds, map chunks to them, then notify servers of mappings
-  @remapRegions = =>
+  @mapRegions = =>
     # TODO: handle more than one world
     #for world in @worlds.models
     world = @worlds.get 0
@@ -41,4 +41,12 @@ module.exports = (config) ->
         assignment: region
 
   @on 'peer.server:after', (e, server, connection) =>
-    @remapRegions()
+    @mapRegions()
+
+  @on 'peer.server.update:after', (e, server, stats) =>
+    for region in stats.regions
+      world = @worlds.get region.worldId
+
+      if world?
+        for chunk in region.chunks
+          world.getChunk(chunk.x, chunk.z).players = chunk.players

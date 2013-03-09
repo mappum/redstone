@@ -24,6 +24,8 @@ module.exports = ->
         @emit 'region', region, previous
         region.start()
 
+        console.log region.world.map
+
     @on 'join:before', (e, player) =>
         region = player.region = @regions.get 'world.id', player.storage.world
         region.players.insert player
@@ -47,13 +49,13 @@ module.exports = ->
             r =
                 chunks: []
                 players: region.players.length
+                regionId: region.regionId
+                worldId: region.world.id
 
             for chunk in region.chunkList
                 r.chunks.push
                     x: chunk.x
                     z: chunk.z
                     players: region.players.grid[chunk.x]?[chunk.z]?.length or 0
-                    regionId: region.regionId
-                    worldId: region.world.id
 
             data.regions.push r

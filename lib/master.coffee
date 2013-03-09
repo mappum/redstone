@@ -19,7 +19,8 @@ class Master extends Component
 
             connection.on 'update', (data) =>
                 server.stats = _.extend server.stats, data
-                @debug "got stats from server:#{server.id}"
+                @debug "got update from server:#{server.id}"
+                @emit 'peer.server.update', server, server.stats
 
         @connectorUpdateTimer = setInterval @updateConnectors, 10 * 1000
 
