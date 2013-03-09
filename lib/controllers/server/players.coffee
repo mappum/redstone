@@ -43,7 +43,8 @@ module.exports = ->
         else
             @debug "#{player.username} joined (handoff) (connector:#{player.connector.id})"
 
-        player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
+        if not player.entityId?
+            player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
 
         onReady = ->
             player.emit 'ready'
