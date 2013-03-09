@@ -5,7 +5,7 @@ module.exports = (config) ->
   @worlds = new Collection
 
   @on 'db.ready:after', (e) =>
-    @db.ensureIndex 'worlds', {id: 1}, ->
+    @db.ensureIndex 'worlds', {id: 1}
 
     @db.find 'worlds', {}, (err, worlds) =>
       return @error err if err
