@@ -34,8 +34,9 @@ module.exports = ->
     @on 'join:before', (e, player) ->
         player.message = (message) => player.send 0x3, message: message
 
-    @on 'join:after', (e, player) =>
-        player.region.broadcast @prefixes.system + "#{player.username} joined the game"
+    @on 'join:after', (e, player, options) =>
+        if not options.handoff?
+            player.region.broadcast @prefixes.system + "#{player.username} joined the game"
 
         player.on 0x3, (e, data) =>
             player.emit 'message', data.message
