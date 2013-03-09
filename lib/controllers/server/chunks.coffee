@@ -1,30 +1,29 @@
 ChunkCollection = require '../../models/server/chunkCollection'
 
-sendChunk = (player, x, z) ->
-  player.region.chunks.getChunk x, z, (err, chunk) =>
-    return @error err if err?
-    chunk.toPacket {x: x, z: z}, (err, packet) =>
+module.exports = (config) ->
+  sendChunk = (player, x, z) ->
+    player.region.chunks.getChunk x, z, (err, chunk) =>
       return @error err if err?
-      player.send 0x33, packet
-      player.loadedChunks["#{x}.#{z}"] = true
+      chunk.toPacket {x: x, z: z}, (err, packet) =>
+        return @error err if err?
+        player.send 0x33, packet
+        player.loadedChunks["#{x}.#{z}"] = true
 
-sendChunks = (player) ->
-  # TODO: get view distance from settings
-  viewDistance = 5
+  sendChunks = (player) ->
+    viewDistance = config.viewDistance or 10
 
-  # TODO: send in bulk packet rather than one by one
-  for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
-    for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
-        d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
+    # TODO: send in bulk packet rather than one by one
+    for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
+      for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
+          d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
 
-        if d < viewDistance and not player.loadedChunks["#{x}.#{z}"]
-          mappedChunk = player.region.world.map[x]?[z]?
+          if d < viewDistance and not player.loadedChunks["#{x}.#{z}"]
+            mappedChunk = player.region.world.map[x]?[z]?
 
-          if not (player.region.world.static and not mappedChunk)
-            sendChunk player, x, z
-            player.region.chunkList.push {x: x, z: z} if not mappedChunk
+            if not (player.region.world.static and not mappedChunk)
+              sendChunk player, x, z
+              player.region.chunkList.push {x: x, z: z} if not mappedChunk
 
-module.exports = ->
   @on 'region:before', (e, region) =>
     options = {}
 
