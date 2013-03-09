@@ -99,7 +99,8 @@ module.exports = ->
       if lastX? and (lastX != player.chunkX or lastZ != player.chunkZ)
         player.emit 'moveChunk', player.chunkX, player.chunkZ
 
-    player.send 0xd, player.position
+    if not state.handoff?
+      player.send 0xd, player.position
 
     selfSpawn =
       entityId: player.entityId
