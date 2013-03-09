@@ -9,6 +9,11 @@ module.exports =
     'This server is experimental, so expect bugs'
   ]
 
+  worlds: [
+    id: 'main'
+    persistent: true
+  ]
+
   connector:
     'online-mode': false
     encryption: false
