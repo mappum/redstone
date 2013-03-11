@@ -10,6 +10,7 @@ class Region extends Model
 		@[k] = v for k,v of options
 
 		if not @tickInterval? then @tickInterval = 1000 / 20
+		if not @saveInterval? then @saveInterval = 10 * 1000
 
 		@ticks = 0
 		@players = new MapCollection {indexes: ['username'], cellSize: 16}
@@ -21,6 +22,9 @@ class Region extends Model
 	start: ->
 		if not @tickTimer
 			@tickTimer = setInterval @tick.bind(@), @tickInterval
+
+		if not @saveTimer
+			@saveTimer = setInterval @save.bind(@), @saveInterval
 
 	stop: ->
 		clearInterval @tickTimer
@@ -52,5 +56,10 @@ class Region extends Model
 		players = _.difference players, options.exclude if options.exclude
 
 		player.send id, data for player in players
+
+	save: ->
+    # TODO: only save if chunk changed
+    for chunk in @chunkList
+       @chunks.storeChunk chunk.x, chunk.z
 
 module.exports = Region

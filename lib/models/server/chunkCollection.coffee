@@ -5,16 +5,8 @@ class ChunkCollection extends Model
   constructor: (options) ->
     @storage = options?.storage
     @generator = options?.generator
-    @saveInterval = options?.saveInterval or 10 * 1000
 
     @chunks = {}
-
-    # TODO: only save if chunk changed
-    @saveTimer = setInterval =>
-      for x of @chunks
-        for z of @chunks[x]
-          @storeChunk x, z
-    , @saveInterval
 
   getChunk: (x, z, cb) ->
     cb = cb or ->
