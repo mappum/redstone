@@ -12,6 +12,7 @@ module.exports = (options) ->
         for x in [0...16]
           for z in [0...16]
             chunk.setBlock block.type, x, y, z
-            chunk.setField 'skylight', 15, x-1, y+1, z if i == blocks.length-1 and j == block.height-1
-
         y++
+
+    # TODO: do real lighting instead of just lighting everything
+    chunk.skylight.fill 0xf
