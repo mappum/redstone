@@ -1,5 +1,4 @@
 Component = require './component'
-Interface = require './interface'
 Collection = require './models/collection'
 Client = require './models/connector/client'
 Server = require './models/connector/server'
@@ -70,7 +69,7 @@ class Connector extends Component
         if not server?
             server = new Server
                 id: id
-                connection: new Interface[interfaceType](interfaceId)
+                connection: new (require "./interfaces/#{interfaceType}")(interfaceId)
                 interfaceId: interfaceId
                 interfaceType: interfaceType
 

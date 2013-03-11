@@ -69,10 +69,7 @@ transports.push new winston.transports.Console
 logger = new winston.Logger transports: transports, levels: levels
 winston.addColors colors
 
-
-# if running a local master, use direct interface, otherwise use websocket
-Interface = require '../lib/interface'
-Interface = Interface.websocket if not components.master or (components.master and not multipleComponents)
+Interface = require '../lib/interfaces/websocket'
 
 # start components
 if components.master
