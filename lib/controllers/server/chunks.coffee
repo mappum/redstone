@@ -7,7 +7,6 @@ module.exports = (config) ->
       chunk.toPacket {x: x, z: z}, (err, packet) =>
         return @error err if err?
         player.send 0x33, packet
-        player.loadedChunks["#{x}.#{z}"] = true
 
   sendChunks = (player) ->
     viewDistance = config.viewDistance or 10
