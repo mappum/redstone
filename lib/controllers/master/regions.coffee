@@ -49,4 +49,4 @@ module.exports = (config) ->
 
       if world?
         for chunk in region.chunks
-          world.getChunk(chunk.x, chunk.z).players = chunk.players
+          world.getChunk(chunk.x, chunk.z).players = chunk.players or 0

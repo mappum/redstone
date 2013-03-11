@@ -67,5 +67,6 @@ class Region extends Model
 	updateChunkList: ->
 		@chunkList = []
 		@chunkList.push chunk for chunk in @assignment if @assignment?
+		
 
 module.exports = Region
