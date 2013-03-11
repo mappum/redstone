@@ -43,14 +43,18 @@ module.exports = ->
 
       player.region.chunks.getChunk chunkX, chunkZ, (err, chunk) =>
         return @error err if err
-        chunk.setBlock packet.heldItem.id,
-          (coords.x + if coords.x < 0 then 1 else 0) % 16 + if coords.x < 0 then 15 else 0,
-          coords.y,
-          (coords.z + if coords.z < 0 then 1 else 0) % 16 + if coords.z < 0 then 15 else 0
+
+        chunkCoords =
+          x: (coords.x + if coords.x < 0 then 1 else 0) % 16 + if coords.x < 0 then 15 else 0
+          y: coords.y
+          z: (coords.z + if coords.z < 0 then 1 else 0) % 16 + if coords.z < 0 then 15 else 0
+
+        chunk.setBlock packet.heldItem.id, chunkCoords.x, chunkCoords.y, chunkCoords.z
+        chunk.setField 'meta', packet.heldItem.itemDamage, chunkCoords.x, chunkCoords.y, chunkCoords.z
 
         player.region.send player.position, 0x35,
           x: coords.x
           y: coords.y
           z: coords.z
           type: packet.heldItem.id
-          metadata: 0
+          metadata: packet.heldItem.itemDamage or 0
