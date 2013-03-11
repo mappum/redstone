@@ -25,6 +25,7 @@ class Region extends Model
 
 		if not @saveTimer
 			@saveTimer = setInterval @save.bind(@), @saveInterval
+		@lastSave = null
 
 	stop: ->
 		clearInterval @tickTimer
@@ -58,8 +59,11 @@ class Region extends Model
 		player.send id, data for player in players
 
 	save: ->
-    # TODO: only save if chunk changed
-    for chunk in @chunkList
-       @chunks.storeChunk chunk.x, chunk.z
+		for chunk in @chunkList
+			do (chunk) =>
+				@chunks.getChunk chunk.x, chunk.z, (err, c) =>
+					if c.lastUpdate and @lastSave and c.lastUpdate > @lastSave
+						@chunks.storeChunk chunk.x, chunk.z
+		@lastSave = Date.now()
 
 module.exports = Region

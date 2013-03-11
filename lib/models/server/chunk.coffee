@@ -36,6 +36,7 @@ class Chunk extends Model
       @buf.fill 0
     offset = 0
     @[k] = @buf.slice offset, offset += v for k, v of sizes
+    @lastUpdate = null
 
   getBlock: (x, y, z) ->
     # TODO: set add values
@@ -44,12 +45,14 @@ class Chunk extends Model
   setBlock: (value, x, y, z) ->
     # TODO: get add values
     @types[@getOffset x, y, z] = value
+    @lastUpdate = Date.now()
 
   getField: (field, x, y, z) ->
     getNibble @[field], @getOffset(x+1, y, z)
 
   setField: (field, value, x, y, z) ->
     setNibble @[field], value, @getOffset(x+1, y, z)
+    @lastUpdate = Date.now()
 
   getOffset: (x, y, z) -> y * 16 * 16 + z * 16 + x % 16
 
