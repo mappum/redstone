@@ -29,6 +29,7 @@ module.exports = ->
             # TODO: hand off players to their new locations
             @info "remapping region #{region.id}"
             _.extend region, r
+            region.updateChunkList()
             region.emit 'remap'
 
     @on 'join:before', (e, player) =>

@@ -15,9 +15,7 @@ class Region extends Model
 		@ticks = 0
 		@players = new MapCollection {indexes: ['username'], cellSize: 16}
 
-		# TODO: on chunk unload, remove from chunkList
-		@chunkList = []
-		@chunkList.push chunk for chunk in options.assignment if options.assignment?
+		@updateChunkList()
 
 	start: ->
 		if not @tickTimer
@@ -65,5 +63,9 @@ class Region extends Model
 					if c.lastUpdate and @lastSave and c.lastUpdate > @lastSave
 						@chunks.storeChunk chunk.x, chunk.z
 		@lastSave = Date.now()
+
+	updateChunkList: ->
+		@chunkList = []
+		@chunkList.push chunk for chunk in @assignment if @assignment?
 
 module.exports = Region
