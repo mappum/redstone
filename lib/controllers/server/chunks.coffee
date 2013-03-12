@@ -8,24 +8,30 @@ module.exports = (config) ->
         return @error err if err?
         player.send 0x33, packet
 
+        col = player.loadedChunks[x]
+        col = player.loadedChunks[x] = {} if not col?
+        col[z] = chunk.timeLoaded
+
   sendChunks = (player) ->
     viewDistance = config.viewDistance or 10
 
     # TODO: send in bulk packet rather than one by one
     for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
       for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
+
           d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
 
-          if d < viewDistance and not player.loadedChunks[x]?[z]
-            mappedChunk = player.region.world.map[x]?[z]?
+          lastUpdate = player.loadedChunks[x]?[z]
+          chunk = player.region.chunks.chunks[x]?[z]? and player.region.chunks.chunks[x][z]
+          mappedChunk = player.region.world.map[x]?[z]?
+          localChunk = mappedChunk and player.region.world.map[x][z].region == player.region.regionId
 
-            if not (player.region.world.static and not mappedChunk)
-              sendChunk player, x, z
-              player.region.chunkList.push {x: x, z: z} if not mappedChunk
+          old = not lastUpdate or lastUpdate < if localChunk then chunk.lastUpdate else chunk.timeLoaded
+          oob = player.region.world.static and not mappedChunk
 
-              col = player.loadedChunks[x]
-              col = player.loadedChunks[x] = {} if not col?
-              col[z] = true
+          if d < viewDistance and old and not oob
+            sendChunk player, x, z
+            player.region.chunkList.push {x: x, z: z} if not mappedChunk
 
   @on 'region:before', (e, region) =>
     options = {}
@@ -50,5 +56,11 @@ module.exports = (config) ->
     sendChunks player
 
     player.on 'moveChunk:after', ->
-      # TODO: mark chunks as out of range
       sendChunks player
+
+    player.on 'leave:before', ->
+      now = Date.now()
+      for chunk in player.region.chunkList
+        col = player.loadedChunks[chunk.x]
+        col = player.loadedChunks[chunk.x] = {} if not col?
+        col[chunk.z] = now
