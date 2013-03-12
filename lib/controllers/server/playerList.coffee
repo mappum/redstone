@@ -25,10 +25,16 @@ module.exports = ->
         packet.ping = p.latency or 0
         player.send 0xc9, packet
 
-    player.on 'quit:after', (e) =>
+    player.on 'leave:after', (e) =>
       packet =
         playerName: player.username
         online: false
         ping: 0
 
       player.region.send 0xc9, packet
+
+      for p in player.region.players.models
+        player.send 0xc9,
+          online: false
+          playerName: p.username
+          ping: 0
