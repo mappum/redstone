@@ -15,4 +15,4 @@ module.exports = (options) ->
         y++
 
     # TODO: do real lighting instead of just lighting everything
-    chunk.skylight.fill 0xf
+    chunk.skylight.fill 0xff
