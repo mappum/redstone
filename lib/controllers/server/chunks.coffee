@@ -8,10 +8,6 @@ module.exports = (config) ->
         return @error err if err?
         player.send 0x33, packet
 
-        col = player.loadedChunks[x]
-        col = player.loadedChunks[x] = {} if not col?
-        col[z] = chunk.timeLoaded
-
   sendChunks = (player) ->
     viewDistance = config.viewDistance or 10
 
@@ -26,12 +22,18 @@ module.exports = (config) ->
           mappedChunk = player.region.world.map[x]?[z]?
           localChunk = mappedChunk and player.region.world.map[x][z].region == player.region.regionId
 
-          old = not lastUpdate or lastUpdate < if localChunk then chunk.lastUpdate else chunk.timeLoaded
+          old = lastUpdate != true and (not lastUpdate or lastUpdate < if localChunk then chunk.lastUpdate else chunk.timeLoaded)
           oob = player.region.world.static and not mappedChunk
 
           if d < viewDistance and old and not oob
             sendChunk player, x, z
             player.region.chunkList.push {x: x, z: z} if not mappedChunk
+
+            col = player.loadedChunks[x]
+            col = player.loadedChunks[x] = {} if not col?
+            
+            if localChunk then col[z] = true
+            else col[z] = chunk.timeLoaded
 
   @on 'region:before', (e, region) =>
     options = {}
