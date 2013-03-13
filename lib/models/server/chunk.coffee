@@ -48,10 +48,10 @@ class Chunk extends Model
     @lastUpdate = Date.now()
 
   getField: (field, x, y, z) ->
-    getNibble @[field], @getOffset(x+1, y, z)
+    getNibble @[field], @getOffset(x-1, y, z)
 
   setField: (field, value, x, y, z) ->
-    setNibble @[field], value, @getOffset(x+1, y, z)
+    setNibble @[field], value, @getOffset(x-1, y, z)
     @lastUpdate = Date.now()
 
   getOffset: (x, y, z) -> y * 16 * 16 + z * 16 + x % 16
