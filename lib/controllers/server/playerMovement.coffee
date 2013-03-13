@@ -55,9 +55,46 @@ module.exports = ->
         player.emit 'stop'
 
     player.on 'ready:after', (e) ->
-      player.on 0xb, onMovement
-      player.on 0xc, onMovement
-      player.on 0xd, onMovement
+      setTimeout ->        
+        if not state.handoff?
+          player.send 0xd, player.position
+
+        selfSpawn =
+          entityId: player.entityId
+          name: player.username
+          x: Math.floor player.position.x * 32
+          y: Math.floor player.position.y * 32
+          z: Math.floor player.position.z * 32
+          yaw: packAngle player.position.yaw
+          pitch: packAngle player.position.pitch
+          currentItem: 0
+          metadata: [
+            {key: 0, type: 'byte', value: 0}
+            {key: 8, type: 'int', value: 0}
+          ]
+
+        player.region.send player.position, {radius: 64, exclude: [player]}, 0x14, selfSpawn
+        for p in player.region.players.getRadius player, 64
+          if p != player
+            player.send 0x14,
+              entityId: p.entityId
+              name: p.username
+              x: Math.floor p.position.x * 32
+              y: Math.floor p.position.y * 32
+              z: Math.floor p.position.z * 32
+              yaw: packAngle p.position.yaw
+              pitch: packAngle p.position.pitch
+              currentItem: 0
+              metadata: [
+                {key: 0, type: 'byte', value: 0}
+                {key: 8, type: 'int', value: 0}
+              ]
+
+          player.on 0xb, onMovement
+          player.on 0xc, onMovement
+          player.on 0xd, onMovement
+      , 1000
+      # TODO: remove delay when networking allows faster chunk loading
 
     player.on 'quit', (e) =>
       # TODO: save position at other times, too
@@ -98,37 +135,3 @@ module.exports = ->
 
       if lastX? and (lastX != player.chunkX or lastZ != player.chunkZ)
         player.emit 'moveChunk', player.chunkX, player.chunkZ
-
-    if not state.handoff?
-      player.send 0xd, player.position
-
-    selfSpawn =
-      entityId: player.entityId
-      name: player.username
-      x: Math.floor player.position.x * 32
-      y: Math.floor player.position.y * 32
-      z: Math.floor player.position.z * 32
-      yaw: packAngle player.position.yaw
-      pitch: packAngle player.position.pitch
-      currentItem: 0
-      metadata: [
-        {key: 0, type: 'byte', value: 0}
-        {key: 8, type: 'int', value: 0}
-      ]
-
-    player.region.send player.position, {radius: 64, exclude: [player]}, 0x14, selfSpawn
-    for p in player.region.players.getRadius player, 64
-      if p != player
-        player.send 0x14,
-          entityId: p.entityId
-          name: p.username
-          x: Math.floor p.position.x * 32
-          y: Math.floor p.position.y * 32
-          z: Math.floor p.position.z * 32
-          yaw: packAngle p.position.yaw
-          pitch: packAngle p.position.pitch
-          currentItem: 0
-          metadata: [
-            {key: 0, type: 'byte', value: 0}
-            {key: 8, type: 'int', value: 0}
-          ]
