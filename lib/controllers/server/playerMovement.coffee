@@ -54,6 +54,9 @@ module.exports = ->
         player.movingInterval = null
         player.emit 'stop'
 
+    player.on 'toJson', (e, json) ->
+      delete json.movingInterval
+
     player.on 'ready:after', (e) ->
       player.on 0xb, onMovement
       player.on 0xc, onMovement
