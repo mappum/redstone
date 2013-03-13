@@ -22,14 +22,19 @@ class Client extends EventEmitter
     else
       throw new Error 'Invalid host argument, must be a string, number, or net.Socket'
 
+    @buffer = new Buffer 0
     @socket.on 'data', @onData.bind(@)
 
   onData: (data) ->
+    @buffer = Buffer.concat [@buffer, data]
+
     offset = 0
-    while offset < data.length
-      unpacked = @unpack data.slice offset
-      @_emit.apply @, unpacked
+    while offset < @buffer.length
+      unpacked = @unpack @buffer
+      return if not unpacked
       offset += unpacked.size
+      @buffer = @buffer.slice unpacked.size
+      @_emit.apply @, unpacked
 
   emit: ->
     buffer = @pack.apply @, Array::slice.call(arguments, 0)
@@ -45,6 +50,7 @@ class Client extends EventEmitter
     for i in [0...argN]
       argLength = data.readUInt32LE offset
       offset += 4
+      return false if argLength + offset > data.length
       args.push msgpack.decode data.slice offset, offset + argLength
       offset += argLength
 
