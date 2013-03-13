@@ -69,7 +69,7 @@ transports.push new winston.transports.Console
 logger = new winston.Logger transports: transports, levels: levels
 winston.addColors colors
 
-Interface = require '../lib/interfaces/websocket'
+Interface = require '../lib/interfaces/sock'
 
 # start components
 if components.master
@@ -82,15 +82,13 @@ if components.master
         logger.log level, (if multipleComponents then '[master] ' else '') + message
 
     master.start()
-    
-masterInterface = if components.master then master.interface else config.master
 
 if components.server
     logger.info 'Initializing server'
 
     Server = require '../lib/server'
 
-    server = new Server config, new Interface().listen(config.control), new Interface(masterInterface)
+    server = new Server config, new Interface().listen(config.control), new Interface(config.master)
     server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
 
@@ -104,7 +102,7 @@ if components.connector
         cluster.fork() for i in [0...cpus]
     else
         logger.info 'Initializing connector'
-        connector = new Connector config, new Interface(masterInterface)
+        connector = new Connector config, new Interface(config.master)
         connector.on 'log', (e, level, message) ->
             logger.log level, (if multipleComponents then '[connector] ' else '') + message
 

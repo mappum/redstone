@@ -1,6 +1,16 @@
 mongodb = require 'mongodb'
 Db = mongodb.Db
 
+convertBuffers = (doc) ->
+  if doc instanceof Array
+    convertBuffers d for d in doc
+    
+  else
+    for k, v of doc
+      if typeof v == 'object' and v?
+        if v._bsontype == 'Binary' then doc[k] = v.buffer
+        else convertBuffers v
+
 module.exports = (config) ->
   Db.connect config.database, (err, db) =>
     return @error "Error connecting to database: #{err}" if err
@@ -11,12 +21,14 @@ module.exports = (config) ->
       find: (collectionName, query, fields, options, cb) =>
         cb = arguments[arguments.length-1] if typeof arguments[arguments.length-1] == 'function'
         collection = db.collection collectionName
-        collection.find(query, fields, options).toArray cb
+        collection.find(query, fields, options).toArray (err, doc) ->
+          convertBuffers doc; cb err, doc
 
       findOne: (collectionName, query, fields, options, cb) =>
         cb = arguments[arguments.length-1] if typeof arguments[arguments.length-1] == 'function'
         collection = db.collection collectionName
-        collection.findOne query, fields, options, cb
+        collection.findOne query, fields, options, (err, doc) ->
+          convertBuffers doc; cb err, doc
 
       count: (collectionName, query, options, cb) =>
         cb = arguments[arguments.length-1] if typeof arguments[arguments.length-1] == 'function'

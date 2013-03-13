@@ -31,7 +31,10 @@ class Component extends EventStack
             peer.connection = connection
 
             if peer.interfaceType?
-                if peer.interfaceType == 'websocket'
+                if peer.interfaceType == 'sock'
+                    address = peer.connection.sock.socket.remoteAddress
+                    peer.interfaceId = "#{address}:#{peer.port}"
+                else if peer.interfaceType == 'websocket'
                     address = peer.connection.socket.handshake.address
                     peer.interfaceId = "#{address.address}:#{peer.port}"
                 else if peer.interfaceType == 'direct'

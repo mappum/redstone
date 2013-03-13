@@ -12,7 +12,6 @@ toSlot = (input, cb) ->
     async.parallel tasks, cb
 
   else
-    # TODO: handle nbt data
     cb null, input
 
 sendInventory = ->

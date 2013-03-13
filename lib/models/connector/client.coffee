@@ -32,6 +32,6 @@ class Client extends Model
     @server.send.apply @server, args
 
   toJson: =>
-    _.omit @, 'server', 'connection'
+    _.omit @, 'server', 'connection', 'stacks', _.functions(@)
 
 module.exports = Client

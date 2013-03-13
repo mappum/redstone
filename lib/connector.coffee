@@ -22,7 +22,7 @@ class Connector extends Component
         # listen for client connections
         @mcserver = mcnet.createServer @config.connector
         @mcserver.on 'error', @error
-        @mcserver.on 'login', @connection
+        @mcserver.on 'login', @playerConnect
         @mcserver.on 'listening', =>
             @info "listening for Minecraft connections on port #{@config.connector.port or 25565}"
             @emit 'listening'
@@ -30,7 +30,7 @@ class Connector extends Component
         # register with master
         @master.request 'init', type: 'connector', (@id) =>
 
-    connection: (connection) =>
+    playerConnect: (connection) =>
         connectionJson =
             username: connection.username
             ip: connection.socket.remoteAddress
