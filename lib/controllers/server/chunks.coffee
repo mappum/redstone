@@ -1,17 +1,12 @@
 ChunkCollection = require '../../models/server/chunkCollection'
 
 module.exports = (config) ->
-  sendChunk = (player, x, z) ->
-    player.region.chunks.getChunk x, z, (err, chunk) =>
-      return @error err if err?
-      chunk.toPacket {x: x, z: z}, (err, packet) =>
-        return @error err if err?
-        player.send 0x33, packet
-
   sendChunks = (player) ->
-    viewDistance = config.viewDistance or 10
+    viewDistance = config.chunks?.viewDistance or 9
+    chunksPerPacket = config.chunks?.perPacket or 64
 
-    # TODO: send in bulk packet rather than one by one
+    chunks = []
+
     for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
       for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
 
@@ -26,14 +21,21 @@ module.exports = (config) ->
           oob = player.region.world.static and not mappedChunk
 
           if d < viewDistance and old and not oob
-            sendChunk player, x, z
+            chunks.push {x: x, z: z}
             player.region.chunkList.push {x: x, z: z} if not mappedChunk
 
             col = player.loadedChunks[x]
             col = player.loadedChunks[x] = {} if not col?
-            
             if localChunk then col[z] = true
             else col[z] = chunk.timeLoaded
+
+    i = 0
+    while i < chunks.length
+      subChunks = chunks.slice i, i + chunksPerPacket
+      player.region.chunks.toPacket chunks, (err, packet) ->
+        return @error err if err?
+        player.send 0x38, {data: packet}
+      i += chunksPerPacket
 
   @on 'region:before', (e, region) =>
     options = {}

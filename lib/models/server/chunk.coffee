@@ -72,15 +72,19 @@ class Chunk extends Model
       z: z
       groundUp: true
       bitMap: 0xffff
-      addBitMap: 0
+      addBitMap: 0xffff
+
+    # TODO: figure out which sections to include here
+    #buf = Buffer.concat [@types, @meta, @light, @skylight, @biomes]
+    buf = @buf
 
     if compress
-      zlib.deflate @buf, (err, data) ->
+      zlib.deflate buf, (err, data) ->
         return cb err if err
         output.compressedChunkData = data
         cb null, output
     else
-      output.data = @buf
+      output.data = buf
       cb null, output
 
 module.exports = Chunk
