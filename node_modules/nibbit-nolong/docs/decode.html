@@ -1,0 +1,319 @@
+<!DOCTYPE html>  <html> <head>   <title>decode.js</title>   <meta http-equiv="content-type" content="text/html; charset=UTF-8">   <link rel="stylesheet" media="all" href="docco.css" /> </head> <body>   <div id="container">     <div id="background"></div>            <div id="jump_to">         Jump To &hellip;         <div id="jump_wrapper">           <div id="jump_page">                                           <a class="source" href="convert.html">                 convert.js               </a>                                           <a class="source" href="decode.html">                 decode.js               </a>                                           <a class="source" href="encode.html">                 encode.js               </a>                                           <a class="source" href="index.html">                 index.js               </a>                        </div>         </div>       </div>          <table cellpadding="0" cellspacing="0">       <thead>         <tr>           <th class="docs">             <h1>               decode.js             </h1>           </th>           <th class="code">           </th>         </tr>       </thead>       <tbody>                               <tr id="section-1">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-1">&#182;</a>               </div>               <p>The parser is based on <a href="https://github.com/substack/node-binary">node-binary</a>.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">var</span> <span class="nx">binary</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s2">&quot;binary&quot;</span><span class="p">);</span></pre></div>             </td>           </tr>                               <tr id="section-2">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-2">&#182;</a>               </div>               <p>Welcome to the decoding module. Here you'll find all manner of decode related
+functionality. Feel free to clarify any comments here.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">;</span></pre></div>             </td>           </tr>                               <tr id="section-3">             <td class="docs">               <div class="pilwrap">                 <a class="pilcrow" href="#section-3">&#182;</a>               </div>               <p>This is where you'll want to start. The usage is usually like this:</p>
+
+<p>nibbit.decode(some_buffer, function(err, ast) { ... });</p>
+
+<p>If the first element isn't a compound type (mentioned as being mandatory on
+<a href="http://wiki.vg/NBT">the wiki</a>, it'll throw an error. In other
+error cases, it'll probably just throw exceptions and/or set fire to your
+computer. It's not very well tested with bad input.</p>
+
+<p>This file could really do with more documentation on how the stuff works
+internally.</p>             </td>             <td class="code">               <div class="highlight"><pre><span class="kd">function</span> <span class="nx">Decode</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="nx">done</span><span class="p">)</span> <span class="p">{</span>
+  <span class="nx">b</span> <span class="o">=</span> <span class="nx">binary</span><span class="p">(</span><span class="nx">data</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word8</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">done</span><span class="p">(</span><span class="nb">Error</span><span class="p">(</span><span class="s2">&quot;first tag must be compound&quot;</span><span class="p">));</span>
+    <span class="p">}</span>
+
+    <span class="nx">Decode</span><span class="p">[</span><span class="nx">type</span><span class="p">](</span><span class="nx">b</span><span class="p">,</span> <span class="kc">true</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nx">done</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="kr">byte</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word8s</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="kr">short</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">integer</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word32bs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="kr">long</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word64bs</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="kr">float</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="mi">4</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">readFloatBE</span><span class="p">(</span><span class="mi">0</span><span class="p">)];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="kr">double</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">readDoubleBE</span><span class="p">(</span><span class="mi">0</span><span class="p">)];</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">byte_array</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word32bs</span><span class="p">(</span><span class="s2">&quot;length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">)];</span>
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">string</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word16be</span><span class="p">(</span><span class="s2">&quot;data_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;data_length&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">8</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">.</span><span class="nx">toString</span><span class="p">()];</span>
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data_length</span><span class="p">;</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16be</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word8s</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">).</span><span class="nx">word32bs</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">type</span> <span class="o">=</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">type</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+    <span class="nx">count</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">count</span><span class="p">;</span>
+
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">count</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">loop</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span><span class="o">++</span> <span class="o">&gt;=</span> <span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">end</span><span class="p">();</span>
+      <span class="p">}</span>
+
+      <span class="nx">Decode</span><span class="p">[</span><span class="nx">type</span><span class="p">](</span><span class="k">this</span><span class="p">,</span> <span class="kc">false</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+        <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
+      <span class="p">});</span>
+    <span class="p">}).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">9</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">elements</span><span class="p">];</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">compound</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">10</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16be</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">loop</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">end</span><span class="p">,</span> <span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">this</span><span class="p">.</span><span class="nx">word8</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">type</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+        <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">type</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">type</span> <span class="o">===</span> <span class="mi">0</span> <span class="o">||</span> <span class="nx">type</span> <span class="o">===</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+          <span class="k">return</span> <span class="nx">end</span><span class="p">();</span>
+        <span class="p">}</span>
+
+        <span class="nx">Decode</span><span class="p">[</span><span class="nx">type</span><span class="p">](</span><span class="k">this</span><span class="p">,</span> <span class="kc">true</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+          <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
+        <span class="p">});</span>
+      <span class="p">});</span>
+    <span class="p">}).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">elements</span><span class="p">];</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="nx">Decode</span><span class="p">.</span><span class="nx">integer_array</span> <span class="o">=</span> <span class="nx">Decode</span><span class="p">[</span><span class="mi">11</span><span class="p">]</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">b</span><span class="p">,</span> <span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">has_name</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">b</span><span class="p">.</span><span class="nx">word16bs</span><span class="p">(</span><span class="s2">&quot;name_length&quot;</span><span class="p">).</span><span class="nx">buffer</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name_length&quot;</span><span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">word32bs</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">);</span>
+
+  <span class="nx">b</span><span class="p">.</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">name</span> <span class="o">=</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">elements</span> <span class="o">=</span> <span class="p">[];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span> <span class="o">&amp;&amp;</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">name</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name_length</span><span class="p">;</span>
+      <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">name</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="nx">count</span> <span class="o">=</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">count</span><span class="p">;</span>
+    <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">count</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">loop</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">end</span><span class="p">)</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nx">i</span><span class="o">++</span> <span class="o">&gt;=</span> <span class="nx">count</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="nx">end</span><span class="p">();</span>
+      <span class="p">}</span>
+
+      <span class="nx">Decode</span><span class="p">.</span><span class="nx">integer</span><span class="p">(</span><span class="k">this</span><span class="p">).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">elements</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">);</span>
+        <span class="k">delete</span> <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span><span class="p">;</span>
+      <span class="p">});</span>
+    <span class="p">}).</span><span class="nx">tap</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">vars</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">vars</span><span class="p">.</span><span class="nx">data</span> <span class="o">=</span> <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">elements</span><span class="p">];</span>
+    <span class="p">});</span>
+  <span class="p">});</span>
+
+  <span class="k">return</span> <span class="nx">b</span><span class="p">;</span>
+<span class="p">};</span>
+
+</pre></div>             </td>           </tr>                </tbody>     </table>   </div> </body> </html> 
