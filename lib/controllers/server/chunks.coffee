@@ -3,7 +3,7 @@ ChunkCollection = require '../../models/server/chunkCollection'
 module.exports = (config) ->
   sendChunks = (player) ->
     viewDistance = config.chunks?.viewDistance or 9
-    chunksPerPacket = config.chunks?.perPacket or 64
+    chunksPerPacket = config.chunks?.perPacket or 200
 
     chunks = []
 
