@@ -43,8 +43,9 @@ class ChunkCollection extends Model
   loadChunk: (x, z, cb) ->
     @storage.get x, z, (err, chunk) =>
       return cb err if err?
-      @setChunk chunk, x, z if chunk?
-      chunk.timeLoaded = Date.now()
+      if chunk?
+        @setChunk chunk, x, z
+        chunk.timeLoaded = Date.now()
       cb null, chunk
 
   storeChunk: (x, z, cb) ->
