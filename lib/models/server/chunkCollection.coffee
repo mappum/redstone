@@ -37,6 +37,7 @@ class ChunkCollection extends Model
     if typeof @generator == 'function' then @generator chunk, x, z
     else if @generator instanceof Array
       generator chunk, x, z for generator in @generator
+    chunk.lastUpdate = Date.now()
     @setChunk chunk, x, z
     cb null, chunk
 
@@ -44,8 +45,8 @@ class ChunkCollection extends Model
     @storage.get x, z, (err, chunk) =>
       return cb err if err?
       if chunk?
+        chunk.lastUpdate = Date.now()
         @setChunk chunk, x, z
-        chunk.timeLoaded = Date.now()
       cb null, chunk
 
   storeChunk: (x, z, cb) ->

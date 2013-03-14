@@ -22,7 +22,7 @@ module.exports = (config) ->
           mappedChunk = player.region.world.map[x]?[z]?
           localChunk = mappedChunk and player.region.world.map[x][z].region == player.region.regionId
 
-          old = lastUpdate != true and (not lastUpdate or lastUpdate < if localChunk then chunk.lastUpdate else chunk.timeLoaded)
+          old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk.lastUpdate)
           oob = player.region.world.static and not mappedChunk
 
           if d < viewDistance and old and not oob
@@ -31,9 +31,7 @@ module.exports = (config) ->
 
             col = player.loadedChunks[x]
             col = player.loadedChunks[x] = {} if not col?
-            
-            if localChunk then col[z] = true
-            else col[z] = chunk.timeLoaded
+            col[z] = chunk.lastUpdate
 
   @on 'region:before', (e, region) =>
     options = {}
