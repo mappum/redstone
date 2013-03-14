@@ -5,4 +5,4 @@ server.on 'connection', (client) ->
   console.log 'incoming connection'
 
   client.on 'pong', -> console.log 'got pong'
-  client.emit 'ping', {hello: 'world'}, 'another argument'
+  client.emit 'ping', {hello: 'world'}, 'another argument', new Buffer('a buffer')
