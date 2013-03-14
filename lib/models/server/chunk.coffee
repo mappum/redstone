@@ -4,13 +4,13 @@ zlib = require 'zlib'
 getNibble = (buf, offset) ->
   offset /= 2
   word = buf[Math.floor offset]
-  return if offset % 0 then word & 0xf else (word & 0xf0) >> 4
+  return if offset % 0 == 0 then word & 0xf else (word & 0xf0) >> 4
 
 setNibble = (buf, value, offset) ->
   value &= 0xf
   i = Math.floor offset / 2
   word = buf[i]
-  if offset % 2 == 1
+  if offset % 2 == 0
     word = (word | 0xf) ^ 0xf
     word |= value
   else
@@ -48,10 +48,10 @@ class Chunk extends Model
     @lastUpdate = Date.now()
 
   getField: (field, x, y, z) ->
-    getNibble @[field], @getOffset(x-1, y, z)
+    getNibble @[field], @getOffset(x, y, z)
 
   setField: (field, value, x, y, z) ->
-    setNibble @[field], value, @getOffset(x-1, y, z)
+    setNibble @[field], value, @getOffset(x, y, z)
     @lastUpdate = Date.now()
 
   getOffset: (x, y, z) -> y * 16 * 16 + z * 16 + x % 16
