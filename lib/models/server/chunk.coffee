@@ -75,10 +75,16 @@ class Chunk extends Model
       addBitMap: 0
 
     if compress
-      zlib.deflate @buf, (err, data) ->
-        return cb err if err
-        output.compressedChunkData = data
+      if @cachedPacket? and @cachedTime >= @lastUpdate
+        output.compressedChunkData = @cachedPacket
         cb null, output
+      else
+        zlib.deflate @buf, (err, data) ->
+          return cb err if err
+          output.compressedChunkData = data
+          @cachedTime = Date.now()
+          @cachedPacket = data
+          cb null, output
     else
       output.data = @buf
       cb null, output
