@@ -12,6 +12,7 @@ module.exports =
   worlds: [
     id: 'main'
     persistent: true
+    time: 5000
   ]
 
   connector:
