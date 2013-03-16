@@ -29,6 +29,20 @@ module.exports = ->
             # TODO: hand off players to their new locations
             @info "remapping region #{region.id}"
             _.extend region, r
+            oldList = _.clone region.chunkList
+
+            for chunk in oldList
+                if chunk.players
+                    newRegion = region.world.map[chunk.x][chunk.z].region
+                    if newRegion != region.regionId
+                        newServer = region.world.servers[newRegion]
+                        players = region.players.grid[chunk.x][chunk.z].models
+
+                        for player in players
+                            player.handoff newServer,
+                                handoff: transparent: true
+                                storage: player.storage
+
             region.updateChunkList()
             region.emit 'remap'
 
