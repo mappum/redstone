@@ -32,7 +32,7 @@ module.exports = (config) ->
 
             col = @loadedChunks[x]
             col = @loadedChunks[x] = {} if not col?
-            col[z] = lastUpdate
+            col[z] = chunk.lastUpdate
 
   @on 'region:before', (e, region) =>
     options = {}
