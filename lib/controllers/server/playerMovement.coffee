@@ -62,6 +62,10 @@ module.exports = (config) ->
     player.spawn = spawn.bind player
 
   @on 'join:after', (e, player, state) =>
+    setTimeout ->
+      player.spawn state
+    , config.spawnDelay or 750
+
     emitMoving = -> player.emit 'moving'
 
     onMovement = (e, packet) ->
@@ -93,12 +97,9 @@ module.exports = (config) ->
       delete json.movingInterval
 
     player.on 'ready:after', (e) ->
-      setTimeout ->
-        player.spawn state
-        player.on 0xb, onMovement
-        player.on 0xc, onMovement
-        player.on 0xd, onMovement
-      , config.spawnDelay or 750
+      player.on 0xb, onMovement
+      player.on 0xc, onMovement
+      player.on 0xd, onMovement
 
     player.on 'quit', (e) =>
       # TODO: save position at other times, too
