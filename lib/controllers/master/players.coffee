@@ -9,24 +9,31 @@ module.exports = ->
         return @error err if err
 
         storage = doc?.storage
-        player.storage = storage or
-          world: 'main'
+        player.storage = storage or {}
 
-        position =
-          if storage? and storage.position? then storage.position
-          else
-            # TODO: allow spawning in a random spot in an area
-            # TODO: distribute spawns across a list of points/areas
-            # TODO: get a real spawn point/area from world data
-            x: 0
-            y: 128
-            z: 0
-            yaw: 0
-            pitch: 0
+        # TODO: get default world from somewhere
+        player.storage.world = 'main' if not player.storage.world?
+        world = @worlds.get player.storage.world
 
-        server = @peers.servers.get 0
+        if not player.storage.position?
+          # TODO: allow spawning in a random spot in an area
+          # TODO: distribute spawns across a list of points/areas
+          player.storage.position =
+            if world.spawn? then _.clone world.spawn
+            else
+              x: 0
+              y: 128
+              z: 0
+              yaw: 0
+              pitch: 0
 
-        res _.pick(server, 'id', 'interfaceType', 'interfaceId'), player
+        chunkX = Math.floor player.storage.position.x / 16
+        chunkZ = Math.floor player.storage.position.z / 16
+        # TODO: figure out what to do if the chunk is unmapped
+        regionId = world.map[chunkX]?[chunkZ]?.region or Math.floor Math.random() * @peers.servers.length
+        server = world.servers[regionId]
+
+        res server, player
 
         if not storage
           player.created = Date.now()
