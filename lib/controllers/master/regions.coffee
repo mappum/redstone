@@ -1,7 +1,6 @@
 _ = require 'underscore'
 
 module.exports = (config) ->  
-
   # assign servers to worlds, map chunks to them, then notify servers of mappings
   @mapRegions = =>
     # TODO: handle more than one world
@@ -42,6 +41,8 @@ module.exports = (config) ->
 
   @on 'peer.server:after', (e, server, connection) =>
     @mapRegions()
+    if not @remapTimer?
+      @remapTimer = setInterval @mapRegions, config.remapInterval or 4 * 60 * 1000
 
   @on 'peer.server.update:after', (e, server, stats) =>
     for region in stats.regions

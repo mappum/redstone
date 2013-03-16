@@ -15,6 +15,8 @@ module.exports =
     time: 5000
   ]
 
+  remapInterval: 4 * 60 * 1000
+
   spawnDelay: 250
 
   connector:
