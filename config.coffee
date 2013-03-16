@@ -15,6 +15,8 @@ module.exports =
     time: 5000
   ]
 
+  spawnDelay: 250
+
   connector:
     'online-mode': false
     encryption: false

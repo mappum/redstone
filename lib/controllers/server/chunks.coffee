@@ -1,37 +1,38 @@
 ChunkCollection = require '../../models/server/chunkCollection'
 
 module.exports = (config) ->
-  sendChunk = (player, x, z) ->
-    player.region.chunks.getChunk x, z, (err, chunk) =>
+
+  sendChunk = (x, z) ->
+    @region.chunks.getChunk x, z, (err, chunk) =>
       return @error err if err?
       chunk.toPacket {x: x, z: z}, (err, packet) =>
         return @error err if err?
-        player.send 0x33, packet
+        @send 0x33, packet
 
-  sendChunks = (player) ->
-    viewDistance = config.viewDistance or 10
+  sendChunks = ->
+    maxViewDistance = config.viewDistance or 9
+    multiplier = (5 - if @settings? then @settings.viewDistance else 3) / 5
+    viewDistance = Math.round multiplier * maxViewDistance
 
-    # TODO: send in bulk packet rather than one by one
-    for x in [-viewDistance+player.chunkX..viewDistance+player.chunkX]
-      for z in [-viewDistance+player.chunkZ..viewDistance+player.chunkZ]
+    for x in [-viewDistance+@chunkX..viewDistance+@chunkX]
+      for z in [-viewDistance+@chunkZ..viewDistance+@chunkZ]
+        lastUpdate = @loadedChunks[x]?[z]
+        chunk = @region.chunks.chunks[x]?[z]? and @region.chunks.chunks[x][z]
+        mappedChunk = @region.world.map[x]?[z]?
+        localChunk = mappedChunk and @region.world.map[x][z].region == @region.regionId
 
-          d = Math.sqrt Math.pow(x - player.chunkX, 2) + Math.pow(z - player.chunkZ, 2)
+        old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk.lastUpdate)
+        oob = @region.world.static and not mappedChunk
 
-          lastUpdate = player.loadedChunks[x]?[z]
-          chunk = player.region.chunks.chunks[x]?[z]? and player.region.chunks.chunks[x][z]
-          mappedChunk = player.region.world.map[x]?[z]?
-          localChunk = mappedChunk and player.region.world.map[x][z].region == player.region.regionId
+        if old and not oob
+          d = Math.sqrt Math.pow(x - @chunkX, 2) + Math.pow(z - @chunkZ, 2)
+          if d < viewDistance
+            @sendChunk x, z
+            @region.chunkList.push {x: x, z: z} if not mappedChunk
 
-          old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk.lastUpdate)
-          oob = player.region.world.static and not mappedChunk
-
-          if d < viewDistance and old and not oob
-            sendChunk player, x, z
-            player.region.chunkList.push {x: x, z: z} if not mappedChunk
-
-            col = player.loadedChunks[x]
-            col = player.loadedChunks[x] = {} if not col?
-            col[z] = chunk.lastUpdate
+            col = @loadedChunks[x]
+            col = @loadedChunks[x] = {} if not col?
+            col[z] = lastUpdate
 
   @on 'region:before', (e, region) =>
     options = {}
@@ -52,11 +53,13 @@ module.exports = (config) ->
 
   @on 'join:before', (e, player, options) =>
     player.loadedChunks = {} if not options.handoff?.transparent
-    
-    sendChunks player
+    player.sendChunk = sendChunk.bind player
+    player.sendChunks = sendChunks.bind player
 
-    player.on 'moveChunk:after', ->
-      sendChunks player
+  @on 'join:after', (e, player) ->
+    player.sendChunks()
+    player.on 'ready:after', player.sendChunks
+    player.on 'moveChunk:after', player.sendChunks
 
     player.on 'leave:before', ->
       now = Date.now()
