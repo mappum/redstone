@@ -9,13 +9,22 @@ module.exports = ->
         return @error err if err
 
         storage = doc?.storage
-        player.storage = storage or {
+        player.storage = storage or
           world: 'main'
-          # TODO: handle default region
-        }
+
+        position =
+          if storage? and storage.position? then storage.position
+          else
+            # TODO: allow spawning in a random spot in an area
+            # TODO: distribute spawns across a list of points/areas
+            # TODO: get a real spawn point/area from world data
+            x: 0
+            y: 128
+            z: 0
+            yaw: 0
+            pitch: 0
 
         server = @peers.servers.get 0
-        # TODO: find correct server
 
         res _.pick(server, 'id', 'interfaceType', 'interfaceId'), player
 

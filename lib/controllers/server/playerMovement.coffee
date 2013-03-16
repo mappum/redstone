@@ -11,10 +11,10 @@ updateChunkCoordinates = (player) ->
 module.exports = ->
 
   @on 'join:before', (e, player, state) =>
-    # TODO: get a real spawn point
+    # fallback spawn position (connector should be setting initial position)
     spawn =
       x: 0
-      y: 256
+      y: 128
       z: 0
       yaw: 0
       pitch: 0
