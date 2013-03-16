@@ -8,23 +8,58 @@ updateChunkCoordinates = (player) ->
   player.chunkX = Math.floor player.position.x / 16
   player.chunkZ = Math.floor player.position.z / 16
 
-module.exports = ->
+spawn = (options) ->
+  if not options?.handoff?
+    @send 0xd, @position
 
+  packet =
+    entityId: @entityId
+    name: @username
+    x: Math.floor @position.x * 32
+    y: Math.floor @position.y * 32
+    z: Math.floor @position.z * 32
+    yaw: packAngle @position.yaw
+    pitch: packAngle @position.pitch
+    currentItem: 0
+    metadata: [
+      {key: 0, type: 'byte', value: 0}
+      {key: 8, type: 'int', value: 0}
+    ]
+
+  @region.send @position, {radius: 64, exclude: [@]}, 0x14, packet
+
+  for p in @region.players.getRadius @, 64
+    if p != @
+      @send 0x14,
+        entityId: p.entityId
+        name: p.username
+        x: Math.floor p.position.x * 32
+        y: Math.floor p.position.y * 32
+        z: Math.floor p.position.z * 32
+        yaw: packAngle p.position.yaw
+        pitch: packAngle p.position.pitch
+        currentItem: 0
+        metadata: [
+          {key: 0, type: 'byte', value: 0}
+          {key: 8, type: 'int', value: 0}
+        ]
+
+module.exports = (config) ->
   @on 'join:before', (e, player, state) =>
-    # fallback spawn position (connector should be setting initial position)
-    spawn =
-      x: 0
-      y: 128
-      z: 0
-      yaw: 0
-      pitch: 0
-
     if not player.position?
-      player.position = if player.storage.position? then _.clone player.storage.position else _.clone spawn
+      player.position =
+        if player.storage.position? then _.clone player.storage.position
+        else 
+          x: 0
+          y: 128
+          z: 0
+          yaw: 0
+          pitch: 0
     player.position.stance = player.position.y + 1.8
     player.position.onGround = false
 
     updateChunkCoordinates player
+    player.spawn = spawn.bind player
 
   @on 'join:after', (e, player, state) =>
     emitMoving = -> player.emit 'moving'
@@ -58,9 +93,12 @@ module.exports = ->
       delete json.movingInterval
 
     player.on 'ready:after', (e) ->
-      player.on 0xb, onMovement
-      player.on 0xc, onMovement
-      player.on 0xd, onMovement
+      setTimeout ->
+        player.spawn state
+        player.on 0xb, onMovement
+        player.on 0xc, onMovement
+        player.on 0xd, onMovement
+      , config.spawnDelay or 750
 
     player.on 'quit', (e) =>
       # TODO: save position at other times, too
@@ -101,37 +139,3 @@ module.exports = ->
 
       if lastX? and (lastX != player.chunkX or lastZ != player.chunkZ)
         player.emit 'moveChunk', player.chunkX, player.chunkZ
-
-    if not state.handoff?
-      player.send 0xd, player.position
-
-    selfSpawn =
-      entityId: player.entityId
-      name: player.username
-      x: Math.floor player.position.x * 32
-      y: Math.floor player.position.y * 32
-      z: Math.floor player.position.z * 32
-      yaw: packAngle player.position.yaw
-      pitch: packAngle player.position.pitch
-      currentItem: 0
-      metadata: [
-        {key: 0, type: 'byte', value: 0}
-        {key: 8, type: 'int', value: 0}
-      ]
-
-    player.region.send player.position, {radius: 64, exclude: [player]}, 0x14, selfSpawn
-    for p in player.region.players.getRadius player, 64
-      if p != player
-        player.send 0x14,
-          entityId: p.entityId
-          name: p.username
-          x: Math.floor p.position.x * 32
-          y: Math.floor p.position.y * 32
-          z: Math.floor p.position.z * 32
-          yaw: packAngle p.position.yaw
-          pitch: packAngle p.position.pitch
-          currentItem: 0
-          metadata: [
-            {key: 0, type: 'byte', value: 0}
-            {key: 8, type: 'int', value: 0}
-          ]
