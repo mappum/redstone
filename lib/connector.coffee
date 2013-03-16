@@ -79,10 +79,16 @@ class Connector extends Component
 
         else callback server
 
-    getClient: (cb) => (id) =>
-        client = @clients.get id
-        args = [client]
-        args = args.concat Array::slice.call(arguments, 1)
-        cb.apply @, args
+    getClient: (id) -> @clients.get id
+
+    getClients: (cb) => (ids) =>
+        if ids instanceof Array
+            clients = []
+            clients.push @getClient id for id in ids
+        else
+            clients = [@getClient ids]
+
+        args = [clients]
+        cb.apply @, args.concat Array::slice.call(arguments, 1)
 
 module.exports = Connector

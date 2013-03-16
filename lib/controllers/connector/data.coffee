@@ -7,9 +7,7 @@ module.exports = ->
 
   @on 'connect', (e, server) =>
 
-    server.connection.on 'data', @getClient (client, id, data) =>
-      if client?
-
+    server.connection.on 'data', @getClients (clients, id, data) =>
         packet = protocol.get id, false
 
         for field in packet
@@ -18,7 +16,9 @@ module.exports = ->
           else if field.type == 'slotArray'
             convertSlot slot for slot in data[field.name]
 
-        try
-          client.send id, data
-        catch err
-          @error new Error "Error sending data to client: (0x#{id.toString 16}) #{err}" if err?
+        for client in clients
+          if client?
+            try
+              client.send id, data
+            catch err
+              @error new Error "Error sending data to client: (0x#{id.toString 16}) #{err}" if err?

@@ -54,7 +54,15 @@ class Region extends Model
 		players = if not position then @players.models else @players.getRadius position, options.radius
 		players = _.difference players, options.exclude if options.exclude
 
-		player.send id, data for player in players
+		connectors = {}
+		for player in players
+			if not connectors[player.connector.id]?
+				connector = connectors[player.connector.id] =
+					players: [player.id]
+					connector: player.connector
+			else connector.players.push player.id
+
+		c.connector.connection.emit 'data', c.players, id, data for cId, c of connectors
 
 	save: ->
 		for chunk in @chunkList

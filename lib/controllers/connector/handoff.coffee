@@ -2,7 +2,8 @@ module.exports = ->
 
   @.on 'connect', (e, server) =>
 
-    server.connection.on 'handoff', @getClient (client, server, player, options) =>
+    server.connection.on 'handoff', @getClients (clients, server, player, options) =>
+      client = clients[0]
       if client?
         @connect server.id, server.interfaceType, server.interfaceId, (newServer) =>
           oldServer = client.server

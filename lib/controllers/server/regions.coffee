@@ -39,9 +39,10 @@ module.exports = ->
                         players = region.players.grid[chunk.x][chunk.z].models
 
                         for player in players
-                            player.handoff newServer,
-                                handoff: transparent: true
-                                storage: player.storage
+                            if player?
+                                player.handoff newServer,
+                                    handoff: transparent: true
+                                    storage: player.storage
 
             region.updateChunkList()
             region.emit 'remap'
