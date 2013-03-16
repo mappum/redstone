@@ -79,7 +79,7 @@ class Chunk extends Model
         output.compressedChunkData = @cachedPacket
         cb null, output
       else
-        zlib.deflate @buf, (err, data) ->
+        zlib.deflate @buf, (err, data) =>
           return cb err if err
           output.compressedChunkData = data
           @cachedTime = Date.now()
