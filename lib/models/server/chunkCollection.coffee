@@ -52,7 +52,8 @@ class ChunkCollection extends Model
   storeChunk: (x, z, cb) ->
     cb = cb or ->
     @getChunk x, z, (err, chunk) =>
-      return cb err if err
+      return cb err if err?
+      chunk.lastSave = Date.now()
       @storage.set chunk, x, z, cb
 
   unloadChunk: (x, z) -> @setChunk null, x, z
