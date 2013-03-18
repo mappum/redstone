@@ -84,3 +84,17 @@ module.exports = (config) ->
         col = player.loadedChunks[chunk.x]
         col = player.loadedChunks[chunk.x] = {} if not col?
         col[chunk.z] = now
+
+  @on 'update:after', (e, data, lastUpdate) =>
+    for region, i in @regions.models
+      r = data.regions[i]
+      for chunk in region.chunkList
+        do (chunk) =>
+          region.chunks.getChunk chunk.x, chunk.z, (err, c) =>
+            return @error err if err?
+            if c.lastUpdate >= lastUpdate
+              col = r.chunks[chunk.x]
+              col = r.chunks[chunk.x] = {} if not col?
+              updateChunk = col[chunk.z]
+              updateChunk = col[chunk.z] = {} if not updateChunk?
+              updateChunk.lastUpdate = c.lastUpdate
