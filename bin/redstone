@@ -109,4 +109,4 @@ if components.connector
         connector.start()
 
 process.on 'uncaughtException', (err) ->
-    logger.log 'error', err
+    logger.log 'error', err.stack
