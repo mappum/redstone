@@ -32,6 +32,7 @@ class Server extends Component
             port: @interface.port or @interface,
             (@id) =>
 
+        lastUpdate = 0
         updateMaster = =>
             data = 
                 loadavg: os.loadavg()
@@ -39,9 +40,10 @@ class Server extends Component
                 totalmem: os.totalmem()
                 freemem: os.freemem()
                 cpus: os.cpus().length
-            @emit 'update', data
+            @emit 'update', data, lastUpdate
             @master.emit 'update', data
             @debug 'sending stats to master'
+            lastUpdate = Date.now()
 
         updateMaster()
         @updateMasterInterval = setInterval updateMaster, 10 * 1000

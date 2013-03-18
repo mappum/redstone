@@ -49,5 +49,8 @@ module.exports = (config) ->
       world = @worlds.get region.worldId
 
       if world?
-        for chunk in region.chunks
-          world.getChunk(chunk.x, chunk.z).players = chunk.players or 0
+        for x, col of region.chunks
+          for z, chunk of col
+            c = world.getChunk(x, z)
+            _.extend c, chunk
+            c.players = c.players or 0

@@ -80,7 +80,7 @@ module.exports = ->
 
         for region in @regions.models
             r =
-                chunks: []
+                chunks: {}
                 players: region.players.length
                 regionId: region.regionId
                 worldId: region.world.id
@@ -88,11 +88,13 @@ module.exports = ->
             for chunk in region.chunkList
                 players = region.players.grid[chunk.x]?[chunk.z]?.length or 0
                 if not chunk.players? or players != chunk.players
-                    obj =
-                        x: chunk.x
-                        z: chunk.z
+                    obj = {}
                     obj.players = players if players or chunk.players?
-                    r.chunks.push obj
+                    
+                    col = r.chunks[chunk.x]
+                    col = r.chunks[chunk.x] = {} if not col?
+
+                    col[chunk.z] = obj                    
                     chunk.players = players
 
             data.regions.push r
