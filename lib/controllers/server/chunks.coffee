@@ -1,4 +1,5 @@
 ChunkCollection = require '../../models/server/chunkCollection'
+async = require 'async'
 
 module.exports = (config) ->
 
@@ -10,10 +11,18 @@ module.exports = (config) ->
         @send 0x33, packet
 
   sendChunks = ->
+    initial = not @settings?
+
     maxViewDistance = config.viewDistance or 9
-    multiplier = (5 - if @settings? then @settings.viewDistance else 3) / 5
+    multiplier = (5 - if not initial then @settings.viewDistance else 3) / 5
     viewDistance = Math.round multiplier * maxViewDistance
 
+    chunkRate =
+      if initial then 0
+      else if config.chunkInterval? then config.chunkInterval
+      else 10
+
+    tasks = []
     for x in [-viewDistance+@chunkX..viewDistance+@chunkX]
       for z in [-viewDistance+@chunkZ..viewDistance+@chunkZ]
         lastUpdate = @loadedChunks[x]?[z]
@@ -27,12 +36,20 @@ module.exports = (config) ->
         if old and not oob
           d = Math.sqrt Math.pow(x - @chunkX, 2) + Math.pow(z - @chunkZ, 2)
           if d < viewDistance
-            @sendChunk x, z
             @region.chunkList.push {x: x, z: z} if not mappedChunk
+            do (x, z, chunk) =>
+              tasks.push (cb) =>
+                @sendChunk x, z
 
-            col = @loadedChunks[x]
-            col = @loadedChunks[x] = {} if not col?
-            col[z] = chunk.lastUpdate
+                col = @loadedChunks[x]
+                col = @loadedChunks[x] = {} if not col?
+                col[z] = chunk.lastUpdate
+
+                done = -> cb null, true
+                if chunkRate then setTimeout done, chunkRate
+                else done()
+
+    async.series tasks
 
   @on 'region:before', (e, region) =>
     options = {}
