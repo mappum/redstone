@@ -42,6 +42,7 @@ class ChunkCollection extends Model
     cb null, chunk
 
   loadChunk: (x, z, cb) ->
+    cb = cb or ->
     @storage.get x, z, (err, chunk) =>
       return cb err if err?
       if chunk?
