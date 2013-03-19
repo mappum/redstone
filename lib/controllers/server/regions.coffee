@@ -15,8 +15,9 @@ module.exports = ->
     @regions = new Collection indexes: [{key: 'world.id', replace: true}, 'id']
     @regions.generateId = (region) -> "#{region.world.id}.#{region.regionId}"
 
-    @master.on 'region', (r) =>
+    @master.on 'region', (r, options) =>
         region = @regions.get 'world.id', r.world.id
+        options = options or {}
 
         if not region?
             region = new Region r
@@ -26,26 +27,32 @@ module.exports = ->
             region.start()
 
         else
-            # TODO: hand off players to their new locations
-            @info "remapping region #{region.id}"
-            _.extend region, r
-            oldList = _.clone region.chunkList
+            delay = options.start - Date.now()
 
-            for chunk in oldList
-                if chunk.players
-                    newRegion = region.world.map[chunk.x][chunk.z].region
-                    if newRegion != region.regionId
-                        newServer = region.world.servers[newRegion]
-                        players = region.players.grid[chunk.x][chunk.z].models
+            @info "preparing to remap region #{region.id}"
+            region.emit 'preRemap', r, options
 
-                        for player in players
-                            if player?
-                                player.handoff newServer,
-                                    handoff: transparent: true
-                                    storage: player.storage
+            remap = =>
+                @info "remapping region #{region.id}"
+                _.extend region, r
 
-            region.updateChunkList()
-            region.emit 'remap'
+                for chunk in region.chunkList
+                    if chunk.players
+                        newRegion = region.world.map[chunk.x][chunk.z].region
+                        if newRegion != region.regionId
+                            newServer = region.world.servers[newRegion]
+                            players = region.players.grid[chunk.x][chunk.z].models
+
+                            for player in players
+                                if player? 
+                                    player.handoff newServer,
+                                        handoff: transparent: true
+                                        storage: player.storage
+
+                region.updateChunkList()
+                region.emit 'remap'
+
+            setTimeout remap, delay
 
     @on 'join:before', (e, player) =>
         region = player.region = @regions.get 'world.id', player.storage.world

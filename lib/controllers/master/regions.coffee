@@ -34,10 +34,15 @@ module.exports = (config) ->
       #   pregen: whether or not to pregenerate all chunks (size must be defined)
       #   static: whether or not to expand to unmapped chunks (servers should only load assigned chunks)
 
-      server.connection.emit 'region',
+      options = {}
+      remapDelay = if config.remapDelay? then config.remapDelay else 10 * 1000
+      options.start = Date.now() + remapDelay
+
+      server.connection.emit 'region', {
         regionId: i
         world: world
         assignment: region
+      }, options
 
   @on 'peer.server:after', (e, server, connection) =>
     @mapRegions()
