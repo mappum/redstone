@@ -22,6 +22,8 @@ module.exports = (config) ->
       else if config.chunkInterval? then config.chunkInterval
       else 10
 
+    now = Date.now()
+
     tasks = []
     for x in [-viewDistance+@chunkX..viewDistance+@chunkX]
       for z in [-viewDistance+@chunkZ..viewDistance+@chunkZ]
@@ -37,6 +39,7 @@ module.exports = (config) ->
           d = Math.sqrt Math.pow(x - @chunkX, 2) + Math.pow(z - @chunkZ, 2)
           if d < viewDistance
             @region.chunkList.push {x: x, z: z} if not mappedChunk
+            chunk.lastServed = now if chunk
             do (x, z, chunk) =>
               tasks.push (cb) =>
                 @sendChunk x, z
@@ -77,15 +80,25 @@ module.exports = (config) ->
     if options.delay then setTimeout getChunks, options.delay / 2
     else getChunks()
 
-    region.saveChunks = saveChunks.bind region
-    region.saveTimer = setInterval region.saveChunks, config.saveInterval or 60 * 1000
+    loadNeighborChunks = ->
+      for x, col of region.chunks.chunks
+        for z, chunk of col
+          if region.world.map[x]?[z]? and region.world.map[x]?[z]?.region != region.regionId
+            if Date.now() - chunk.lastServed >= (config.chunkUnloadDelay or 5 * 60 * 1000)
+              region.chunks.unloadChunk x, z
+            else
+              # TODO: only load if updated
+              region.chunks.loadChunk x, z
+    region.loadTimer = setInterval loadNeighborChunks, config.chunkReloadInterval or 60 * 1000
 
     region.on 'preRemap:before', (e, r, options) ->
       loadChunks = ->
         region.chunks.loadChunk chunk.x, chunk.z for chunk in options.chunks.add
       setTimeout loadChunks, options.delay / 2
-
       region.chunks.storeChunk chunk.x, chunk.z for chunk in options.chunks.remove
+
+    region.saveChunks = saveChunks.bind region
+    region.saveTimer = setInterval region.saveChunks, config.saveInterval or 60 * 1000
 
   @on 'join:before', (e, player, options) =>
     player.loadedChunks = {} if not options.handoff?.transparent

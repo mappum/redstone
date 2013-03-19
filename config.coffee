@@ -15,7 +15,10 @@ module.exports =
     time: 5000
   ]
 
-  saveInterval: 5 * 60 * 1000
+  saveInterval: 5 * 60 * 1000     # how often to save chunks inside the region
+  chunkReloadInterval: 60 * 1000  # how often we should reload neighboring chunks
+  chunkUnloadDelay: 2 * 60 * 1000 # how long a chunk should be inactive before unloading
+  chunkInterval: 10               # how long to wait in between sending chunks (to prevent locking up)
 
   remapInterval: 10 * 60 * 1000
   remapDelay: 20 * 1000
