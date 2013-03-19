@@ -57,6 +57,9 @@ class ChunkCollection extends Model
       chunk.lastSave = Date.now()
       @storage.set chunk, x, z, cb
 
-  unloadChunk: (x, z) -> @setChunk null, x, z
+  unloadChunk: (x, z) ->
+    col = @chunks[x]
+    col = @chunks[x] = {} if not col?
+    delete col[z]
 
 module.exports = ChunkCollection
