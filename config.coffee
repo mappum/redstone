@@ -15,7 +15,10 @@ module.exports =
     time: 5000
   ]
 
-  remapInterval: 4 * 60 * 1000
+  saveInterval: 5 * 60 * 1000
+
+  remapInterval: 10 * 60 * 1000
+  remapDelay: 20 * 1000
 
   spawnDelay: 250
 

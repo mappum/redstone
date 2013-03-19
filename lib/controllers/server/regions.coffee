@@ -19,15 +19,37 @@ module.exports = ->
         region = @regions.get 'world.id', r.world.id
         options = options or {}
 
+        delay = options.delay = options.start - Date.now() if options.start?
+
         if not region?
             region = new Region r
             @regions.insert region
             @info "starting region #{region.id}"
-            @emit 'region', region
+            @emit 'region', region, options
             region.start()
 
         else
-            delay = options.start - Date.now()
+            options.chunks =
+                add: []
+                remove: []
+                keep: []
+
+            chunkGrid = {}
+
+            for chunk in region.chunkList
+                col = chunkGrid[chunk.x]
+                col = chunkGrid[chunk.x] = {} if not col?
+                col[chunk.z] = chunk
+
+                newRegion = r.world.map[chunk.x]?[chunk.z]?.region
+                if newRegion != r.regionId
+                    chunk.region = newRegion
+                    options.chunks.remove.push chunk
+                else
+                    options.chunks.keep.push chunk
+
+            for chunk in r.assignment
+                options.chunks.add.push chunk if not chunkGrid[chunk.x]?[chunk.z]?
 
             @info "preparing to remap region #{region.id}"
             region.emit 'preRemap', r, options
@@ -36,18 +58,16 @@ module.exports = ->
                 @info "remapping region #{region.id}"
                 _.extend region, r
 
-                for chunk in region.chunkList
+                for chunk in options.chunks.remove
                     if chunk.players
-                        newRegion = region.world.map[chunk.x][chunk.z].region
-                        if newRegion != region.regionId
-                            newServer = region.world.servers[newRegion]
-                            players = region.players.grid[chunk.x][chunk.z].models
+                        newServer = region.world.servers[chunk.region]
+                        players = region.players.grid[chunk.x][chunk.z].models
 
-                            for player in players
-                                if player? 
-                                    player.handoff newServer,
-                                        handoff: transparent: true
-                                        storage: player.storage
+                        for player in players
+                            if player? 
+                                player.handoff newServer,
+                                    handoff: transparent: true
+                                    storage: player.storage
 
                 region.updateChunkList()
                 region.emit 'remap'

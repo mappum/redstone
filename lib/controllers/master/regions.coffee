@@ -12,6 +12,10 @@ module.exports = (config) ->
     for server in @peers.servers.models
       world.servers.push _.pick server, 'id', 'interfaceType', 'interfaceId'
 
+    options = {}
+    remapDelay = if config.remapDelay? then config.remapDelay else 10 * 1000
+    options.start = Date.now() + remapDelay
+
     for region, i in world.regions
       # TODO: figure out how servers should be assigned to worlds
       server = @peers.servers.get i
@@ -33,10 +37,6 @@ module.exports = (config) ->
       #   size: the size limit of the world, either a number, or an object like {width: x, height: x}
       #   pregen: whether or not to pregenerate all chunks (size must be defined)
       #   static: whether or not to expand to unmapped chunks (servers should only load assigned chunks)
-
-      options = {}
-      remapDelay = if config.remapDelay? then config.remapDelay else 10 * 1000
-      options.start = Date.now() + remapDelay
 
       server.connection.emit 'region', {
         regionId: i
