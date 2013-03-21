@@ -48,13 +48,15 @@ module.exports = (config) ->
     clearInterval @remapTimer if @remapTimer?
     @remapTimer = setInterval @mapRegions, config.remapInterval or 4 * 60 * 1000
 
-  @on 'peer.server:after', (e, server, connection) =>
+  remapTimeout = null
+  remap = =>
     @mapRegions()
     resetTimer()
+    remapTimeout = null
 
-    connection.on 'disconnect', =>
-      @mapRegions()
-      @resetTimer()
+  @on 'peer.server:after', (e, server, connection) =>
+    remapTimeout = setTimeout remap, 2000 if not remapTimeout?
+    connection.on 'disconnect', remap
 
   @on 'peer.server.update:after', (e, server, stats) =>
     for region in stats.regions
