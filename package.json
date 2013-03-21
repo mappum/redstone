@@ -20,6 +20,7 @@
     "underscore": "1.4.3",
     "mongodb": "1.2.x",
     "async": "0.2.x",
-    "sock": "0.0.x"
+    "sock": "0.0.x",
+    "aws-sdk": "0.9.x"
   }
 }
