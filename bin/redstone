@@ -84,28 +84,32 @@ if components.master
     master.start()
 
 if components.server
-    logger.info 'Initializing server'
+    
+    if cluster.isMaster and os.platform().indexOf('win') != 0
+        cpus = os.cpus().length
+        cluster.fork() for i in [0...cpus]
 
-    Server = require '../lib/server'
+    else
+        logger.info 'Initializing server'
+        Server = require '../lib/server'
+        server = new Server config, new Interface().listen(config.control), new Interface(config.master)
+        server.on 'log', (e, level, message) ->
+            logger.log level, (if multipleComponents then '[server] ' else '') + message
+        server.start()
 
-    server = new Server config, new Interface().listen(config.control), new Interface(config.master)
-    server.on 'log', (e, level, message) ->
-        logger.log level, (if multipleComponents then '[server] ' else '') + message
-
-    server.start()
 
 if components.connector
-    Connector = require '../lib/connector'
 
     if cluster.isMaster and os.platform().indexOf('win') != 0
         cpus = os.cpus().length
         cluster.fork() for i in [0...cpus]
+
     else
         logger.info 'Initializing connector'
+        Connector = require '../lib/connector'
         connector = new Connector config, new Interface(config.master)
         connector.on 'log', (e, level, message) ->
             logger.log level, (if multipleComponents then '[connector] ' else '') + message
-
         connector.start()
 
 process.on 'uncaughtException', (err) ->
