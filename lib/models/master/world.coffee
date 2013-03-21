@@ -10,7 +10,9 @@ class World extends Model
     @chunks = []
 
     # TODO: figure out which chunks to map initially
-    @getChunk 0, 0
+    for x in [-4..5]
+      for z in [-4..5]
+        @getChunk x, z
 
     @remap()
 
