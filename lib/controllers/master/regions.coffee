@@ -44,10 +44,17 @@ module.exports = (config) ->
         assignment: region
       }, options
 
+  resetTimer = =>
+    clearInterval @remapTimer if @remapTimer?
+    @remapTimer = setInterval @mapRegions, config.remapInterval or 4 * 60 * 1000
+
   @on 'peer.server:after', (e, server, connection) =>
     @mapRegions()
-    if not @remapTimer?
-      @remapTimer = setInterval @mapRegions, config.remapInterval or 4 * 60 * 1000
+    resetTimer()
+
+    connection.on 'disconnect', =>
+      @mapRegions()
+      @resetTimer()
 
   @on 'peer.server.update:after', (e, server, stats) =>
     for region in stats.regions
