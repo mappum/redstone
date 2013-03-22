@@ -84,15 +84,15 @@ if components.master
     master.start()
 
 if components.server
-    
+
     if cluster.isMaster and os.platform().indexOf('win') != 0
         cpus = os.cpus().length
-        cluster.fork() for i in [0...cpus]
+        cluster.fork(CONTROL: config.control++) for i in [0...cpus]
 
     else
         logger.info 'Initializing server'
         Server = require '../lib/server'
-        server = new Server config, new Interface().listen(config.control), new Interface(config.master)
+        server = new Server config, new Interface().listen(process.env.CONTROL or config.control), new Interface(config.master)
         server.on 'log', (e, level, message) ->
             logger.log level, (if multipleComponents then '[server] ' else '') + message
         server.start()
