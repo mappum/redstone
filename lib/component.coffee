@@ -6,9 +6,9 @@ class Component extends EventStack
         super()
 
         if @interface?
-            @peers = new Collection indexes: [{key: 'id', replace: true}]
-            @peers.connectors = new Collection indexes: [{key: 'id', replace: true}]
-            @peers.servers = new Collection indexes: [{key: 'id', replace: true}]
+            @peers = new Collection
+            @peers.connectors = new Collection
+            @peers.servers = new Collection
 
             # listen for connections from servers/connectors
             @interface.on 'connection', @connection
