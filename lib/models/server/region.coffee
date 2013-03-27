@@ -51,7 +51,8 @@ class Region extends Model
 
 		connectors = {}
 		for player in players
-			if not connectors[player.connector.id]?
+			connector = connectors[player.connector.id]
+			if not connector?
 				connector = connectors[player.connector.id] =
 					players: [player.id]
 					connector: player.connector
