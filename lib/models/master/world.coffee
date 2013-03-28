@@ -25,6 +25,9 @@ class World extends Model
     @regions = []
 
     @chunks.sort (a, b) ->
+      Math.floor(Math.random() * 3) - 1
+
+    @chunks.sort (a, b) ->
       diff = a.players - b.players
       if diff > 0 then return -1
       else if diff < 0 then return 1
