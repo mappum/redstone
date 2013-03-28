@@ -27,8 +27,14 @@ module.exports = ->
         chat: ''
         system: text.yellow
 
-    @on 'region:before', (e, region) ->
-        region.broadcast = (message) ->
+    @broadcast = (message) =>
+        @master.emit 'message', message
+
+    @on 'region:before', (e, region) =>
+        region.broadcast = (message) =>
+            @master.emit 'message', message
+
+        @master.on 'message', (message) ->
             region.send 0x3, {message: message}
             
     @on 'join:before', (e, player) ->
@@ -47,5 +53,6 @@ module.exports = ->
 
     @on 'message', (e, player, message) =>
         formatted = "<#{player.username}> #{message}"
-        player.region.send player.position, {radius: 128}, 0x3, {message: formatted}
+        player.region.send 0x3, {message: formatted}
+        @broadcast formatted
         @log 'chat', "[#{player.region.id}] #{formatted}"

@@ -11,6 +11,7 @@ class Master extends Component
         @use require '../lib/controllers/master/worlds'
         @use require '../lib/controllers/master/regions'
         @use require '../lib/controllers/master/players'
+        @use require '../lib/controllers/master/chat'
 
         @players = 0
         @on 'peer.server', (e, server, connection) =>
