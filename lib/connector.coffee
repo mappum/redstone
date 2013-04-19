@@ -33,7 +33,6 @@ class Connector extends Component
   playerConnect: (connection) =>
     connectionJson =
       username: connection.username
-      ip: connection.socket.remoteAddress
 
     # request server to forward player connection to
     @master.request 'connection', connectionJson, (server, player) =>

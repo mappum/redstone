@@ -42,7 +42,7 @@ class Component extends EventStack
 
       @peers.insert peer
       @peers[options.type+'s'].insert peer
-
+      
       @info "incoming connection from #{options.type}:#{peer.id}"
 
       res peer.id

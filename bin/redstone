@@ -71,46 +71,53 @@ winston.addColors colors
 
 Interface = require '../lib/interfaces/sock'
 
-# start components
+control = process.env.CONTROL or config.control
+
+startComponents = ->
+  if components.server
+    if cluster.isMaster and os.platform().indexOf('win') != 0
+      cpus = os.cpus().length
+      cluster.fork(CONTROL: control++) for i in [0...cpus]
+
+    else
+      logger.info 'Initializing server'
+      Server = require '../lib/server'
+      server = new Server config, new Interface().listen(control++), new Interface(config.master)
+      server.on 'log', (e, level, message) ->
+        logger.log level, (if multipleComponents then '[server] ' else '') + message
+      server.start()
+
+
+  if components.connector
+    if cluster.isMaster and os.platform().indexOf('win') != 0
+      cpus = os.cpus().length
+      cluster.fork() for i in [0...cpus]
+
+    else
+      logger.info 'Initializing connector'
+      Connector = require '../lib/connector'
+      connector = new Connector config, new Interface(config.master)
+      connector.on 'log', (e, level, message) ->
+        logger.log level, (if multipleComponents then '[connector] ' else '') + message
+      connector.start()
+
 if components.master
   logger.info 'Initializing master'
 
   Master = require '../lib/master'
 
-  master = new Master config, new Interface().listen(config.control)
+  c = control++
+  config.master = 'localhost:'+c
+
+  master = new Master config, new Interface().listen(c)
   master.on 'log', (e, level, message) ->
     logger.log level, (if multipleComponents then '[master] ' else '') + message
 
   master.start()
 
-if components.server
-
-  if cluster.isMaster and os.platform().indexOf('win') != 0
-    cpus = os.cpus().length
-    cluster.fork(CONTROL: config.control++) for i in [0...cpus]
-
-  else
-    logger.info 'Initializing server'
-    Server = require '../lib/server'
-    server = new Server config, new Interface().listen(process.env.CONTROL or config.control), new Interface(config.master)
-    server.on 'log', (e, level, message) ->
-      logger.log level, (if multipleComponents then '[server] ' else '') + message
-    server.start()
-
-
-if components.connector
-
-  if cluster.isMaster and os.platform().indexOf('win') != 0
-    cpus = os.cpus().length
-    cluster.fork() for i in [0...cpus]
-
-  else
-    logger.info 'Initializing connector'
-    Connector = require '../lib/connector'
-    connector = new Connector config, new Interface(config.master)
-    connector.on 'log', (e, level, message) ->
-      logger.log level, (if multipleComponents then '[connector] ' else '') + message
-    connector.start()
+  setTimeout startComponents, 2000
+else
+  startComponents()
 
 process.on 'uncaughtException', (err) ->
   logger.log 'error', err.stack
