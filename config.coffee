@@ -18,7 +18,7 @@ module.exports =
   saveInterval: 5 * 60 * 1000     # how often to save chunks inside the region
   chunkReloadInterval: 60 * 1000  # how often we should reload neighboring chunks
   chunkUnloadDelay: 2 * 60 * 1000 # how long a chunk should be inactive before unloading
-  chunkInterval: 10               # how long to wait in between sending chunks (to prevent locking up)
+  chunkInterval: 16               # how long to wait in between sending chunks (to prevent locking up)
 
   remapInterval: 10 * 60 * 1000
   remapDelay: 20 * 1000
@@ -26,8 +26,9 @@ module.exports =
   spawnDelay: 250
 
   connector:
-    'online-mode': false
-    encryption: false
+    'online-mode': true
+    encryption: true
     motd: 'Redstone test server'
+    'max-players': '0'
 
   database: 'mongodb://localhost/redstone'
