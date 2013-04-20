@@ -65,6 +65,7 @@ class Region extends Model
     @chunkList = []
     @chunkList.push chunk for chunk in @assignment if @assignment?
 
+    # TODO: maybe add all regions in range, rather than bordering neighbors
     neighbors = {}
     checkNeighbor = (x, z) =>
       regionId = @world.map[x]?[z]?.region

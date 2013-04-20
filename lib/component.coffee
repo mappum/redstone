@@ -5,13 +5,12 @@ class Component extends EventStack
   constructor: (@config, @interface) ->
     super()
 
-    if @interface?
-      @peers = new Collection
-      @peers.connectors = new Collection
-      @peers.servers = new Collection
+    @peers = new Collection
+    @peers.connectors = new Collection
+    @peers.servers = new Collection
 
-      # listen for connections from servers/connectors
-      @interface.on 'connection', @connection
+    # listen for connections from servers/connectors
+    @interface.on 'connection', @connection if @interface?
 
   log: (level, message) => @emit 'log', level, message
   debug: (message) => @log 'debug', message
@@ -42,7 +41,7 @@ class Component extends EventStack
 
       @peers.insert peer
       @peers[options.type+'s'].insert peer
-      
+
       @info "incoming connection from #{options.type}:#{peer.id}"
 
       res peer.id
@@ -55,6 +54,26 @@ class Component extends EventStack
         @peers[options.type+'s'].remove peer
 
         @info "#{options.type}:#{peer.id} disconnected"
-      
+
+  connect: (peer, cb) =>
+    server = @peers.servers.get peer.id
+    if typeof cb != 'function' then cb = ->
+
+    if not server?
+      server =
+        id: peer.id
+        connection: new (require "./interfaces/#{peer.interfaceType}")(peer.interfaceId)
+        interfaceId: peer.interfaceId
+        interfaceType: peer.interfaceType
+
+      @peers.insert server
+      @peers.servers.insert server
+      @emit 'connect', server
+      server.connection.request 'init',
+        type: @type
+        id: @id,
+        -> cb server
+
+    else cb server
 
 module.exports = Component

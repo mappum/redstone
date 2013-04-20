@@ -4,6 +4,7 @@ _ = require 'underscore'
 class Master extends Component
   constructor: (config, iface) ->
     super config, iface
+    @type = 'master'
 
   start: =>
     # load core modules

@@ -1,16 +1,15 @@
 Component = require './component'
 Collection = require './models/collection'
 Client = require './models/connector/client'
-Server = require './models/connector/server'
 mcnet = require 'minecraft-protocol'
 _ = require 'underscore'
 
 class Connector extends Component
   constructor: (config, @master) ->
     super config
+    @type = 'connector'
     
     @clients = new Collection [], indexes: ['username']
-    @servers = new Collection
 
     @stats = {}
 
@@ -36,7 +35,7 @@ class Connector extends Component
 
     # request server to forward player connection to
     @master.request 'connection', connectionJson, (server, player) =>
-      @connect server.id, server.interfaceType, server.interfaceId, (server) =>
+      @connect server, (server) =>
         player.server = server
         player.connection = connection
         client = new Client player
@@ -60,23 +59,6 @@ class Connector extends Component
       @stats = _.extend @stats, data
 
       @mcserver.playerCount = @stats.players
-
-  connect: (id, interfaceType, interfaceId, callback) =>
-    server = @servers.get id
-    if typeof callback != 'function' then callback = ->
-
-    if not server?
-      server = new Server
-        id: id
-        connection: new (require "./interfaces/#{interfaceType}")(interfaceId)
-        interfaceId: interfaceId
-        interfaceType: interfaceType
-
-      @servers.insert server
-      @emit 'connect', server
-      server.connect @id, -> callback server
-
-    else callback server
 
   getClient: (id) -> @clients.get id
 

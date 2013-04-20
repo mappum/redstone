@@ -4,6 +4,7 @@ os = require 'os'
 class Server extends Component
   constructor: (config, iface, @master) ->
     super config, iface
+    @type = 'server'
 
   start: =>
     # load core modules
