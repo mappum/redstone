@@ -6,8 +6,6 @@ module.exports = ->
   s = @
 
   handoff = (server, options) ->
-    # TODO: maybe we shouldn't be transporting the whole player object
-    # TODO: class instances don't transport
     @emit 'leave'
     @message "§aLeaving server:#{s.id}"
     @_send 'handoff', server, @toJson(), options
@@ -64,12 +62,12 @@ module.exports = ->
             players = region.players.grid[chunk.x][chunk.z].models
 
             for player in players
-              if player? 
+              if player?
                 player.handoff newServer,
                   handoff: transparent: true
                   storage: player.storage
 
-        region.updateChunkList()
+        region.update()
         region.emit 'remap'
 
       setTimeout remap, delay
