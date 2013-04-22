@@ -37,7 +37,7 @@ module.exports = ->
       chunkGrid = new GridCollection
 
       for chunk in region.chunkList
-        chunkGrid.set chunk.x, chunk.z, chunk
+        chunkGrid.set chunk, chunk.x, chunk.z
         newRegion = r.world.map[chunk.x]?[chunk.z]?.region
         if newRegion != r.regionId
           chunk.region = newRegion

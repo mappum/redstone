@@ -10,7 +10,7 @@ class GridCollection extends Model
     col = @cells[x] = {} if not col?
     col
 
-  set: (x, y, model) ->
+  set: (model, x, y) ->
     @getCol(x)[y] = model
 
   get: (x, y) ->

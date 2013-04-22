@@ -24,7 +24,7 @@ class MapCollection extends Collection
     cell = @grid.get x, z
     if not cell
       cell = new Collection @options
-      @grid.set x, z, cell
+      @grid.set cell, x, z
       cell.x = x
       cell.z = z
     return cell
