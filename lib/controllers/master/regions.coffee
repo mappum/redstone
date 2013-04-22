@@ -28,7 +28,7 @@ module.exports = (config) ->
 
       # world options
       #   id: the id of the world this region is in (a string)
-      #   map: a map of the assigned chunks
+      #   map: a GridCollection of the assigned chunks
       #   servers: an array of the servers hosting the regions in this world, ordered by the regionId they are assigned to
       #   persistent: whether or not this is a persistent world (and should be loaded from disk/saved to db/etc)
       #   meta: an object that contains the level type/dimension/etc. settings

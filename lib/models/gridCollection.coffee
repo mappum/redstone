@@ -2,8 +2,8 @@ Model = require './model'
 
 # a general class for storing things on a static 2d grid (1 model per cell)
 class GridCollection extends Model
-  constructor: ->
-    @cells = {}
+  constructor: (cells) ->
+    @cells = cells?.cells or cells or {}
 
   getCol: (x) ->
     col = @cells[x]

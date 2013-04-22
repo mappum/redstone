@@ -18,6 +18,8 @@ module.exports = ->
     region = @regions.get 'world.id', r.world.id
     options = options or {}
 
+    r.world.map = new GridCollection r.world.map
+
     delay = options.delay = options.start - Date.now() if options.start?
 
     if not region?
@@ -38,7 +40,7 @@ module.exports = ->
 
       for chunk in region.chunkList
         chunkGrid.set chunk, chunk.x, chunk.z
-        newRegion = r.world.map[chunk.x]?[chunk.z]?.region
+        newRegion = r.world.map.get(chunk.x, chunk.z)?.region
         if newRegion != r.regionId
           chunk.region = newRegion
           options.chunks.remove.push chunk
@@ -89,13 +91,14 @@ module.exports = ->
 
     player.on 'moveChunk:after', (e, x, z) =>
       world = player.region.world
+      chunk = world.map.get x, z
 
-      if not world.map[x]?[z]?
+      if not chunk?
         @debug "#{player.username}/#{player.id} moved to an unmapped chunk"
 
-      else if world.map[x]?[z]?.region != player.region.regionId
-        neighbor = world.servers[world.map[x][z].region]
-        @debug "handing off #{player.username}/#{player.id} to server:#{neighbor.id} (region #{world.map[x][z].region})"
+      else if chunk.region != player.region.regionId
+        neighbor = world.servers[chunk.region]
+        @debug "handing off #{player.username}/#{player.id} to server:#{neighbor.id} (region #{chunk.region})"
         player.handoff neighbor, {handoff: {transparent: true}, storage: player.storage}
 
     player.on 'toJson', (e, json) ->

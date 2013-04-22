@@ -1,6 +1,6 @@
 Model = require '../model'
-Player = require './player'
 MapCollection = require '../mapCollection'
+Player = require './player'
 _ = require 'underscore'
 
 class Region extends Model
@@ -60,7 +60,7 @@ class Region extends Model
 
     c.connector.connection.emit 'data', c.players, id, data for cId, c of connectors
 
-  # recalculates list of chunks, neighbors, etc
+  # recalculates list of chunks, neighbors, etc after a remap
   update: ->
     @chunkList = []
     @chunkList.push chunk for chunk in @assignment if @assignment?

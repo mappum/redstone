@@ -1,3 +1,4 @@
+GridCollection = require '../../models/gridCollection'
 ChunkCollection = require '../../models/server/chunkCollection'
 async = require 'async'
 
@@ -9,6 +10,7 @@ module.exports = (config) ->
       chunk.toPacket {x: x, z: z}, (err, packet) =>
         return @error err if err?
         @send 0x33, packet
+        @loadedChunks.set chunk.lastUpdate, x, z
 
   sendChunks = ->
     initial = not @settings?
@@ -27,12 +29,12 @@ module.exports = (config) ->
     tasks = []
     for x in [-viewDistance+@chunkX..viewDistance+@chunkX]
       for z in [-viewDistance+@chunkZ..viewDistance+@chunkZ]
-        lastUpdate = @loadedChunks[x]?[z]
-        chunk = @region.chunks.chunks[x]?[z]? and @region.chunks.chunks[x][z]
-        mappedChunk = @region.world.map[x]?[z]?
-        localChunk = mappedChunk and @region.world.map[x][z].region == @region.regionId
+        lastUpdate = @loadedChunks.get x, z
+        chunk = @region.chunks.chunks.get x, z
+        mappedChunk = @region.world.map.get x, z
+        localChunk = mappedChunk?.region == @region.regionId
 
-        old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk.lastUpdate)
+        old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk?.lastUpdate)
         oob = @region.world.static and not mappedChunk
 
         if old and not oob
@@ -43,10 +45,6 @@ module.exports = (config) ->
             do (x, z, chunk) =>
               tasks.push (cb) =>
                 @sendChunk x, z
-
-                col = @loadedChunks[x]
-                col = @loadedChunks[x] = {} if not col?
-                col[z] = chunk.lastUpdate
 
                 done = -> cb null, true
                 if chunkRate then setTimeout done, chunkRate
@@ -83,7 +81,7 @@ module.exports = (config) ->
     loadNeighborChunks = ->
       for x, col of region.chunks.chunks
         for z, chunk of col
-          if region.world.map[x]?[z]? and region.world.map[x]?[z]?.region != region.regionId
+          if region.world.map.get(x, z)?.region != region.regionId
             if Date.now() - chunk.lastServed >= (config.chunkUnloadDelay or 5 * 60 * 1000)
               region.chunks.unloadChunk x, z
             else
@@ -101,7 +99,7 @@ module.exports = (config) ->
     region.saveTimer = setInterval region.saveChunks, config.saveInterval or 60 * 1000
 
   @on 'join:before', (e, player, options) =>
-    player.loadedChunks = {} if not options.handoff?.transparent
+    player.loadedChunks = new GridCollection player.loadedChunks
     player.sendChunk = sendChunk.bind player
     player.sendChunks = sendChunks.bind player
 
@@ -113,9 +111,7 @@ module.exports = (config) ->
     player.on 'leave:before', ->
       now = Date.now()
       for chunk in player.region.chunkList
-        col = player.loadedChunks[chunk.x]
-        col = player.loadedChunks[chunk.x] = {} if not col?
-        col[chunk.z] = now
+        player.loadedChunks.set now, chunk.x, chunk.z
 
   @on 'update:after', (e, data, lastUpdate) =>
     for region, i in @regions.models
