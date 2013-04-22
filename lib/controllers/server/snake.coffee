@@ -8,6 +8,8 @@ MARGIN = 20
 module.exports = ->
   @on 'join:after', (e, player) =>
     player.on 'command.snake', (e) =>
+      player.enableKeys() if not player.keysEnabled
+      
       # TODO: use inventory controller function for item-giving
       player.send 0x67,
         windowId: 0
