@@ -1,12 +1,13 @@
 Model = require '../model'
 Collection = require '../collection'
+GridCollection = require '../gridCollection'
 _ = require 'underscore'
 
 class World extends Model
   constructor: (options) ->
     _.extend @, options
 
-    @map = {}
+    @map = new GridCollection
     @chunks = []
 
     # TODO: figure out which chunks to map initially
@@ -52,11 +53,10 @@ class World extends Model
     # TODO: balance regions
 
   getChunk: (x, z) ->
-    col = @map[x]
-    col = @map[x] = {} if not col?
-    chunk = col[z]
+    chunk = @map.get x, z
     if not chunk?
-      chunk = col[z] = {x: x, z: z, players: 0}
+      chunk = {x: x, z: z, players: 0}
+      @map.set chunk, x, z
       @chunks.push chunk
     chunk
 
