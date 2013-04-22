@@ -72,6 +72,10 @@ module.exports = ->
         # recalculate who our neighbors are and reset some stuff
         region.update()
         
+        # connect to new neighbors
+        # TODO: disconnect from neighbors when not needed
+        @connect neighbor for neighbor in region.neighbors
+
         region.emit 'remap'
 
       setTimeout remap, delay
