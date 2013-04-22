@@ -34,7 +34,7 @@ module.exports = (config) ->
         mappedChunk = @region.world.map.get x, z
         localChunk = mappedChunk?.region == @region.regionId
 
-        old = lastUpdate != true and (not lastUpdate or lastUpdate < chunk?.lastUpdate)
+        old = not lastUpdate or lastUpdate < chunk?.lastUpdate
         oob = @region.world.static and not mappedChunk
 
         if old and not oob
