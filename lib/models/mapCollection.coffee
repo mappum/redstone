@@ -1,4 +1,5 @@
 Collection = require './collection'
+GridCollection = require './gridCollection'
 
 class MapCollection extends Collection
   constructor: (models, options) ->
@@ -11,7 +12,7 @@ class MapCollection extends Collection
     @options = options or {}
     @cellSize = @options.cellSize or 32
     @positionKey = @options.positionKey or 'position'
-    @grid = {}
+    @grid = new GridCollection
     @cellMap = {}
 
     @onMove = @onMove.bind @
@@ -20,11 +21,10 @@ class MapCollection extends Collection
     position = model[@positionKey]
     x = Math.floor position.x / @cellSize
     z = Math.floor position.z / @cellSize
-    col = @grid[x]
-    col = @grid[x] = [] if not col
-    cell = col[z]
+    cell = @grid.get x, z
     if not cell
-      cell = col[z] = new Collection @options
+      cell = new Collection @options
+      @grid.set x, z, cell
       cell.x = x
       cell.z = z
     return cell
@@ -63,8 +63,8 @@ class MapCollection extends Collection
     for i in [x-range..x+range]
       for j in [z-range..z+range]
         # TODO: check if models are in radius?
-        cell = @grid[i]?[j]
-        cells.push cell.models if cell
+        cell = @grid.get i, j
+        cells.push cell.models if cell?
     return Array::concat.apply [], cells
 
 module.exports = MapCollection
