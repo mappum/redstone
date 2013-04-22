@@ -1,4 +1,5 @@
 Model = require '../model'
+GridCollection = require '../gridCollection'
 Chunk = require './chunk'
 
 class ChunkCollection extends Model
@@ -6,16 +7,15 @@ class ChunkCollection extends Model
     @storage = options?.storage
     @generator = options?.generator
 
-    @chunks = {}
+    @chunks = new GridCollection
 
   getChunk: (x, z, cb) ->
     cb = cb or ->
-    col = @chunks[x]
-    col = @chunks[x] = {} if not col?
-    chunk = col[z]
+    chunk = @chunks.get x, z
 
     if not chunk
-      chunk = col[z] = new Chunk
+      chunk = new Chunk
+      @chunks.set chunk, x, z
 
       generate = => @generateChunk x, z, cb
 
@@ -27,9 +27,7 @@ class ChunkCollection extends Model
       cb null, chunk
 
   setChunk: (chunk, x, z) ->
-    col = @chunks[x]
-    col = @chunks[x] = {} if not col?
-    col[z] = chunk
+    @chunks.set chunk, x, z
 
   generateChunk: (x, z, cb) ->
     cb = cb or ->
@@ -58,8 +56,6 @@ class ChunkCollection extends Model
       @storage.set chunk, x, z, cb
 
   unloadChunk: (x, z) ->
-    col = @chunks[x]
-    col = @chunks[x] = {} if not col?
-    delete col[z]
+    @chunks.remove x, z
 
 module.exports = ChunkCollection
