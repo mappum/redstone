@@ -1,5 +1,6 @@
 Region = require '../../models/server/region'
 Collection = require '../../models/collection'
+GridCollection = require '../../models/gridCollection'
 _ = require 'underscore'
 
 module.exports = ->
@@ -27,35 +28,36 @@ module.exports = ->
       region.start()
 
     else
+      # calculate diff of chunks inside region
       options.chunks =
         add: []
         remove: []
         keep: []
 
-      chunkGrid = {}
+      chunkGrid = new GridCollection
 
       for chunk in region.chunkList
-        col = chunkGrid[chunk.x]
-        col = chunkGrid[chunk.x] = {} if not col?
-        col[chunk.z] = chunk
-
+        chunkGrid.set chunk.x, chunk.z, chunk
         newRegion = r.world.map[chunk.x]?[chunk.z]?.region
         if newRegion != r.regionId
           chunk.region = newRegion
           options.chunks.remove.push chunk
         else
           options.chunks.keep.push chunk
-
       for chunk in r.assignment
-        options.chunks.add.push chunk if not chunkGrid[chunk.x]?[chunk.z]?
+        options.chunks.add.push chunk if not chunkGrid.get(chunk.x, chunk.z)?
 
+      # do stuff that needs to happen before actual remap (e.g. saving/loading)
       @info "preparing to remap region #{region.id}"
       region.emit 'preRemap', r, options
 
+      # make the remap active
       remap = =>
         @info "remapping region #{region.id}"
         _.extend region, r
 
+        # in chunks that we aren't handling anymore,
+        # handoff the players to their new server
         for chunk in options.chunks.remove
           if chunk.players
             newServer = region.world.servers[chunk.region]
@@ -67,7 +69,9 @@ module.exports = ->
                   handoff: transparent: true
                   storage: player.storage
 
+        # recalculate who our neighbors are and reset some stuff
         region.update()
+        
         region.emit 'remap'
 
       setTimeout remap, delay
