@@ -62,7 +62,7 @@ class Component extends EventStack
     else if typeof cb != 'function' then cb = ->
     if typeof type != 'string' then type = p.type or 'server'
 
-    peer = @peers[type+'s'].get p.id
+    peer = @peers.get p.id
 
     if not peer?
       peer =

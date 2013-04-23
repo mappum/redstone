@@ -80,6 +80,6 @@ class Region extends Model
 
     @neighbors = []
     for regionId of neighbors
-      @neighbors.push @world.servers[regionId]
+      @neighbors.push _.clone @world.servers[regionId]
 
 module.exports = Region
