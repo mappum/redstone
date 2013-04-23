@@ -25,6 +25,7 @@ module.exports = ->
             packet.y,
             (packet.z + if packet.z < 0 then 1 else 0) % 16 + if packet.z < 0 then 15 else 0
 
+          # TODO: set players' chunk load time to chunk.lastUpdate
           player.region.send player.position, 0x35,
             x: packet.x
             y: packet.y
@@ -52,6 +53,7 @@ module.exports = ->
         chunk.setBlock packet.heldItem.id, chunkCoords.x, chunkCoords.y, chunkCoords.z
         chunk.setField 'meta', packet.heldItem.itemDamage, chunkCoords.x, chunkCoords.y, chunkCoords.z
 
+        # TODO: set players' chunk load time to chunk.lastUpdate
         player.region.send player.position, 0x35,
           x: coords.x
           y: coords.y
