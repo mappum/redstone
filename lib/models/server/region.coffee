@@ -68,7 +68,7 @@ class Region extends Model
     # TODO: maybe add all regions in range, rather than bordering neighbors
     neighbors = {}
     checkNeighbor = (x, z) =>
-      regionId = @world.map[x]?[z]?.region
+      regionId = @world.map.get(x, z)?.region
       if regionId? and regionId != @regionId and not neighbors[regionId]?
         neighbors[regionId] = true
 

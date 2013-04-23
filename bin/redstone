@@ -96,7 +96,7 @@ startComponents = ->
     else
       logger.info 'Initializing connector'
       Connector = require '../lib/connector'
-      connector = new Connector config, new Interface(config.master)
+      connector = new Connector config, new Interface().listen(control++), new Interface(config.master)
       connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ' else '') + message
       connector.start()

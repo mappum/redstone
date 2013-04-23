@@ -10,7 +10,7 @@ class Component extends EventStack
     @peers.servers = new Collection
 
     # listen for connections from servers/connectors
-    @interface.on 'connection', @connection if @interface?
+    @interface.on 'connection', @connection
 
   log: (level, message) => @emit 'log', level, message
   debug: (message) => @log 'debug', message
@@ -55,25 +55,37 @@ class Component extends EventStack
 
         @info "#{options.type}:#{peer.id} disconnected"
 
-  connect: (peer, cb) =>
-    server = @peers.servers.get peer.id
-    if typeof cb != 'function' then cb = ->
+  connect: (p, type, cb) =>
+    if typeof type == 'function'
+      cb = type
+      type = null
+    else if typeof cb != 'function' then cb = ->
+    if typeof type != 'string' then type = p.type or 'server'
 
-    if not server?
-      server =
-        id: peer.id
-        connection: new (require "./interfaces/#{peer.interfaceType}")(peer.interfaceId)
-        interfaceId: peer.interfaceId
-        interfaceType: peer.interfaceType
+    peer = @peers[type+'s'].get p.id
 
-      @peers.insert server
-      @peers.servers.insert server
-      @emit 'connect', server
-      server.connection.request 'init',
+    if not peer?
+      peer =
+        id: p.id
+        connection: new (require "./interfaces/#{p.interfaceType}")(p.interfaceId)
+        interfaceId: p.interfaceId
+        interfaceType: p.interfaceType
+
+      peer.connection.request 'init',
         type: @type
-        id: @id,
-        -> cb server
+        id: @id
+        interfaceType: @interface.type
+        port: @interface.port,
+        =>
+          @peers.insert peer
+          @peers[type+'s'].insert peer
+          @emit 'connect', peer
+          @emit 'connect.'+type, peer
+          @emit 'peer', peer, peer.connection
+          @emit 'peer.'+type, peer, peer.connection
 
-    else cb server
+          cb peer
+
+    else cb peer
 
 module.exports = Component

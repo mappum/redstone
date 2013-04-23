@@ -73,10 +73,6 @@ module.exports = ->
 
         # recalculate who our neighbors are and reset some stuff
         region.update()
-        
-        # connect to new neighbors
-        # TODO: disconnect from neighbors when not needed
-        @connect neighbor for neighbor in region.neighbors
 
         region.emit 'remap'
 
@@ -85,6 +81,7 @@ module.exports = ->
   @on 'join:before', (e, player) =>
     region = player.region = @regions.get 'world.id', player.storage.world
     region.players.insert player
+
     @debug "#{player.username} added to region:#{region.id}"
 
     player.handoff = handoff.bind player

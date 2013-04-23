@@ -5,8 +5,8 @@ mcnet = require 'minecraft-protocol'
 _ = require 'underscore'
 
 class Connector extends Component
-  constructor: (config, @master) ->
-    super config
+  constructor: (config, iface, @master) ->
+    super config, iface
     @type = 'connector'
     
     @clients = new Collection [], indexes: ['username']

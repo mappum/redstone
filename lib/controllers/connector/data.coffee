@@ -5,7 +5,7 @@ convertSlot = (slot) ->
 
 module.exports = ->
 
-  @on 'connect', (e, server) =>
+  @on 'peer.server', (e, server) =>
 
     server.connection.on 'data', @getClients (clients, id, data) =>
       packet = protocol.get id, false
