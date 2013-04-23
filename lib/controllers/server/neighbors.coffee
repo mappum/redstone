@@ -1,0 +1,59 @@
+_ = require 'underscore'
+MapCollection = require '../../models/mapCollection'
+Player = require '../../models/server/player'
+
+module.exports = ->
+
+  connectNeighbors = (region) =>
+    # TODO: disconnect from neighbors when not needed
+    for neighbor in region.neighbors
+      do (neighbor) =>
+        if neighbor.id > @id and not neighbor.connection?
+          @connect neighbor, (server) =>
+            neighbor.connection = server.connection
+
+  @on 'region:after', (e, region, options) =>
+    region.globalPlayers = new MapCollection
+      indexes: [{key: 'username', replace: true}]
+      cellSize: 16
+
+    broadcastPlayer = (player, connector) ->
+      p = _.pick player, 'username', 'position', 'id'
+      p.connector = _.omit player.connector, 'connection' if connector
+      for neighbor in region.neighbors
+        neighbor.connection.emit 'player', region.world.id, p
+
+    connectNeighbors region
+
+    region.players.on 'insert:after', (e, player) =>
+      broadcastPlayer player, true
+
+      setInterval ->
+        broadcastPlayer player
+      , 5000
+
+    region.on 'remap:after', (e) =>
+      connectNeighbors region
+      broadcastPlayer player, true for player in region.players.models
+
+  @on 'peer.server', (e, server, connection) =>
+    for region in @regions.models
+      for neighbor in region.neighbors
+        if neighbor.id == server.id
+          neighbor.connection = connection
+          break
+
+    connection.on 'player', (regionId, p) =>
+      region = @regions.get 'world.id', regionId
+      player = region.globalPlayers.get p.id
+
+      if not player?
+        @connect p.connector, (connector) =>
+          player = new Player p
+          player.connector = connector
+
+          region.globalPlayers.insert player
+
+      else if not region.players.get p.id
+        _.extend player, p
+        player.emit 'move'

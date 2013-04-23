@@ -25,6 +25,7 @@ class Server extends Component
     @use require '../lib/controllers/server/playerList'
     @use require '../lib/controllers/server/motd'
     @use require '../lib/controllers/server/playerSettings'
+    @use require '../lib/controllers/server/neighbors'
 
     # register with master
     @master.request 'init',
