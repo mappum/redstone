@@ -18,12 +18,12 @@ module.exports =
   saveInterval: 5 * 60 * 1000     # how often to save chunks inside the region
   chunkReloadInterval: 60 * 1000  # how often we should reload neighboring chunks
   chunkUnloadDelay: 2 * 60 * 1000 # how long a chunk should be inactive before unloading
-  chunkInterval: 16               # how long to wait in between sending chunks (to prevent locking up)
+  chunkInterval: 10               # how long to wait in between sending chunks (to prevent locking up)
 
   remapInterval: 10 * 60 * 1000
   remapDelay: 20 * 1000
 
-  spawnDelay: 250
+  readyDelay: 250
 
   connector:
     'online-mode': true

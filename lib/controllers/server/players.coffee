@@ -4,7 +4,7 @@ _ = require 'underscore'
 
 PLAYER_ENTITY_PREFIX = 1 << 28
 
-module.exports = ->
+module.exports = (config) ->
   @players = new Collection [], indexes: ['username']
 
   getPlayer = (fn) =>
@@ -46,12 +46,15 @@ module.exports = ->
     if not player.entityId?
       player.entityId = PLAYER_ENTITY_PREFIX | Math.floor Math.random() * 0xfffffff
 
-    onReady = ->
+    readyStart = Date.now()
+    ready = ->
       player.emit 'ready'
+    onReady = ->
       player.off 0xa, onReady
       player.off 0xb, onReady
       player.off 0xc, onReady
       player.off 0xd, onReady
+      setTimeout ready, (readyStart + (config.readyDelay or 0)) - Date.now()
     player.on 0xa, onReady
     player.on 0xb, onReady
     player.on 0xc, onReady
