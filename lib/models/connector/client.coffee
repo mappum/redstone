@@ -29,7 +29,7 @@ class Client extends Model
   sendServer: =>
     args = Array::slice.call arguments, 0
     args.splice 1, 0, @id
-    @server.connection.emit.apply @server, args
+    @server.connection.emit.apply @server.connection, args
 
   toJson: =>
     _.omit @, 'server', 'connection', 'stacks', _.functions(@)

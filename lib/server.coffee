@@ -2,11 +2,11 @@ Component = require './component'
 os = require 'os'
 
 class Server extends Component
-  constructor: (config, iface, @master) ->
-    super config, iface
+  constructor: (config, control, master) ->
     @type = 'server'
+    super config, control, master
 
-  start: =>
+  start: ->
     # load core modules
     @use require '../lib/controllers/server/players'
     @use require '../lib/controllers/server/playerStorage'
@@ -27,12 +27,7 @@ class Server extends Component
     @use require '../lib/controllers/server/playerSettings'
     #@use require '../lib/controllers/server/neighbors'
 
-    # register with master
-    @master.request 'init',
-      type: 'server'
-      interfaceType: @interface.type
-      port: @interface.port or @interface,
-      (@id) =>
+    super()
 
     lastUpdate = 0
     updateMaster = =>

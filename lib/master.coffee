@@ -3,10 +3,10 @@ _ = require 'underscore'
 
 class Master extends Component
   constructor: (config, iface) ->
-    super config, iface
     @type = 'master'
+    super config, iface
 
-  start: =>
+  start: ->
     # load core modules
     @use require '../lib/controllers/master/db'
     @use require '../lib/controllers/master/worlds'

@@ -40,5 +40,5 @@ module.exports = ->
           @db.insert 'players', player, (err) => @error err if err
 
     @on 'peer.connector', (e, connector, connection) =>
-      connection.respond 'connection', (res, player) =>
+      connection.respond 'join', (res, player) =>
         @emit 'join', player, res

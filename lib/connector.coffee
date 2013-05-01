@@ -5,15 +5,15 @@ mcnet = require 'minecraft-protocol'
 _ = require 'underscore'
 
 class Connector extends Component
-  constructor: (config, iface, @master) ->
-    super config, iface
+  constructor: (config, port, master) ->
     @type = 'connector'
+    super config, port, master
     
     @clients = new Collection [], indexes: ['username']
 
     @stats = {}
 
-  start: =>
+  start: ->
     # load core modules
     @use require '../lib/controllers/connector/data'
     @use require '../lib/controllers/connector/handoff'
@@ -21,20 +21,24 @@ class Connector extends Component
     # listen for client connections
     @mcserver = mcnet.createServer @config.connector
     @mcserver.on 'error', @error
-    @mcserver.on 'login', @playerConnect
+    @mcserver.on 'login', @onPlayerConnect
     @mcserver.on 'listening', =>
       @info "listening for Minecraft connections on port #{@config.connector.port or 25565}"
       @emit 'listening'
+    
+    # listen for master updates
+    @master.on 'update', (data) =>
+      @stats = _.extend @stats, data
+      @mcserver.playerCount = @stats.players
 
-    # register with master
-    @master.request 'init', type: 'connector', (@id) =>
+    super()
 
-  playerConnect: (connection) =>
+  onPlayerConnect: (connection) =>
     connectionJson =
       username: connection.username
 
     # request server to forward player connection to
-    @master.request 'connection', connectionJson, (server, player) =>
+    @master.request 'join', connectionJson, (server, player) =>
       @connect server, (server) =>
         player.server = server
         player.connection = connection
@@ -54,11 +58,6 @@ class Connector extends Component
 
         @emit 'join', client
         client.start()
-
-    @master.on 'update', (data) =>
-      @stats = _.extend @stats, data
-
-      @mcserver.playerCount = @stats.players
 
   getClient: (id) -> @clients.get id
 

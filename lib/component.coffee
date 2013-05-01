@@ -1,16 +1,21 @@
+sock = require 'sock'
 EventStack = require './eventstack'
 Collection = require './models/collection'
 
 class Component extends EventStack
-  constructor: (@config, @interface) ->
+  constructor: (@config, control, master) ->
     super()
 
     @peers = new Collection
     @peers.connectors = new Collection
     @peers.servers = new Collection
 
-    # listen for connections from servers/connectors
-    @interface.on 'connection', @connection
+    # listen for control connections from peers
+    @control = sock.listen control
+    @control.on 'connection', @onConnection
+
+    #if a master is specified, connect to it
+    @master = sock.connect master if master?
 
   log: (level, message) => @emit 'log', level, message
   debug: (message) => @log 'debug', message
@@ -24,26 +29,28 @@ class Component extends EventStack
     if typeof module == 'function' then module.apply @, args
     else if Array.isArray module then m.apply @, args for m in module
 
-  connection: (connection) =>
+  start: ->
+    # tell the master we are ready
+    @master.request 'init',
+      type: @type
+      port: @control.port,
+      (@id) =>
+        @emit 'ready'
+
+  onConnection: (connection) =>
+    # when a peer connects, wait for a 'init' request
     connection.respond 'init', (res, options) =>
       peer = options or {}
       peer.connection = connection
+      peer.address = "#{connection.remoteAddress}:#{peer.port}"
 
-      if peer.interfaceType?
-        if peer.interfaceType == 'sock'
-          address = peer.connection.sock.socket.remoteAddress
-          peer.interfaceId = "#{address}:#{peer.port}"
-        else if peer.interfaceType == 'websocket'
-          address = peer.connection.socket.handshake.address
-          peer.interfaceId = "#{address.address}:#{peer.port}"
-        else if peer.interfaceType == 'direct'
-          peer.interfaceId = peer.port
-
+      # add peer to collections
       @peers.insert peer
       @peers[options.type+'s'].insert peer
 
-      @info "incoming connection from #{options.type}:#{peer.id}"
+      @info "incoming connection from #{options.type}:#{peer.id} (#{peer.address})"
 
+      # answer peer with its id
       res peer.id
 
       @emit 'peer', peer, connection
@@ -55,37 +62,33 @@ class Component extends EventStack
 
         @info "#{options.type}:#{peer.id} disconnected"
 
-  connect: (p, type, cb) =>
-    if typeof type == 'function'
-      cb = type
-      type = null
-    else if typeof cb != 'function' then cb = ->
-    if typeof type != 'string' then type = p.type or 'server'
+  # connect to a peer (not master), or get the connection if already connected
+  connect: (p, cb) ->
+    if typeof cb != 'function' then cb = ->
 
     peer = @peers.get p.id
 
+    # not connected, make a new connection
     if not peer?
-      peer =
-        id: p.id
-        connection: new (require "./interfaces/#{p.interfaceType}")(p.interfaceId)
-        interfaceId: p.interfaceId
-        interfaceType: p.interfaceType
+      peer = p
+      peer.connection = sock.connect peer.address
 
+      # make an 'init' request so peer will handle connection
       peer.connection.request 'init',
         type: @type
         id: @id
-        interfaceType: @interface.type
-        port: @interface.port,
+        port: @control.port,
         =>
           @peers.insert peer
-          @peers[type+'s'].insert peer
+          @peers[p.type+'s'].insert peer
           @emit 'connect', peer
-          @emit 'connect.'+type, peer
+          @emit 'connect.'+p.type, peer
           @emit 'peer', peer, peer.connection
-          @emit 'peer.'+type, peer, peer.connection
+          @emit 'peer.'+p.type, peer, peer.connection
 
           cb peer
 
+    # already connected, return the connection
     else cb peer
 
 module.exports = Component

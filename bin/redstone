@@ -69,8 +69,6 @@ transports.push new winston.transports.Console
 logger = new winston.Logger transports: transports, levels: levels
 winston.addColors colors
 
-Interface = require '../lib/interfaces/sock'
-
 control = process.env.CONTROL or config.control
 
 startComponents = ->
@@ -82,7 +80,7 @@ startComponents = ->
     else
       logger.info 'Initializing server'
       Server = require '../lib/server'
-      server = new Server config, new Interface().listen(control++), new Interface(config.master)
+      server = new Server config, control++, config.master
       server.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[server] ' else '') + message
       server.start()
@@ -91,12 +89,12 @@ startComponents = ->
   if components.connector
     if cluster.isMaster and os.platform().indexOf('win') != 0
       cpus = os.cpus().length
-      cluster.fork() for i in [0...cpus]
+      cluster.fork(CONTROL: control++) for i in [0...cpus]
 
     else
       logger.info 'Initializing connector'
       Connector = require '../lib/connector'
-      connector = new Connector config, new Interface().listen(control++), new Interface(config.master)
+      connector = new Connector config, control++, config.master
       connector.on 'log', (e, level, message) ->
         logger.log level, (if multipleComponents then '[connector] ' else '') + message
       connector.start()
@@ -109,7 +107,7 @@ if components.master
   c = control++
   config.master = 'localhost:'+c
 
-  master = new Master config, new Interface().listen(c)
+  master = new Master config, c
   master.on 'log', (e, level, message) ->
     logger.log level, (if multipleComponents then '[master] ' else '') + message
 

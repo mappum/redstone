@@ -10,7 +10,7 @@ module.exports = (config) ->
 
     world.servers = []
     for server in @peers.servers.models
-      world.servers.push _.pick server, 'id', 'interfaceType', 'interfaceId'
+      world.servers.push _.pick(server, 'id', 'address', 'type')
 
     options = {}
     remapDelay = if config.remapDelay? then config.remapDelay else 10 * 1000
