@@ -26,7 +26,8 @@ module.exports = (config) ->
 
     now = Date.now()
 
-    tasks = []
+    # get list of in-range, unsent chunks
+    chunks = []
     for x in [-viewDistance+@chunkX..viewDistance+@chunkX]
       for z in [-viewDistance+@chunkZ..viewDistance+@chunkZ]
         lastUpdate = @loadedChunks.get x, z
@@ -42,14 +43,23 @@ module.exports = (config) ->
           if d < viewDistance
             @region.chunkList.push {x: x, z: z} if not mappedChunk
             chunk.lastServed = now if chunk
-            do (x, z, chunk) =>
-              tasks.push (cb) =>
-                @sendChunk x, z
+            chunks.push x: x, z: z, d: d
 
-                done = -> cb null, true
-                if chunkRate then setTimeout done, chunkRate
-                else done()
+    # sort chunks by distance
+    chunks.sort (a, b) ->
+      if a.d < b.d then -1
+      else 1
 
+    # send chunks
+    tasks = []
+    for chunk in chunks
+      do (chunk) =>
+        tasks.push (cb) =>
+          @sendChunk chunk.x, chunk.z
+
+          done = -> cb null, true
+          if chunkRate then setTimeout done, chunkRate
+          else done()
     async.series tasks
 
   saveChunks = ->
