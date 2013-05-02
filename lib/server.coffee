@@ -1,5 +1,4 @@
 Component = require './component'
-os = require 'os'
 
 class Server extends Component
   constructor: (config, control, master) ->
@@ -28,21 +27,5 @@ class Server extends Component
     #@use require '../lib/controllers/server/neighbors'
 
     super()
-
-    lastUpdate = 0
-    updateMaster = =>
-      data = 
-        loadavg: os.loadavg()
-        uptime: os.uptime()
-        totalmem: os.totalmem()
-        freemem: os.freemem()
-        cpus: os.cpus().length
-      @emit 'update', data, lastUpdate
-      @master.emit 'update', data
-      @debug 'sending stats to master'
-      lastUpdate = Date.now()
-
-    updateMaster()
-    @updateMasterInterval = setInterval updateMaster, 10 * 1000
 
 module.exports = Server

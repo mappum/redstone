@@ -1,3 +1,4 @@
+os = require 'os'
 sock = require 'sock'
 EventStack = require './eventstack'
 Collection = require './models/collection'
@@ -36,6 +37,22 @@ class Component extends EventStack
       port: @control.port,
       (@id) =>
         @emit 'ready'
+
+    # send stats to master periodically
+    lastUpdate = 0
+    updateMaster = =>
+      data = 
+        loadavg: os.loadavg()
+        uptime: os.uptime()
+        totalmem: os.totalmem()
+        freemem: os.freemem()
+        cpus: os.cpus().length
+      @emit 'update', data, lastUpdate
+      @master.emit 'update', data
+      lastUpdate = Date.now()
+
+    updateMaster()
+    @updateMasterInterval = setInterval updateMaster, 10 * 1000
 
   onConnection: (connection) =>
     # when a peer connects, wait for a 'init' request
