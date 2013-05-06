@@ -8,9 +8,13 @@ module.exports = ->
     # TODO: disconnect from neighbors when not needed
     for neighbor in region.neighbors
       do (neighbor) =>
-        if neighbor.id > @id and not neighbor.connection?
+        connect = =>
           @connect neighbor, (server) =>
             neighbor.connection = server.connection
+
+        if neighbor.id > @id and not neighbor.connection?
+          setTimeout connect, 2000
+        else connect()
 
   @on 'region:after', (e, region, options) =>
     region.globalPlayers = new MapCollection
@@ -21,7 +25,8 @@ module.exports = ->
       p = _.pick player, 'username', 'position', 'id'
       p.connector = _.omit player.connector, 'connection' if connector
       for neighbor in region.neighbors
-        neighbor.connection.emit 'player', region.world.id, p
+        if neighbor.connection?
+          neighbor.connection.emit 'player', region.world.id, p
 
     connectNeighbors region
 
