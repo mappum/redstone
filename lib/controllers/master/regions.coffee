@@ -54,6 +54,8 @@ module.exports = (config) ->
     resetTimer()
     remapTimeout = null
 
+  @on 'peer.server:before', (e, server, connection) =>
+    server.regions = []
   @on 'peer.server:after', (e, server, connection) =>
     remapTimeout = setTimeout remap, 2000 if not remapTimeout?
     connection.on 'disconnect', remap

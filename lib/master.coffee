@@ -16,14 +16,14 @@ class Master extends Component
     @use require '../lib/controllers/master/web'
 
     @players = 0
-    @on 'peer.server', (e, server, connection) =>
-      server.stats = {}
-      server.regions = []
+    @on 'peer', (e, peer, connection) =>
+      peer.stats = {}
 
       connection.on 'update', (data) =>
-        server.stats = _.extend server.stats, data
-        @debug "got update from server:#{server.id}"
-        @emit 'peer.server.update', server, server.stats
+        peer.stats = _.extend peer.stats, data
+        @debug "got update from #{peer.type}:#{peer.id}"
+        @emit "peer.update", peer, peer.stats
+        @emit "peer.#{peer.type}.update", peer, peer.stats
 
     @connectorUpdateTimer = setInterval @updateConnectors, 10 * 1000
 
