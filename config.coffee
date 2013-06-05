@@ -12,7 +12,6 @@ module.exports =
   worlds: [
     id: 'main'
     persistent: true
-    time: 5000
   ]
 
   saveInterval: 5 * 60 * 1000     # how often to save chunks inside the region
