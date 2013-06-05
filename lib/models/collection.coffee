@@ -94,7 +94,7 @@ class Collection extends Model
       else
         @removeModel models
 
-      models
+      return models
 
   removeModel: (model) ->
     remove @models, model
@@ -109,6 +109,7 @@ class Collection extends Model
       else delete index.models[value]
 
     @emit 'remove', model
+    return model
 
   createIndex: (index) ->
     if typeof index == 'string' then index = {key: index}

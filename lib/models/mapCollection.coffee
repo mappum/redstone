@@ -49,7 +49,7 @@ class MapCollection extends Collection
     model.on 'move:after', @onMove
 
   remove: (model) ->
-    super model
+    model = super model
     @cellMap[model.id].remove model
     delete @cellMap[model.id]
     model.off 'move:after', @onMove
