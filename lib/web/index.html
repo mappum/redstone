@@ -18,38 +18,72 @@
 <body>
   <h1>Redstone Control Panel</h1>
   <hr>
-  <div id="map">
+  <div id="worlds">
     <h2>Worlds<h2>
+  </div>
+  <hr>
+  <div id="servers">
+    <h2>Servers<h2>
   </div>
   <hr>
   <script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
   <script>
+    // TODO: use some sort of rendering/templating system to make this cleaner
     $(function() {
       $.get('/worlds', function(worlds) {
-        var world = worlds[0];
-        $('#map').append($('<h3>').text(world.id));
+        for(var i = 0; i < worlds.length; i++) {
+          var world = worlds[i];
+          var div = $('<div>');
+          div.append($('<h3>').text(world.id));
 
-        var table = $('<table>');
-        for(var y = world.map.minY; y <= world.map.maxY; y++) {
-          var row = $('<tr>');
+          var table = $('<table>');
+          for(var y = world.map.minY; y <= world.map.maxY; y++) {
+            var row = $('<tr>');
 
-          for(var x = world.map.minX; x < world.map.maxX; x++) {
-            var cell = $('<td>');
-            var col = world.map.cells[x];
-            if(col) {
-              var chunk = col[y];
-              if(chunk) {
-                cell.addClass('solid');
-                cell.text(chunk.region);
+            for(var x = world.map.minX; x < world.map.maxX; x++) {
+              var cell = $('<td>');
+              var col = world.map.cells[x];
+              if(col) {
+                var chunk = col[y];
+                if(chunk) {
+                  cell.addClass('solid');
+                  cell.text(chunk.region);
+                }
+                row.append(cell);
               }
-              row.append(cell);
             }
+
+            table.append(row);
           }
 
-          table.append(row);
+          div.append(table);
+          $('#worlds').append(div);
         }
+      });
 
-        $('#map').append(table);
+      $.get('/servers', function(servers) {
+        for(var i = 0; i < servers.length; i++) {
+          var server = servers[i];
+          var div = $('<div>');
+
+          var stats = server.stats;
+          var usedMemory = Math.round((stats.totalmem - stats.freemem) / 1000000);
+          var totalMemory = Math.round(stats.totalmem / 1000000);
+          var memoryPercentage = Math.round((usedMemory / totalMemory) * 1000) / 10;
+
+          div.append($('<h3>').text(server.type + ':' + server.id));
+          div.append($('<p>')
+            .append($('<strong>').text('Memory: '))
+            .append($('<span>').text(usedMemory + ' / ' + totalMemory + ' MB (' +
+              memoryPercentage + '%)'))
+            .append($('<br>'))
+
+            .append($('<strong>').text('CPU: '))
+            .append($('<span>').text(stats.loadavg[0] + '% (1m), ' + stats.loadavg[1] + '% (5m), ' + stats.loadavg[2] + '% (15m)'))
+            .append($('<br>'))
+          );
+          $('#servers').append(div);
+        }
       });
     });
   </script>
