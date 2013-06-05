@@ -18,7 +18,8 @@
     "underscore": "1.4.3",
     "mongodb": "1.2.x",
     "async": "0.2.x",
-    "sock": ">=0.0.6",
-    "aws-sdk": "0.9.x"
+    "sock": "0.0.6",
+    "aws-sdk": "0.9.x",
+    "express": "3.2.6"
   }
 }

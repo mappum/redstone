@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+  <title>Redstone Control Panel</title>
+  <style>
+    td {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .solid {
+      background: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>Redstone Control Panel</h1>
+  <hr>
+  <div id="map">
+    <h2>Worlds<h2>
+  </div>
+  <hr>
+  <script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
+  <script>
+    $(function() {
+      $.get('/worlds', function(worlds) {
+        var world = worlds[0];
+        $('#map').append($('<h3>').text(world.id));
+
+        var table = $('<table>');
+        for(var y = world.map.minY; y <= world.map.maxY; y++) {
+          var row = $('<tr>');
+
+          for(var x = world.map.minX; x < world.map.maxX; x++) {
+            var cell = $('<td>');
+            var col = world.map.cells[x];
+            if(col) {
+              var chunk = col[y];
+              if(chunk) {
+                cell.addClass('solid');
+                cell.text(chunk.region);
+              }
+              row.append(cell);
+            }
+          }
+
+          table.append(row);
+        }
+
+        $('#map').append(table);
+      });
+    });
+  </script>
+</body>
+</html>
