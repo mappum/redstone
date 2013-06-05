@@ -28,14 +28,24 @@ module.exports = ->
         if neighbor.connection?
           neighbor.connection.emit 'player', region.world.id, p
 
+    broadcastRemovePlayer = (player) ->
+      p = _.pick player, 'username', 'position', 'id'
+      for neighbor in region.neighbors
+        if neighbor.connection?
+          neighbor.connection.emit 'removePlayer', region.world.id, p
+
     connectNeighbors region
 
     region.players.on 'insert:after', (e, player) =>
       broadcastPlayer player, true
 
-      setInterval ->
+      broadcastInterval = setInterval ->
         broadcastPlayer player
       , 5000
+
+      player.on 'leave:after', ->
+        clearInterval broadcastInterval
+        broadcastRemovePlayer player
 
     region.on 'remap:after', (e) =>
       connectNeighbors region
@@ -62,3 +72,8 @@ module.exports = ->
       else if not region.players.get p.id
         _.extend player, p
         player.emit 'move'
+
+    connection.on 'removePlayer', (regionId, p) =>
+      region = @regions.get 'world.id', regionId
+      player = region.globalPlayers.get p.id
+      region.globalPlayers.remove p.id if player?
