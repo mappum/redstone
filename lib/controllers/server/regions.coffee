@@ -119,7 +119,7 @@ module.exports = ->
         worldId: region.world.id
 
       for chunk in region.chunkList
-        players = region.players.grid[chunk.x]?[chunk.z]?.length or 0
+        players = region.players.grid.get(chunk.x, chunk.z)?.length or 0
         if not chunk.players? or players != chunk.players
           obj = {}
           obj.players = players if players or chunk.players?
@@ -127,7 +127,7 @@ module.exports = ->
           col = r.chunks[chunk.x]
           col = r.chunks[chunk.x] = {} if not col?
 
-          col[chunk.z] = obj                    
+          col[chunk.z] = obj
           chunk.players = players
 
       data.regions.push r
