@@ -61,7 +61,7 @@ module.exports = (config) ->
     updateChunkCoordinates player
     player.spawn = spawn.bind player
 
-    setTimeout player.spawn, config.spawnDelay or 250
+    setTimeout player.spawn, config.spawnDelay or 250, state
 
   @on 'join:after', (e, player, state) =>
     emitMoving = -> player.emit 'moving'
