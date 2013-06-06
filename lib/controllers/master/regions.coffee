@@ -70,3 +70,16 @@ module.exports = (config) ->
             c = world.getChunk(x, z)
             _.extend c, chunk
             c.players = c.players or 0
+
+  setInterval =>
+    worlds = {}
+
+    for server in @peers.servers.models
+      for region in server.stats.regions
+        worlds[region.worldId] = 0 if not worlds[region.worldId]?
+        worlds[region.worldId] += region.players
+
+    for worldId, players of worlds
+      world = @worlds.get worldId
+      world.players = players
+  , 10 * 1000
