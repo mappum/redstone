@@ -32,10 +32,10 @@ module.exports = ->
 
   @on 'region:before', (e, region) =>
     region.broadcast = (message) =>
-      @master.emit 'message', message
+      region.send 0x3, {message: message}
 
     @master.on 'message', (message) ->
-      region.send 0x3, {message: message}
+      region.broadcast message
       
   @on 'join:before', (e, player) ->
     player.message = (message) => player.send 0x3, message: message
