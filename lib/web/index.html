@@ -3,15 +3,22 @@
 <head>
   <title>Redstone Control Panel</title>
   <style>
+    table {
+      border-spacing: 0;
+    }
+
     td {
-      width: 20px;
-      height: 20px;
+      width: 12px;
+      height: 12px;
       font-size: 12px;
       text-align: center;
+      overflow: hidden;
+      padding: 0;
     }
 
     .solid {
       background: #eee;
+      border: 1px solid #ddd;
     }
   </style>
 </head>
@@ -28,64 +35,97 @@
   <hr>
   <script src="http://code.jquery.com/jquery-2.0.0.min.js"></script>
   <script>
-    // TODO: use some sort of rendering/templating system to make this cleaner
-    $(function() {
-      $.get('/worlds', function(worlds) {
-        for(var i = 0; i < worlds.length; i++) {
-          var world = worlds[i];
-          var div = $('<div>');
-          div.append($('<h3>').text(world.id));
+function interpolateColors(v, c1, c2) {
+  var output = [
+    Math.floor((c2[0] - c1[0]) * v + c1[0]),
+    Math.floor((c2[1] - c1[1]) * v + c1[1]),
+    Math.floor((c2[2] - c1[2]) * v + c1[2])
+  ];
+  console.log('rgb('+output.join()+')');
+  return 'rgb('+output.join()+')';
+}
 
-          var table = $('<table>');
-          for(var y = world.map.minY; y <= world.map.maxY; y++) {
-            var row = $('<tr>');
+// TODO: use some sort of rendering/templating system to make this cleaner
+$(function() {
+  $.get('/worlds', function(worlds) {
+    for(var i = 0; i < worlds.length; i++) {
 
-            for(var x = world.map.minX; x < world.map.maxX; x++) {
-              var cell = $('<td>');
-              var col = world.map.cells[x];
-              if(col) {
-                var chunk = col[y];
-                if(chunk) {
-                  cell.addClass('solid');
-                  cell.text(chunk.region);
-                }
-                row.append(cell);
-              }
+      var world = worlds[i];
+      var map = world.map;
+
+      var playerMax = 0;
+      for(var j = 0; j < world.chunks.length; j++) {
+        var players = world.chunks[j].players;
+        if(players > playerMax) playerMax = players;
+      }
+
+      var div = $('<div>');
+      div
+        .append($('<h3>').text(world.id))
+        .append($('<p>').text(world.players + ' player' + (world.players != 1?'s':'')));
+
+      var table = $('<table>');
+      for(var y = map.minY; y <= map.maxY; y++) {
+        var row = $('<tr>');
+
+        for(var x = map.minX; x < map.maxX; x++) {
+          var cell = $('<td>');
+          var col = map.cells[x];
+          if(col) {
+            var chunk = col[y];
+            if(chunk) {
+              cell.addClass('solid')
+                .text(chunk.region);
+
+              var regionBorder = '1px solid red';
+              if(map.cells[x][y-1] && map.cells[x][y-1].region != chunk.region)
+                cell.css('border-top', regionBorder);
+              if(map.cells[x-1] && map.cells[x-1][y] && map.cells[x-1][y].region != chunk.region)
+                cell.css('border-left', regionBorder);
+
+              var c1 = [0xee, 0xee, 0xee];
+              var c2 = [0, 0x77, 0x22];
+              var v = (chunk.players / playerMax) || 0;
+              console.log(chunk.players, playerMax, v);
+              cell.css('background-color', interpolateColors(v, c1, c2));
             }
-
-            table.append(row);
+            row.append(cell);
           }
-
-          div.append(table);
-          $('#worlds').append(div);
         }
-      });
 
-      $.get('/servers', function(servers) {
-        for(var i = 0; i < servers.length; i++) {
-          var server = servers[i];
-          var div = $('<div>');
+        table.append(row);
+      }
 
-          var stats = server.stats;
-          var usedMemory = Math.round((stats.totalmem - stats.freemem) / 1000000);
-          var totalMemory = Math.round(stats.totalmem / 1000000);
-          var memoryPercentage = Math.round((usedMemory / totalMemory) * 1000) / 10;
+      div.append(table);
+      $('#worlds').append(div);
+    }
+  });
 
-          div.append($('<h3>').text(server.type + ':' + server.id));
-          div.append($('<p>')
-            .append($('<strong>').text('Memory: '))
-            .append($('<span>').text(usedMemory + ' / ' + totalMemory + ' MB (' +
-              memoryPercentage + '%)'))
-            .append($('<br>'))
+  $.get('/servers', function(servers) {
+    for(var i = 0; i < servers.length; i++) {
+      var server = servers[i];
+      var div = $('<div>');
 
-            .append($('<strong>').text('CPU: '))
-            .append($('<span>').text(stats.loadavg[0] + '% (1m), ' + stats.loadavg[1] + '% (5m), ' + stats.loadavg[2] + '% (15m)'))
-            .append($('<br>'))
-          );
-          $('#servers').append(div);
-        }
-      });
-    });
+      var stats = server.stats;
+      var usedMemory = Math.round((stats.totalmem - stats.freemem) / 1000000);
+      var totalMemory = Math.round(stats.totalmem / 1000000);
+      var memoryPercentage = Math.round((usedMemory / totalMemory) * 1000) / 10;
+
+      div.append($('<h3>').text(server.type + ':' + server.id));
+      div.append($('<p>')
+        .append($('<strong>').text('Memory: '))
+        .append($('<span>').text(usedMemory + ' / ' + totalMemory + ' MB (' +
+          memoryPercentage + '%)'))
+        .append($('<br>'))
+
+        .append($('<strong>').text('CPU: '))
+        .append($('<span>').text(stats.loadavg[0] + '% (1m), ' + stats.loadavg[1] + '% (5m), ' + stats.loadavg[2] + '% (15m)'))
+        .append($('<br>'))
+      );
+      $('#servers').append(div);
+    }
+  });
+});
   </script>
 </body>
 </html>
