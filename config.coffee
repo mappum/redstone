@@ -22,7 +22,8 @@ module.exports =
   remapInterval: 10 * 60 * 1000
   remapDelay: 20 * 1000
 
-  readyDelay: 250
+  spawnDelay: 250
+  readyDelay: 0
 
   connector:
     'online-mode': true
