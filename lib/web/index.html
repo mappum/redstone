@@ -10,7 +10,7 @@
     td {
       width: 12px;
       height: 12px;
-      font-size: 12px;
+      font-size: 10px;
       text-align: center;
       overflow: hidden;
       padding: 0;
@@ -113,6 +113,9 @@ $(function() {
 
       div.append($('<h3>').text(server.type + ':' + server.id));
       div.append($('<p>')
+        .append($('<span>').text(server.address))
+        .append($('<br>'))
+
         .append($('<strong>').text('Memory: '))
         .append($('<span>').text(usedMemory + ' / ' + totalMemory + ' MB (' +
           memoryPercentage + '%)'))
