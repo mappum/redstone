@@ -26,8 +26,8 @@ module.exports =
   readyDelay: 0
 
   connector:
-    'online-mode': true
-    encryption: true
+    'online-mode': false
+    encryption: false
     motd: 'Redstone test server'
     'max-players': '0'
 

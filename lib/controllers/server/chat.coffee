@@ -22,6 +22,8 @@ text =
   italic:         '§o',
   reset:          '§r'
 
+jsonify = (message) -> JSON.stringify({text: message})
+
 module.exports = ->
   @prefixes =
     chat: ''
@@ -32,13 +34,13 @@ module.exports = ->
 
   @on 'region:before', (e, region) =>
     region.broadcast = (message) =>
-      region.send 0x3, {message: message}
+      region.send 0x3, {message: jsonify message }
 
     @master.on 'message', (message) ->
       region.broadcast message
       
   @on 'join:before', (e, player) ->
-    player.message = (message) => player.send 0x3, message: message
+    player.message = (message) => player.send 0x3, message: jsonify message
 
   @on 'join:after', (e, player, options) =>
     if not options.handoff?
@@ -53,6 +55,6 @@ module.exports = ->
 
   @on 'message', (e, player, message) =>
     formatted = "<#{player.username}> #{message}"
-    player.region.send 0x3, {message: formatted}
+    player.region.send 0x3, {message: jsonify formatted}
     @broadcast formatted
     @log 'chat', "[#{player.region.id}] #{formatted}"
