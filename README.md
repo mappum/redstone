@@ -33,14 +33,14 @@ node bin/redstone.js -m
 
 Next, you will need to start the other components (servers and connectors). When starting them, you will need to specify the hostname of the master. You must start at least one server and at least one connector, but you may start as many as you like.
 ```
-node bin/redstone.js -s --master=<HOSTNAME OF MASTER> #server
-node bin/redstone.js -c --master=<HOSTNAME OF MASTER> #connector
+node bin/redstone.js -s --master=<HOSTNAME OF MASTER>
+node bin/redstone.js -c --master=<HOSTNAME OF MASTER>
 ```
 
-*NOTE:* If multiple components are running on the same machine, you must set the control port to a unique port, e.g.:
+**NOTE:** If multiple components are running on the same machine, you must set the control port to a unique port, e.g.:
 ```
 node bin/redstone.js -s --master=<HOSTNAME OF MASTER> --control=8001
 node bin/redstone.js -c --master=<HOSTNAME OF MASTER> --control=8002
 ```
 
-Once your components spin up, you should be able to connect to the machine(s) that are running a connector via your Minecraft client.
+Once your components spin up, you should be able to connect to the connector(s) via your Minecraft client.
