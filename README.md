@@ -39,8 +39,8 @@ node bin/redstone.js -c --master=<HOSTNAME OF MASTER>
 
 **NOTE:** If multiple components are running on the same machine, you must set the control port to a unique port, e.g.:
 ```
-node bin/redstone.js -s --master=<HOSTNAME OF MASTER> --control=8001
-node bin/redstone.js -c --master=<HOSTNAME OF MASTER> --control=8002
+node bin/redstone.js -s --master=localhost --control=8001
+node bin/redstone.js -c --master=localhost --control=8002
 ```
 
 Once your components spin up, you should be able to connect to the connector(s) via your Minecraft client.
